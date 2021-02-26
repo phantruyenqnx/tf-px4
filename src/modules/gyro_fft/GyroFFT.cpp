@@ -38,7 +38,6 @@
 #include <mathlib/math/Functions.hpp>
 
 using namespace matrix;
-using math::radians;
 
 GyroFFT::GyroFFT() :
 	ModuleParams(nullptr),
@@ -167,7 +166,7 @@ void GyroFFT::VehicleIMUStatusUpdate()
 }
 
 // helper function used for frequency estimation
-static constexpr float tau(float x)
+static float tau(float x)
 {
 	float p1 = logf(3.f * powf(x, 2.f) + 6 * x + 1);
 	float part1 = x + 1 - sqrtf(2.f / 3.f);
