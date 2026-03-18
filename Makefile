@@ -597,3 +597,18 @@ failsafe_web:
 run_failsafe_web_server: failsafe_web
 	@cd build/px4_sitl_default_failsafe_web && \
 		python3 -m http.server
+
+# HIL (Hardware-in-the-Loop) — launches Gazebo + mavlink-routerd for real board.
+# Board must be flashed with PX4 firmware and SYS_HITL=1.
+# Usage: make hil
+#        PX4_HIL_DEVICE=/dev/ttyACM1 PX4_HIL_QGC_IP=192.168.1.100 make hil
+.PHONY: hil
+hil:
+	python3 $(SRC_DIR)/src/modules/simulation/gz_bridge/hil/hil_launch.py \
+		$(if $(PX4_HIL_DEVICE),  --device   $(PX4_HIL_DEVICE))  \
+		$(if $(PX4_HIL_BAUD),    --baud     $(PX4_HIL_BAUD))    \
+		$(if $(PX4_HIL_QGC_IP),  --qgc-ip   $(PX4_HIL_QGC_IP)) \
+		$(if $(PX4_HIL_QGC_PORT),--qgc-port $(PX4_HIL_QGC_PORT)) \
+		$(if $(PX4_GZ_WORLD),    --world    $(PX4_GZ_WORLD))    \
+		$(if $(HEADLESS),        --headless)                      \
+		--build $(SRC_DIR)/build/px4_sitl_default
