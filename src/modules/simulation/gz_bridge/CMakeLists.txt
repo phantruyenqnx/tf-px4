@@ -73,6 +73,21 @@ if (gz-transport_FOUND)
 	target_include_directories(modules__simulation__gz_bridge PUBLIC px4_gz_msgs)
 	target_link_libraries(modules__simulation__gz_bridge PUBLIC px4_gz_msgs)
 
+	# HIL bridge plugin — self-contained Gz System plugin (.so)
+	if(NOT DEFINED ENV{GZ_DISTRO} OR NOT "$ENV{GZ_DISTRO}" STREQUAL "harmonic")
+		find_package(gz-sim NAMES gz-sim9 gz-sim8)
+		find_package(gz-plugin NAMES gz-plugin3 gz-plugin2 COMPONENTS register)
+	else()
+		find_package(gz-sim NAMES gz-sim8)
+		find_package(gz-plugin NAMES gz-plugin2 COMPONENTS register)
+	endif()
+
+	if(gz-sim_FOUND AND gz-plugin_FOUND)
+		add_subdirectory(hil)
+	else()
+		message(STATUS "GZHILBridge: skipping — gz-sim or gz-plugin not found")
+	endif()
+
 	px4_add_git_submodule(TARGET git_gz PATH "${PX4_SOURCE_DIR}/Tools/simulation/gz")
 	include(ExternalProject)
 	ExternalProject_Add(gz
