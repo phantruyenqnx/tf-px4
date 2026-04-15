@@ -58,6 +58,8 @@ def parse_args():
                    help="Do not launch Gazebo GUI")
     p.add_argument("--tcp-port",  default=5760, type=int, dest="tcp_port",
                    help="mavlink-routerd TCP port (default: 5760)")
+    p.add_argument("--world-sdf", default=None, dest="world_sdf",
+                   help="Full path to world SDF file (overrides --world name lookup)")
     return p.parse_args()
 
 # ---------------------------------------------------------------------------
@@ -341,19 +343,33 @@ def main():
     gz_submodule = os.path.join(REPO_DIR, "Tools", "simulation", "gz")
 
     env = os.environ.copy()
-    env["GZ_SIM_RESOURCE_PATH"] = (
-        f"{gz_submodule}/models:"
-        f"{gz_submodule}/worlds"
-    )
-    env["GZ_SIM_SYSTEM_PLUGIN_PATH"] = plugin_dir  # .../gz_bridge/hil/
+
+    # Allow callers to prepend extra resource/plugin paths via env vars.
+    # GZ_SIM_EXTRA_RESOURCE_PATH: colon-separated dirs prepended to the base px4 paths.
+    # GZ_SIM_EXTRA_PLUGIN_PATH:   colon-separated dirs prepended to plugin_dir.
+    extra_res  = os.environ.get("GZ_SIM_EXTRA_RESOURCE_PATH", "")
+    base_res   = f"{gz_submodule}/models:{gz_submodule}/worlds"
+    env["GZ_SIM_RESOURCE_PATH"] = f"{extra_res}:{base_res}" if extra_res else base_res
+
+    extra_plug = os.environ.get("GZ_SIM_EXTRA_PLUGIN_PATH", "")
+    env["GZ_SIM_SYSTEM_PLUGIN_PATH"] = f"{extra_plug}:{plugin_dir}" if extra_plug else plugin_dir
+
     env["GZ_SIM_SERVER_CONFIG_PATH"] = (
         f"{REPO_DIR}/src/modules/simulation/gz_bridge/server.config"
     )
 
-    world_sdf = os.path.join(gz_submodule, "worlds", f"{args.world}.sdf")
-    if not os.path.isfile(world_sdf):
-        error(f"World SDF not found: {args.world}.sdf")
-        sys.exit(1)
+    if args.world_sdf:
+        world_sdf = args.world_sdf
+        # Derive world name (for gz service calls) from the SDF filename.
+        args.world = os.path.splitext(os.path.basename(world_sdf))[0]
+        if not os.path.isfile(world_sdf):
+            error(f"World SDF not found: {world_sdf}")
+            sys.exit(1)
+    else:
+        world_sdf = os.path.join(gz_submodule, "worlds", f"{args.world}.sdf")
+        if not os.path.isfile(world_sdf):
+            error(f"World SDF not found: {args.world}.sdf")
+            sys.exit(1)
 
     # 5. Start Gazebo server
     info(f"Starting Gazebo server: {args.world}")
