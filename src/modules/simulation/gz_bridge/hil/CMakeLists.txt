@@ -46,7 +46,10 @@ endif()
 add_library(GZHILBridge SHARED
     GZHILBridge.cpp
 )
-
+ 
+# Ensure mavlink C headers (development dialect) are generated first
+add_dependencies(GZHILBridge mavlink_c_generate)
+ 
 target_include_directories(GZHILBridge PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     # mavlink C library (header-only), provided by PX4 build system
