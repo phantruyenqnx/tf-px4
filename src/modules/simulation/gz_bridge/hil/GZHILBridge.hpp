@@ -72,7 +72,7 @@
 #include <gz/transport/Node.hh>
 
 // mavlink C library (header-only)
-#include <mavlink/development/mavlink.h>
+#include <development/mavlink.h>
 
 namespace custom
 {
