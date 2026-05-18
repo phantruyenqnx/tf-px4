@@ -1,82 +1,82 @@
 # 5. Rate Control (PID + FF + Saturation-aware Anti-Windup)
 
-## 5.1. Vai trò
+## 5.1. Role
 
-Vòng trong cùng. Chạy theo gyro update (~1 kHz). Nhận `vehicle_rates_setpoint` ($\boldsymbol{\omega}_{sp}$) từ attitude controller, gyro $\boldsymbol{\omega}$ và đạo hàm $\dot{\boldsymbol{\omega}}$ từ EKF/sensors. Output là `vehicle_torque_setpoint` ($\boldsymbol{\tau}\in[-1,1]^3$) cho control allocator.
+The innermost loop. Runs on gyro updates (~1 kHz). Receives `vehicle_rates_setpoint` ($\boldsymbol{\omega}_{sp}$) from the attitude controller, gyro $\boldsymbol{\omega}$ and derivative $\dot{\boldsymbol{\omega}}$ from EKF/sensors. Output is `vehicle_torque_setpoint` ($\boldsymbol{\tau}\in[-1,1]^3$) for the control allocator.
 
-Đây là **vòng quan trọng nhất về độ ổn định**: tần số cao, đơn giản, "cứng". Hầu hết tunning UAV xoay quanh tầng này.
+This is the **most stability-critical loop**: high frequency, simple, and "hard". Most UAV tuning revolves around this stage.
 
-## 5.2. Code chính
+## 5.2. Main Code
 
-| Vai trò | File |
+| Role | File |
 |---|---|
-| Wrapper uORB + lập lịch theo gyro | `@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.cpp` |
-| Header tham số | `@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.hpp` |
-| **Lõi thuật toán PID** | `@/home/frank/tf-px4/src/lib/rate_control/rate_control.cpp` |
-| Header lib (cần đọc) | `@/home/frank/tf-px4/src/lib/rate_control/rate_control.hpp` |
+| uORB wrapper + gyro-scheduled execution | `@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.cpp` |
+| Parameter header | `@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.hpp` |
+| **PID algorithm core** | `@/home/frank/tf-px4/src/lib/rate_control/rate_control.cpp` |
+| Lib header (must read) | `@/home/frank/tf-px4/src/lib/rate_control/rate_control.hpp` |
 | Test | `@/home/frank/tf-px4/src/lib/rate_control/rate_control_test.cpp` |
 
-Hàm cần đọc:
-- `MulticopterRateControl::Run()` — orchestrator (đăng ký callback gyro).
-- `MulticopterRateControl::parameters_updated()` — map tham số `K*P/I/D` → ideal form.
-- `RateControl::update(rate, rate_sp, angular_accel, dt, landed)` — luật PID chính.
-- `RateControl::updateIntegral(rate_error, dt)` — anti-windup nonlinear.
+Functions to read:
+- `MulticopterRateControl::Run()` — orchestrator (registers gyro callback).
+- `MulticopterRateControl::parameters_updated()` — maps `K*P/I/D` parameters → ideal form.
+- `RateControl::update(rate, rate_sp, angular_accel, dt, landed)` — main PID law.
+- `RateControl::updateIntegral(rate_error, dt)` — nonlinear anti-windup.
 
-## 5.3. Bảng ký hiệu
+## 5.3. Symbol Table
 
 ### Input / output
 
-| Ký hiệu | Code | Nghĩa |
+| Symbol | Code | Meaning |
 |---|---|---|
-| $\boldsymbol{\omega}_{sp}=(p,q,r)_{sp}^\top$ | `_rates_setpoint` / `rate_sp` | rate setpoint từ attitude controller (rad/s, body) |
-| $\boldsymbol{\omega}=(p,q,r)^\top$ | `rates` | gyro đo thực (rad/s, body) |
-| $\dot{\boldsymbol{\omega}}$ | `angular_accel` | gia tốc góc (đạo hàm gyro filtered, từ sensor pipeline) |
-| $\boldsymbol{\tau}\in[-1,1]^3$ | `torque` / output | torque setpoint normalized (cho mỗi trục body) |
-| $\boldsymbol{T}\in\mathbb{R}^3$ | `_thrust_setpoint` | thrust setpoint normalized (body) |
+| $\boldsymbol{\omega}_{sp}=(p,q,r)_{sp}^\top$ | `_rates_setpoint` / `rate_sp` | rate setpoint from attitude controller (rad/s, body) |
+| $\boldsymbol{\omega}=(p,q,r)^\top$ | `rates` | measured gyro (rad/s, body) |
+| $\dot{\boldsymbol{\omega}}$ | `angular_accel` | angular acceleration (filtered gyro derivative, from sensor pipeline) |
+| $\boldsymbol{\tau}\in[-1,1]^3$ | `torque` / output | normalized torque setpoint (per body axis) |
+| $\boldsymbol{T}\in\mathbb{R}^3$ | `_thrust_setpoint` | normalized thrust setpoint (body) |
 
-### Trung gian
+### Intermediate
 
-| Ký hiệu | Code | Nghĩa |
+| Symbol | Code | Meaning |
 |---|---|---|
 | $\boldsymbol{e}_\omega=\boldsymbol{\omega}_{sp}-\boldsymbol{\omega}$ | `rate_error` | rate error (rad/s) |
 | $\boldsymbol{I}_\omega$ | `_rate_int` | integrator state |
-| $i_{f,i}\in[0,1]$ | `i_factor` | hệ số nonlinear giảm I-gain khi error lớn |
+| $i_{f,i}\in[0,1]$ | `i_factor` | nonlinear coefficient that reduces I-gain when error is large |
 
-### Gain & giới hạn
+### Gains & limits
 
-| Ký hiệu | Code / param | Nghĩa |
+| Symbol | Code / param | Meaning |
 |---|---|---|
-| $\boldsymbol{K}$ | `MC_{R,P,Y}RATE_K` | master gain ideal-form |
-| $\boldsymbol{p},\boldsymbol{i},\boldsymbol{d},\boldsymbol{ff}$ | `MC_{R,P,Y}RATE_{P,I,D,FF}` | tham số parallel-form |
-| $\boldsymbol{K}_p^\omega=\boldsymbol{K}\odot\boldsymbol{p}$ | `_gain_p` | P-gain rate (sau quy đổi) |
-| $\boldsymbol{K}_i^\omega,\boldsymbol{K}_d^\omega,\boldsymbol{K}_{ff}^\omega$ | `_gain_{i,d,ff}` | I/D/FF gain rate |
-| $I_{lim,i}$ | `_lim_int` / `MC_{R,P,Y}R_INT_LIM` | biên integrator |
-| $\theta_{ref}=400\deg=6.98$ rad/s | hard-coded | scale của $i$-factor nonlinear |
-| $f_c^{yaw}$ | `MC_YAW_TQ_CUTOFF` | LPF yaw torque |
-| $s_{bat}=V_{nom}/V_{batt}$ | `_battery_status_scale` | scale bù áp pin |
+| $\boldsymbol{K}$ | `MC_{R,P,Y}RATE_K` | master gain (ideal form) |
+| $\boldsymbol{p},\boldsymbol{i},\boldsymbol{d},\boldsymbol{ff}$ | `MC_{R,P,Y}RATE_{P,I,D,FF}` | parallel-form parameters |
+| $\boldsymbol{K}_p^\omega=\boldsymbol{K}\odot\boldsymbol{p}$ | `_gain_p` | rate P-gain (after conversion) |
+| $\boldsymbol{K}_i^\omega,\boldsymbol{K}_d^\omega,\boldsymbol{K}_{ff}^\omega$ | `_gain_{i,d,ff}` | rate I/D/FF gains |
+| $I_{lim,i}$ | `_lim_int` / `MC_{R,P,Y}R_INT_LIM` | integrator bounds |
+| $\theta_{ref}=400\deg=6.98$ rad/s | hard-coded | scale of nonlinear $i$-factor |
+| $f_c^{yaw}$ | `MC_YAW_TQ_CUTOFF` | yaw torque LPF |
+| $s_{bat}=V_{nom}/V_{batt}$ | `_battery_status_scale` | battery voltage compensation scale |
 
-### Cờ saturation từ allocator
+### Saturation flags from allocator
 
-| Ký hiệu | Code | Nghĩa |
+| Symbol | Code | Meaning |
 |---|---|---|
-| $s_i^+\in\{0,1\}$ | `_control_allocator_saturation_positive(i)` | trục $i$ saturate phía dương |
-| $s_i^-\in\{0,1\}$ | `_control_allocator_saturation_negative(i)` | trục $i$ saturate phía âm |
+| $s_i^+\in\{0,1\}$ | `_control_allocator_saturation_positive(i)` | axis $i$ saturated in positive direction |
+| $s_i^-\in\{0,1\}$ | `_control_allocator_saturation_negative(i)` | axis $i$ saturated in negative direction |
 
 ---
 
-## 5.4. Công thức chi tiết
+## 5.4. Detailed Formulas
 
-### Bước 1 — Quy đổi tham số ideal form
+### Step 1 — Parameter conversion to ideal form
 
-Tham số `K*` cho phép biểu diễn dạng *parallel* (`P + I/s + sD`) ↔ *ideal* (`K(1+1/sTi+sTd)`):
+The `K*` parameter allows expressing the controller in *parallel* form (`P + I/s + sD`) ↔ *ideal* form (`K(1+1/sTi+sTd)`):
 $$
 K_p^\omega = \boldsymbol{K}\odot\boldsymbol{p},\quad K_i^\omega=\boldsymbol{K}\odot\boldsymbol{i},\quad K_d^\omega=\boldsymbol{K}\odot\boldsymbol{d}
 $$
 
-**Giải thích biến**:
-- $\boldsymbol{K}$ = `MC_{R,P,Y}RATE_K`: master gain ideal form ($K$ trong $K(1+1/sTi+sTd)$).
-- $\boldsymbol{p},\boldsymbol{i},\boldsymbol{d}$ = `MC_{R,P,Y}RATE_{P,I,D}`: tỉ lệ P/I/D parallel form (người tune thường quen với dạng này).
-- Tác dụng: tune chỉ $\boldsymbol{K}$ → scale toàn bộ P/I/D đồng đều, giữ nguyên bình đổng hưởng (PID dynamics không đổi, chỉ "speed up" hệ thống).
+**Variable explanation**:
+- $\boldsymbol{K}$ = `MC_{R,P,Y}RATE_K`: master gain in ideal form ($K$ in $K(1+1/sTi+sTd)$).
+- $\boldsymbol{p},\boldsymbol{i},\boldsymbol{d}$ = `MC_{R,P,Y}RATE_{P,I,D}`: parallel-form P/I/D ratios (tuners are typically more familiar with this form).
+- Effect: tuning only $\boldsymbol{K}$ → scales all P/I/D uniformly, preserving the resonant balance (PID dynamics unchanged, system is simply "sped up").
 
 ```@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.cpp:78-92
 // rate control parameters
@@ -96,7 +96,7 @@ _rate_control.setFeedForwardGain(
 	Vector3f(_param_mc_rollrate_ff.get(), _param_mc_pitchrate_ff.get(), _param_mc_yawrate_ff.get()));
 ```
 
-### Bước 2 — Luật PID + Feed-forward
+### Step 2 — PID law + Feed-forward
 
 $$
 \boldsymbol{e}_\omega = \boldsymbol{\omega}_{sp}-\boldsymbol{\omega}
@@ -105,11 +105,11 @@ $$
 \boxed{\ \boldsymbol{\tau} = \boldsymbol{K}_p^\omega\odot\boldsymbol{e}_\omega + \boldsymbol{I}_\omega - \boldsymbol{K}_d^\omega\odot\dot{\boldsymbol{\omega}} + \boldsymbol{K}_{ff}^\omega\odot\boldsymbol{\omega}_{sp}\ }
 $$
 
-**Giải thích biến**:
+**Variable explanation**:
 - $\boldsymbol{e}_\omega$: rate error (rad/s).
-- $\boldsymbol{I}_\omega$: integrator tích lũy, cập nhật qua `updateIntegral` (xem Bước 3).
-- $\dot{\boldsymbol{\omega}}$: gyro derivative thực (KHÔNG phải $\dot{\boldsymbol{e}}_\omega$) → dấu **trừ** + lên thẳng measurement → **derivative on measurement**.
-- $\boldsymbol{\omega}_{sp}$ trong FF-term đi thẳng vào output ("feed-forward through"), không qua P loop → tăng response speed cho maneuver mượt.
+- $\boldsymbol{I}_\omega$: accumulated integrator, updated via `updateIntegral` (see Step 3).
+- $\dot{\boldsymbol{\omega}}$: actual gyro derivative (NOT $\dot{\boldsymbol{e}}_\omega$) → **minus** sign + applied directly to measurement → **derivative on measurement**.
+- $\boldsymbol{\omega}_{sp}$ in the FF-term goes directly to output ("feed-forward through"), bypasses the P loop → increases response speed for smooth maneuvers.
 
 ```@/home/frank/tf-px4/src/lib/rate_control/rate_control.cpp:71-86
 Vector3f RateControl::update(const Vector3f &rate, const Vector3f &rate_sp, const Vector3f &angular_accel,
@@ -130,13 +130,13 @@ Vector3f RateControl::update(const Vector3f &rate, const Vector3f &rate_sp, cons
 }
 ```
 
-⚠️ Đặc điểm:
-- D-term tác động lên $\dot{\boldsymbol{\omega}}$ trực tiếp (`angular_accel`, gyro derivative từ sensor pipeline §1.5.5) — chống "derivative kick" khi $\boldsymbol{\omega}_{sp}$ nhảy bậc.
-- FF-term lên thẳng $\boldsymbol{\omega}_{sp}$ (`rate_sp`) — không bị qua P, giúp tracking nhanh các maneuver mượt.
+Notable characteristics:
+- D-term acts on $\dot{\boldsymbol{\omega}}$ directly (`angular_accel`, gyro derivative from sensor pipeline §1.5.5) — prevents "derivative kick" when $\boldsymbol{\omega}_{sp}$ steps.
+- FF-term acts directly on $\boldsymbol{\omega}_{sp}$ (`rate_sp`) — bypasses P, enabling fast tracking of smooth maneuvers.
 
-### Bước 3 — Anti-Windup tích phân
+### Step 3 — Anti-Windup Integration
 
-Toàn bộ hàm `updateIntegral`:
+Full `updateIntegral` function:
 
 ```@/home/frank/tf-px4/src/lib/rate_control/rate_control.cpp:88-118
 void RateControl::updateIntegral(Vector3f &rate_error, const float dt)
@@ -167,21 +167,21 @@ void RateControl::updateIntegral(Vector3f &rate_error, const float dt)
 }
 ```
 
-Tách từng cơ chế:
+Each mechanism is broken down below:
 
-#### (a) Saturation feedback từ Allocator
+#### (a) Saturation feedback from Allocator
 
-Nếu allocator đã bão hòa motor cho hướng dương:
+If the allocator has saturated the motors in the positive direction:
 $$
-e_{\omega,i}\leftarrow\min(e_{\omega,i},0),\quad\text{hoặc }e_{\omega,i}\leftarrow\max(e_{\omega,i},0)\text{ cho hướng âm}
+e_{\omega,i}\leftarrow\min(e_{\omega,i},0),\quad\text{or }e_{\omega,i}\leftarrow\max(e_{\omega,i},0)\text{ for negative direction}
 $$
 
-**Giải thích biến**:
-- $s_i^+ = 1$: trục $i$ đã saturate phía dương (motor đã max trong hướng tạo $\tau_i>0$).
-- Bằng cách clip $e_{\omega,i}\le 0$, integrator chỉ được giảm theo hướng âm → không "đập mà" wind-up theo hướng đã bão hòa.
-- Tương tự cho $s_i^- = 1$ ở phía âm.
+**Variable explanation**:
+- $s_i^+ = 1$: axis $i$ saturated in the positive direction (motor already at max in the direction producing $\tau_i>0$).
+- By clipping $e_{\omega,i}\le 0$, the integrator can only decrease in the negative direction → does not wind up further in the already-saturated direction.
+- Same applies for $s_i^- = 1$ in the negative direction.
 
-Cờ này được set bởi `MulticopterRateControl::Run()` từ topic `control_allocator_status.unallocated_torque`:
+This flag is set by `MulticopterRateControl::Run()` from the topic `control_allocator_status.unallocated_torque`:
 
 ```@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.cpp:197-216
 // update saturation status from control allocation feedback
@@ -207,33 +207,33 @@ if (_control_allocator_status_sub.update(&control_allocator_status)) {
 }
 ```
 
-#### (b) Nonlinear $i$-factor (giảm tích phân khi sai số lớn)
+#### (b) Nonlinear $i$-factor (reduce integration when error is large)
 
 $$
 i_{f,i} = \max\!\left(0,\ 1-\left(\frac{e_{\omega,i}}{\theta_{ref}}\right)^2\right),\quad \theta_{ref}=400°=6.98\,\text{rad/s}
 $$
 
-**Giải thích biến**:
-- $i_{f,i}\in[0,1]$: hệ số nhân vào I-gain trước khi tích phân.
-- $\theta_{ref}$ = ngưỡng error tại đó $i_f=0$ (hard-coded `math::radians(400.f)` $\approx 6.98$ rad/s).
-- Dạng parabol $1-x^2$ → quan hệ "mềm": với $|e_\omega|<100°$, $i_f\approx 1$ (gần như không ảnh hưởng); với $|e_\omega|=200°$, $i_f\approx 0.75$; với $|e_\omega|\ge400°$, $i_f=0$.
-- Mục đích: tránh "bounce-back" sau flip — khi error cực lớn, integrator không nên build up (phong cách "clamping" anti-windup bổ sung).
+**Variable explanation**:
+- $i_{f,i}\in[0,1]$: coefficient multiplied into the I-gain before integration.
+- $\theta_{ref}$ = error threshold at which $i_f=0$ (hard-coded `math::radians(400.f)` $\approx 6.98$ rad/s).
+- Parabolic shape $1-x^2$ → "soft" relationship: for $|e_\omega|<100°$, $i_f\approx 1$ (nearly no effect); for $|e_\omega|=200°$, $i_f\approx 0.75$; for $|e_\omega|\ge400°$, $i_f=0$.
+- Purpose: avoid "bounce-back" after a flip — when error is very large, the integrator should not build up (a form of supplementary "clamping" anti-windup).
 
 ```@/home/frank/tf-px4/src/lib/rate_control/rate_control.cpp:107-108
 float i_factor = rate_error(i) / math::radians(400.f);
 i_factor = math::max(0.0f, 1.f - i_factor * i_factor);
 ```
 
-#### (c) Tích phân Euler + clamp
+#### (c) Euler integration + clamp
 
 $$
 I_{\omega,i}\leftarrow\mathrm{clip}\!\left(I_{\omega,i}+i_{f,i}\,K_i^\omega\,e_{\omega,i}\Delta t,\ -I_{lim,i},\ I_{lim,i}\right)
 $$
 
-**Giải thích biến**:
-- $i_{f,i}\,K_i^\omega\,e_{\omega,i}\Delta t$: lượng tích phân một bước Euler, có nhân nonlinear factor.
-- $I_{lim,i}$ = `MC_{R,P,Y}R_INT_LIM`: biên clamp tuyệt đối — ngăn integrator chiếm hết ngân sách torque output.
-- Khi `landed` hoặc disarmed → reset $\boldsymbol{I}_\omega=\mathbf{0}$ (ngoài `updateIntegral`, từ wrapper).
+**Variable explanation**:
+- $i_{f,i}\,K_i^\omega\,e_{\omega,i}\Delta t$: single Euler step integration amount, with nonlinear factor applied.
+- $I_{lim,i}$ = `MC_{R,P,Y}R_INT_LIM`: absolute clamp bound — prevents the integrator from consuming the entire torque output budget.
+- When `landed` or disarmed → reset $\boldsymbol{I}_\omega=\mathbf{0}$ (outside `updateIntegral`, from the wrapper).
 
 ```@/home/frank/tf-px4/src/lib/rate_control/rate_control.cpp:111-116
 float rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
@@ -244,16 +244,16 @@ if (PX4_ISFINITE(rate_i)) {
 }
 ```
 
-### Bước 4 — Yaw torque LPF
+### Step 4 — Yaw torque LPF
 $$
 \tau_z\leftarrow \mathrm{LPF}_{f_c=\text{MC\_YAW\_TQ\_CUTOFF}}(\tau_z)
 $$
 
-**Giải thích biến**:
-- $\tau_z$: thành phần yaw của torque setpoint.
-- $\mathrm{LPF}_{f_c}$: 1ˢᵗ-order alpha filter (xem §1.5.5) cắt ở $f_c$ = `MC_YAW_TQ_CUTOFF` Hz.
-- Chỉ chạy lên trục yaw, không động vào roll/pitch.
-- Mục đích: yaw torque được sinh nhờ sự chênh lệch RPM giữa CW/CCW motors (hệ số reaction-torque $c_m$ nhỏ, ~ 1/100 của thrust) → cần biên độ lớn → khuếch đại noise. LPF chống rung.
+**Variable explanation**:
+- $\tau_z$: yaw component of the torque setpoint.
+- $\mathrm{LPF}_{f_c}$: 1st-order alpha filter (see §1.5.5) with cutoff at $f_c$ = `MC_YAW_TQ_CUTOFF` Hz.
+- Applied only to the yaw axis, roll/pitch are unaffected.
+- Purpose: yaw torque is generated by the RPM differential between CW/CCW motors (reaction-torque coefficient $c_m$ is small, ~1/100 of thrust) → requires large amplitude → amplifies noise. LPF suppresses vibration.
 
 ```@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.cpp:218-223
 // run rate controller
@@ -264,20 +264,20 @@ Vector3f torque_setpoint =
 torque_setpoint(2) = _output_lpf_yaw.update(torque_setpoint(2), dt);
 ```
 
-### Bước 5 — Battery scaling (tùy chọn)
+### Step 5 — Battery scaling (optional)
 
-Khi `MC_BAT_SCALE_EN=1`:
+When `MC_BAT_SCALE_EN=1`:
 $$
 s_{bat}=\frac{V_{nom}}{V_{batt}},\quad
 \boldsymbol{\tau}\leftarrow\mathrm{clip}(s_{bat}\boldsymbol{\tau},-1,1),\ \boldsymbol{T}\leftarrow\mathrm{clip}(s_{bat}\boldsymbol{T},-1,1)
 $$
 
-**Giải thích biến**:
-- $V_{nom}$: áp pin danh định (vd. 16.8 V cho 4S full).
-- $V_{batt}$: áp đo thực (từ `battery_status`).
-- $s_{bat}\ge 1$: pin tuụt điện áp → cần PWM cao hơn để sinh cùng lực (vì lực motor tỉ lệ với $V^2$).
-- Clip về $[-1,1]$ tránh tràn.
-- Bù sụt áp pin → giữ phản hồi nhất quán suốt chuyến bay (gain ổn định không bị dịch theo SoC pin).
+**Variable explanation**:
+- $V_{nom}$: nominal battery voltage (e.g. 16.8 V for a full 4S).
+- $V_{batt}$: measured voltage (from `battery_status`).
+- $s_{bat}\ge 1$: battery voltage drops → higher PWM needed to produce the same force (because motor force is proportional to $V^2$).
+- Clip to $[-1,1]$ prevents overflow.
+- Battery voltage compensation → maintains consistent response throughout the flight (gain stability not affected by battery SoC drift).
 
 ```@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.cpp:241-256
 // scale setpoints by battery status if enabled
@@ -299,9 +299,9 @@ if (_param_mc_bat_scale_en.get()) {
 }
 ```
 
-## 5.5. ACRO mode (manual không có attitude loop)
+## 5.5. ACRO mode (manual without attitude loop)
 
-Khi `flag_control_manual_enabled && !flag_control_attitude_enabled`:
+When `flag_control_manual_enabled && !flag_control_attitude_enabled`:
 
 ```@/home/frank/tf-px4/src/modules/mc_rate_control/MulticopterRateControl.cpp:154-177
 if (_vehicle_control_mode.flag_control_manual_enabled && !_vehicle_control_mode.flag_control_attitude_enabled) {
@@ -331,22 +331,22 @@ if (_vehicle_control_mode.flag_control_manual_enabled && !_vehicle_control_mode.
 }
 ```
 $$
-x_{shape}=\mathrm{superexpo}(x,e_{exp},s_{sup})=(1-e_{exp})x+e_{exp}x^3,\ \text{rồi}\ \frac{1-s_{sup}}{1-s_{sup}|x|}
+x_{shape}=\mathrm{superexpo}(x,e_{exp},s_{sup})=(1-e_{exp})x+e_{exp}x^3,\ \text{then}\ \frac{1-s_{sup}}{1-s_{sup}|x|}
 $$
 $$
 \boldsymbol{\omega}_{sp} = \mathrm{shape}(\text{stick})\odot \boldsymbol{\omega}_{max}^{acro}
 $$
 
-**Giải thích biến**:
+**Variable explanation**:
 - $x\in[-1,1]$: stick value.
-- $e_{exp}$ = `MC_ACRO_EXPO*`: độ cong của curve giữa stick và output (0 = linear, 1 = cực củng ở giữa).
-- $s_{sup}$ = `MC_ACRO_SUPEXPO*`: super-expo factor — tăng độ nhạy ở cực đại.
-- $\boldsymbol{\omega}_{max}^{acro}$ = `MC_ACRO_{R,P,Y}_MAX` (rad/s): rate tối đa khi stick = $\pm 1$.
-- Mục đích: cho phi công có vùng "dễ control" ở trừ middle, nhưng vẫn đạt rate cao khi stick cùng cực.
+- $e_{exp}$ = `MC_ACRO_EXPO*`: curve curvature between stick and output (0 = linear, 1 = very curved in the middle).
+- $s_{sup}$ = `MC_ACRO_SUPEXPO*`: super-expo factor — increases sensitivity at the extremes.
+- $\boldsymbol{\omega}_{max}^{acro}$ = `MC_ACRO_{R,P,Y}_MAX` (rad/s): maximum rate when stick = $\pm 1$.
+- Purpose: gives the pilot an "easy to control" zone in the middle, while still achieving high rates when stick is at the extreme.
 
-## 5.6. Cơ sở lý thuyết & keywords
+## 5.6. Theoretical Background & Keywords
 
-| Chủ đề | Keywords |
+| Topic | Keywords |
 |---|---|
 | PID parallel vs ideal | `parallel form vs ideal form PID`, `Astrom Hagglund PID textbook` |
 | Anti-windup | `back-calculation`, `tracking anti-windup`, `conditional integration`, `clamping anti-windup`, `Aström Rundqwist 1989` |
@@ -357,27 +357,27 @@ $$
 | Notch on D-term | `D-term filtering`, `Betaflight RPM filter`, `gyro feedback shaping` |
 | Battery compensation | `voltage compensation ESC`, `thrust normalization`, `motor RPM model` |
 
-### Bài báo / sách
-- Astrom & Hagglund, *PID Controllers: Theory, Design, and Tuning* — chương 3 (anti-windup).
+### Papers / Books
+- Astrom & Hagglund, *PID Controllers: Theory, Design, and Tuning* — Chapter 3 (anti-windup).
 - Faessler, Falanga, Scaramuzza (2018) — *Thrust Mixing, Saturation, and Body-Rate Control for Accurate Aggressive Quadrotor Flight*. RAL.
 - Pounds, Mahony, Corke (2010) — *Modelling and Control of a Large Quadrotor Robot*.
-- Furrer et al. — RotorS Gazebo paper (mô hình motor + ESC).
+- Furrer et al. — RotorS Gazebo paper (motor + ESC model).
 
-## 5.7. Tham số PX4
+## 5.7. PX4 Parameters
 
-| Tham số | Ý nghĩa |
+| Parameter | Meaning |
 |---|---|
-| `MC_ROLLRATE_K`, `MC_PITCHRATE_K`, `MC_YAWRATE_K` | Master gain (scale tất cả P/I/D theo trục) |
-| `MC_*RATE_P`, `MC_*RATE_I`, `MC_*RATE_D`, `MC_*RATE_FF` | PID + FF gain |
-| `MC_RR_INT_LIM`, `MC_PR_INT_LIM`, `MC_YR_INT_LIM` | Integrator limit |
-| `MC_YAW_TQ_CUTOFF` | LPF yaw torque |
-| `MC_BAT_SCALE_EN` | Bật battery scaling |
+| `MC_ROLLRATE_K`, `MC_PITCHRATE_K`, `MC_YAWRATE_K` | Master gain (scales all P/I/D per axis) |
+| `MC_*RATE_P`, `MC_*RATE_I`, `MC_*RATE_D`, `MC_*RATE_FF` | PID + FF gains |
+| `MC_RR_INT_LIM`, `MC_PR_INT_LIM`, `MC_YR_INT_LIM` | Integrator limits |
+| `MC_YAW_TQ_CUTOFF` | Yaw torque LPF |
+| `MC_BAT_SCALE_EN` | Enable battery scaling |
 | `MC_ACRO_*_MAX`, `MC_ACRO_EXPO*`, `MC_ACRO_SUPEXPO*` | ACRO shaping |
-| `IMU_DGYRO_CUTOFF` | LPF cho $\dot{\boldsymbol{\omega}}$ (D-term) |
+| `IMU_DGYRO_CUTOFF` | LPF for $\dot{\boldsymbol{\omega}}$ (D-term) |
 
-## 5.8. Tip tuning
-1. Set `K=1`, P/I/D theo defaults airframe.
-2. Tăng `MC_*RATE_K` đến khi thấy oscillation cao tần (~> 30 Hz) → giảm 30%.
-3. Tăng `MC_*RATE_I/MC_*RATE_K` đến khi steady-state error mất.
-4. D-term tăng nếu overshoot, nhưng cẩn thận khuếch đại noise.
-5. Log `rate_ctrl_status.{rollspeed_integ,...}` xem integrator có saturate không.
+## 5.8. Tuning Tips
+1. Set `K=1`, P/I/D per airframe defaults.
+2. Increase `MC_*RATE_K` until high-frequency oscillation appears (~> 30 Hz) → reduce by 30%.
+3. Increase `MC_*RATE_I/MC_*RATE_K` until steady-state error disappears.
+4. Increase D-term if overshoot occurs, but be careful of noise amplification.
+5. Log `rate_ctrl_status.{rollspeed_integ,...}` to check whether the integrator saturates.

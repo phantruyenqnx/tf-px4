@@ -1,93 +1,93 @@
-# 6. Control Allocation (Mixer toán học)
+# 6. Control Allocation (Mathematical Mixer)
 
-## 6.1. Vai trò
+## 6.1. Role
 
-Chuyển vector lệnh 6-trục $\boldsymbol{c}=[\boldsymbol{\tau};\boldsymbol{T}]\in\mathbb{R}^6$ (3 torque + 3 thrust component) → tín hiệu $n_m$ motor $\boldsymbol{u}\in[0,1]^{n_m}$. Đây là **mixer thế hệ mới** của PX4 thay cho `mixer_module` cũ — tách biệt thuật toán phân phối khỏi cấu hình hình học.
+Converts the 6-axis command vector $\boldsymbol{c}=[\boldsymbol{\tau};\boldsymbol{T}]\in\mathbb{R}^6$ (3 torque + 3 thrust components) into $n_m$ motor signals $\boldsymbol{u}\in[0,1]^{n_m}$. This is the **next-generation mixer** in PX4 replacing the old `mixer_module` — it separates the allocation algorithm from the geometric configuration.
 
-## 6.2. Code chính
+## 6.2. Main Code
 
-| Vai trò | File |
+| Role | File |
 |---|---|
 | Module wrapper | `@/home/frank/tf-px4/src/modules/control_allocator/ControlAllocator.cpp` |
 | Header | `@/home/frank/tf-px4/src/modules/control_allocator/ControlAllocator.hpp` |
-| Effectiveness theo airframe | `@/home/frank/tf-px4/src/modules/control_allocator/VehicleActuatorEffectiveness/` |
+| Effectiveness by airframe | `@/home/frank/tf-px4/src/modules/control_allocator/VehicleActuatorEffectiveness/` |
 | Base allocation | `@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocation.cpp` |
 | **Pseudo-inverse** | `@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocationPseudoInverse.cpp` |
 | **Sequential desaturation** | `@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocationSequentialDesaturation.cpp` |
 | Effectiveness lib | `@/home/frank/tf-px4/src/lib/control_allocation/actuator_effectiveness/` |
 | Generic inverse (Greville/Moore-Penrose) | `@/home/frank/tf-px4/src/lib/matrix/matrix/PseudoInverse.hpp` (`matrix::geninv`) |
 
-## 6.3. Bảng ký hiệu
+## 6.3. Symbol Table
 
-### Biến chính
+### Main Variables
 
-| Ký hiệu | Code | Nghĩa |
+| Symbol | Code | Meaning |
 |---|---|---|
-| $\boldsymbol{c}=[\boldsymbol{\tau};\boldsymbol{T}]\in\mathbb{R}^6$ | `_control_sp` | lệnh đầu vào (3 torque + 3 thrust comp.), normalized $\in[-1,1]$ |
-| $\boldsymbol{u}\in\mathbb{R}^{n_m}$ | `_actuator_sp` | output mỗi actuator $\in[u_{min},u_{max}]$ |
-| $n_m$ | `_num_actuators` | số motor/control surface |
-| $\boldsymbol{B}\in\mathbb{R}^{6\times n_m}$ | `_effectiveness` | effectiveness matrix (sinh từ hình học airframe) |
-| $\boldsymbol{B}^+\in\mathbb{R}^{n_m\times 6}$ | `_mix` | pseudo-inverse đã chuẩn hóa |
-| $\boldsymbol{u}_{trim}$ | `_actuator_trim` | working point (vd. `0.5` cho hover quad) |
-| $\boldsymbol{c}_{trim}$ | `_control_trim` | lệnh tương ứng với $\boldsymbol{u}_{trim}$ |
+| $\boldsymbol{c}=[\boldsymbol{\tau};\boldsymbol{T}]\in\mathbb{R}^6$ | `_control_sp` | input command (3 torque + 3 thrust comp.), normalized $\in[-1,1]$ |
+| $\boldsymbol{u}\in\mathbb{R}^{n_m}$ | `_actuator_sp` | output per actuator $\in[u_{min},u_{max}]$ |
+| $n_m$ | `_num_actuators` | number of motors/control surfaces |
+| $\boldsymbol{B}\in\mathbb{R}^{6\times n_m}$ | `_effectiveness` | effectiveness matrix (generated from airframe geometry) |
+| $\boldsymbol{B}^+\in\mathbb{R}^{n_m\times 6}$ | `_mix` | normalized pseudo-inverse |
+| $\boldsymbol{u}_{trim}$ | `_actuator_trim` | working point (e.g. `0.5` for hover quad) |
+| $\boldsymbol{c}_{trim}$ | `_control_trim` | command corresponding to $\boldsymbol{u}_{trim}$ |
 
-### Tham số mô hình actuator
+### Actuator Model Parameters
 
-| Ký hiệu | Nghĩa |
+| Symbol | Meaning |
 |---|---|
-| $r$ | bán kính cánh tay đòn motor (m) |
-| $\theta_i$ | góc vị trí motor $i$ trong mặt phẳng x-y body |
-| $c_m$ | hệ số mo-men cản (yaw / thrust ratio, $\sim 0.01$) |
-| $\sigma_i\in\{+1,-1\}$ | chiều quay rotor (CW=$-$, CCW=$+$) |
+| $r$ | motor arm radius (m) |
+| $\theta_i$ | angular position of motor $i$ in the body x-y plane |
+| $c_m$ | drag moment coefficient (yaw / thrust ratio, $\sim 0.01$) |
+| $\sigma_i\in\{+1,-1\}$ | rotor spin direction (CW=$-$, CCW=$+$) |
 
-### Saturation handling
+### Saturation Handling
 
-| Ký hiệu | Code | Nghĩa |
+| Symbol | Code | Meaning |
 |---|---|---|
-| $\boldsymbol{d}\in\mathbb{R}^{n_m}$ | `desaturation_vector` | hướng "dịch chuyển" trong nullspace của $\boldsymbol{B}$ (không đổi $\boldsymbol{c}$) |
-| $k$ | `gain` | gain SD tìm được để đẩy $\boldsymbol{u}$ về feasible |
-| $u_{min,i},u_{max,i}$ | `_actuator_min/max` | biên motor $i$ |
-| $\boldsymbol{c}_{achieved}=\boldsymbol{B}\boldsymbol{u}_{clipped}$ | derived | lệnh thực sự sinh được sau khi clip |
-| $\boldsymbol{c}_{unalloc}=\boldsymbol{c}-\boldsymbol{c}_{achieved}$ | `unallocated_torque/thrust` | lệnh KHÔNG sinh được, feedback về rate controller (§5) |
+| $\boldsymbol{d}\in\mathbb{R}^{n_m}$ | `desaturation_vector` | "shift" direction in the nullspace of $\boldsymbol{B}$ (does not change $\boldsymbol{c}$) |
+| $k$ | `gain` | SD gain found to push $\boldsymbol{u}$ back to feasible |
+| $u_{min,i},u_{max,i}$ | `_actuator_min/max` | bounds for motor $i$ |
+| $\boldsymbol{c}_{achieved}=\boldsymbol{B}\boldsymbol{u}_{clipped}$ | derived | command actually produced after clipping |
+| $\boldsymbol{c}_{unalloc}=\boldsymbol{c}-\boldsymbol{c}_{achieved}$ | `unallocated_torque/thrust` | command that CANNOT be produced, fed back to rate controller (§5) |
 
-### Toán tử
+### Operators
 
-| Ký hiệu | Nghĩa |
+| Symbol | Meaning |
 |---|---|
 | $\boldsymbol{B}^+$ | Moore-Penrose pseudo-inverse |
-| $\mathrm{geninv}$ | Greville recursive PI (handle rank-deficient) |
+| $\mathrm{geninv}$ | Greville recursive PI (handles rank-deficient cases) |
 | $\mathrm{Null}(\boldsymbol{B})$ | nullspace = $\{\boldsymbol{u}:\boldsymbol{B}\boldsymbol{u}=\boldsymbol{0}\}$ |
 
 ---
 
-## 6.4. Bài toán toán học
+## 6.4. Mathematical Problem
 
-Vector lệnh chuẩn hóa:
+Normalized command vector:
 $$
 \boldsymbol{c}=\begin{bmatrix}\tau_x\\ \tau_y\\ \tau_z\\ T_x\\ T_y\\ T_z\end{bmatrix}\in[-1,1]^6
 $$
 
-Output mỗi motor $\boldsymbol{u}\in[u_{min},u_{max}]^{n_m}$ (mặc định $[0,1]$).
+Output per motor $\boldsymbol{u}\in[u_{min},u_{max}]^{n_m}$ (default $[0,1]$).
 
-Mô hình actuator tuyến tính:
+Linear actuator model:
 $$
 \boldsymbol{c} = \boldsymbol{B}\boldsymbol{u}
 $$
-$\boldsymbol{B}\in\mathbb{R}^{6\times n_m}$ là **effectiveness matrix** sinh từ hình học airframe.
+$\boldsymbol{B}\in\mathbb{R}^{6\times n_m}$ is the **effectiveness matrix** generated from the airframe geometry.
 
-**Giải thích biến**:
-- $\boldsymbol{c}=(\tau_x,\tau_y,\tau_z,T_x,T_y,T_z)^\top$: lệnh 6-DoF đã normalized về $[-1,1]$.
-- $\boldsymbol{u}=(u_0,\dots,u_{n_m-1})^\top$: giá trị motor (PWM-equivalent), mặc định $\in[0,1]$.
-- $B_{ji}$: trục $j$ (trong 6 trục) thay đổi bao nhiêu khi motor $i$ tăng 1 đơn vị — đánh giá "ai ảnh hưởng đến ai".
+**Variable explanation**:
+- $\boldsymbol{c}=(\tau_x,\tau_y,\tau_z,T_x,T_y,T_z)^\top$: 6-DoF command normalized to $[-1,1]$.
+- $\boldsymbol{u}=(u_0,\dots,u_{n_m-1})^\top$: motor values (PWM-equivalent), default $\in[0,1]$.
+- $B_{ji}$: how much axis $j$ (among the 6 axes) changes when motor $i$ increases by 1 unit — quantifies "who affects what".
 
-### Ví dụ: Quadcopter X (motor đánh số 0..3 ở 4 góc)
+### Example: Quadcopter X (motors numbered 0..3 at 4 corners)
 
-Cho:
-- Vị trí motor $i$: $(r\cos\theta_i, r\sin\theta_i, 0)$ trong body, $\theta_i\in\{45°,135°,225°,315°\}$.
-- Hướng đẩy: $-\hat{\boldsymbol{z}}_B$.
-- Mô-men cản (yaw): hệ số $c_m$, dấu CW/CCW xen kẽ.
+Given:
+- Motor $i$ position: $(r\cos\theta_i, r\sin\theta_i, 0)$ in body, $\theta_i\in\{45°,135°,225°,315°\}$.
+- Thrust direction: $-\hat{\boldsymbol{z}}_B$.
+- Drag moment (yaw): coefficient $c_m$, alternating CW/CCW sign.
 
-Cột $i$ của $\boldsymbol{B}$:
+Column $i$ of $\boldsymbol{B}$:
 $$
 \boldsymbol{B}_{:,i} = \begin{bmatrix}
 -r\sin\theta_i & \text{(roll)}\\
@@ -95,32 +95,32 @@ $$
 \sigma_i\,c_m & \text{(yaw, }\sigma_i=\pm1\text{)}\\
 0 & \text{(T_x)}\\
 0 & \text{(T_y)}\\
--1 & \text{(T_z, đẩy lên)}
+-1 & \text{(T_z, upward thrust)}
 \end{bmatrix}
 $$
 
-**Giải thích từng hàng**:
-- Hàng 1 (roll = $\tau_x$): motor càng xa trục x (lớn $|\sin\theta_i|$) càng tạo roll torque, dấu theo $-\sin\theta_i$ vì thrust hướng $-\hat{z}_B$ × cánh tay $\hat{y}\sin\theta_i$.
-- Hàng 2 (pitch): tương tự với trục y, dấu $+\cos\theta_i$.
-- Hàng 3 (yaw = $\tau_z$): mo-men phản lực không khí từ rotor, dấu theo chiều quay $\sigma_i$, độ lớn = $c_m$ (~ 1/100 của thrust).
-- Hàng 4-5 (T_x, T_y): = 0 vì quad chỉ đẩy theo $\hat{z}_B$, không có lateral thrust (khác với tilt-rotor).
-- Hàng 6 (T_z): = $-1$ — thrust theo $-\hat{z}_B$ ($T_z$ âm trong NED-like body z hướng xuống).
+**Row-by-row explanation**:
+- Row 1 (roll = $\tau_x$): motors farther from the x-axis (larger $|\sin\theta_i|$) generate more roll torque; sign follows $-\sin\theta_i$ because thrust is in the $-\hat{z}_B$ direction × moment arm $\hat{y}\sin\theta_i$.
+- Row 2 (pitch): similar, about the y-axis, sign $+\cos\theta_i$.
+- Row 3 (yaw = $\tau_z$): aerodynamic reaction moment from the rotor, sign follows spin direction $\sigma_i$, magnitude = $c_m$ (~ 1/100 of thrust).
+- Rows 4-5 (T_x, T_y): = 0 because the quad only thrusts along $\hat{z}_B$, no lateral thrust (unlike tilt-rotors).
+- Row 6 (T_z): = $-1$ — thrust along $-\hat{z}_B$ ($T_z$ negative in NED-like body z pointing down).
 
-$\boldsymbol{B}$ được tạo ở `ActuatorEffectivenessRotors.cpp`.
+$\boldsymbol{B}$ is generated in `ActuatorEffectivenessRotors.cpp`.
 
-## 6.5. Pseudo-inverse Moore–Penrose
+## 6.5. Moore–Penrose Pseudo-inverse
 
-Khi $n_m\ge 6$ và $\boldsymbol{B}$ rank đầy:
+When $n_m\ge 6$ and $\boldsymbol{B}$ has full rank:
 $$
 \boldsymbol{B}^+ = \boldsymbol{B}^\top(\boldsymbol{B}\boldsymbol{B}^\top)^{-1}
 $$
 
-**Giải thích biến**:
-- $\boldsymbol{B}\boldsymbol{B}^\top\in\mathbb{R}^{6\times 6}$: invertible khi $\boldsymbol{B}$ full row-rank (đủ motor để control 6 trục).
-- $\boldsymbol{B}^+$: ma trận "đảo" sao cho $\boldsymbol{B}\boldsymbol{B}^+ = \boldsymbol{I}_6$ (trái chỉ khi over-actuated).
-- Dạng này áp dụng cho hex/octo (≥ 6 motor).
+**Variable explanation**:
+- $\boldsymbol{B}\boldsymbol{B}^\top\in\mathbb{R}^{6\times 6}$: invertible when $\boldsymbol{B}$ is full row-rank (enough motors to control 6 axes).
+- $\boldsymbol{B}^+$: "inverse" matrix such that $\boldsymbol{B}\boldsymbol{B}^+ = \boldsymbol{I}_6$ (left-inverse only when over-actuated).
+- This form applies to hex/octo (≥ 6 motors).
 
-Với $n_m<6$ (vd. quad có 4 motor < 6 trục), code dùng `matrix::geninv` — Greville's recursive Moore-Penrose, hoạt động cho cả rank thiếu.
+For $n_m<6$ (e.g. quad with 4 motors < 6 axes), the code uses `matrix::geninv` — Greville's recursive Moore-Penrose, which works even for rank-deficient cases.
 
 ```@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocationPseudoInverse.cpp:61-78
 void
@@ -143,19 +143,19 @@ ControlAllocationPseudoInverse::updatePseudoInverse()
 }
 ```
 
-Luật phân phối:
+Allocation law:
 $$
 \boxed{\ \boldsymbol{u} = \boldsymbol{u}_{trim} + \boldsymbol{B}^+(\boldsymbol{c}-\boldsymbol{c}_{trim})\ }
 $$
 
-**Giải thích biến**:
-- $\boldsymbol{u}_{trim}$: working point — cho quad hover, tương đương hệ số hover thrust (~ 0.5 cho default).
-- $\boldsymbol{c}_{trim}$: lệnh sinh ra tại $\boldsymbol{u}_{trim}$ (giá trị $T_z=-T_h$, các cái khác = 0).
-- $\boldsymbol{c}-\boldsymbol{c}_{trim}$: "lệnh dịch chuyển" so với trim → nhân $\boldsymbol{B}^+$ để ra lượng motor cần thay đổi.
-- Tổng cộng với $\boldsymbol{u}_{trim}$ → PWM cuối.
-- Lợi ích trim: tuyến tính hóa quanh hover → phần dịch nhỏ, gain nằm đúng độ nhạy ESC.
+**Variable explanation**:
+- $\boldsymbol{u}_{trim}$: working point — for a hovering quad, equivalent to the hover thrust coefficient (~ 0.5 by default).
+- $\boldsymbol{c}_{trim}$: command produced at $\boldsymbol{u}_{trim}$ (value $T_z=-T_h$, others = 0).
+- $\boldsymbol{c}-\boldsymbol{c}_{trim}$: "delta command" relative to trim → multiplied by $\boldsymbol{B}^+$ to get the required motor change.
+- Added to $\boldsymbol{u}_{trim}$ → final PWM.
+- Trim benefit: linearizes around hover → small delta, gain aligns with correct ESC sensitivity.
 
-Đối chiếu code (`allocate()`):
+Cross-reference with code (`allocate()`):
 
 ```@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocationPseudoInverse.cpp:179-189
 void
@@ -171,32 +171,32 @@ ControlAllocationPseudoInverse::allocate()
 }
 ```
 
-`_mix` = $\boldsymbol{B}^+$ đã chuẩn hóa.
+`_mix` = normalized $\boldsymbol{B}^+$.
 
-### Tính chất Moore-Penrose
-$\boldsymbol{u}=\boldsymbol{B}^+\boldsymbol{c}$ là nghiệm **năng lượng tối thiểu** (chuẩn $\ell_2$) trong không gian:
+### Moore-Penrose Properties
+$\boldsymbol{u}=\boldsymbol{B}^+\boldsymbol{c}$ is the **minimum-energy solution** ($\ell_2$ norm) in the space:
 $$
 \min_\boldsymbol{u}\|\boldsymbol{u}\|^2\quad\text{s.t.}\quad \boldsymbol{B}\boldsymbol{u}=\boldsymbol{c}
 $$
 
-- Nếu under-actuated ($n_m\ge 6$, $\boldsymbol{B}$ full row-rank): ​vô số nghiệm, PI chọn cái có $\|\boldsymbol{u}\|$ nhỏ nhất (ít sử dụng motor effort).
-- Khi quá xác định ($n_m<6$, rank<6) → KHÔNG có nghiệm chính xác, PI cho **least-squares** approximation $\min\|\boldsymbol{B}\boldsymbol{u}-\boldsymbol{c}\|^2$ — giả như "theo đuổi sát nhất" lệnh, phần lệch được đánh dấu $\boldsymbol{c}_{unalloc}$.
+- If under-actuated ($n_m\ge 6$, $\boldsymbol{B}$ full row-rank): infinitely many solutions, PI selects the one with smallest $\|\boldsymbol{u}\|$ (minimum motor effort).
+- When over-determined ($n_m<6$, rank<6) → NO exact solution, PI gives a **least-squares** approximation $\min\|\boldsymbol{B}\boldsymbol{u}-\boldsymbol{c}\|^2$ — "best pursuit" of the command, with the residual marked as $\boldsymbol{c}_{unalloc}$.
 
-## 6.6. Chuẩn hóa cột $\boldsymbol{B}^+$
+## 6.6. Column Normalization of $\boldsymbol{B}^+$
 
-Mục đích: cùng giá trị $\tau_x=1$ phải tạo cùng "tổng độ lệch motor" bất kể số motor (4-quad vs 6-hex).
+Purpose: the same value $\tau_x=1$ must produce the same "total motor deviation" regardless of the number of motors (4-quad vs 6-hex).
 
-- Roll/Pitch (cùng scale): $\sqrt{\|\boldsymbol{B}^+_{:,0}\|^2/(n_{nz}/2)}$.
+- Roll/Pitch (same scale): $\sqrt{\|\boldsymbol{B}^+_{:,0}\|^2/(n_{nz}/2)}$.
 - Yaw: $\max_i|B^+_{i,2}|$.
-- Thrust mỗi trục: $\frac{1}{n_{nz}}\sum_i|B^+_{i,3+axis}|$.
+- Thrust per axis: $\frac{1}{n_{nz}}\sum_i|B^+_{i,3+axis}|$.
 
-**Giải thích biến**:
-- $\boldsymbol{B}^+_{:,j}$: cột $j$ của $\boldsymbol{B}^+$ — cho thấy lệnh trục $j$ (vd. roll) phân phối đến từng motor thế nào.
-- $n_{nz}$: số motor có effectiveness khác 0 cho trục đó.
-- Roll/pitch được dùng RMS-norm để chuẩn hóa (cho đẹp đối xứng); yaw dùng max-norm vì $c_m$ nhỏ cần biên lớn.
-- Thrust dùng mean-norm để tổng motor command luôn có độ lớn bằng với $T_z$.
+**Variable explanation**:
+- $\boldsymbol{B}^+_{:,j}$: column $j$ of $\boldsymbol{B}^+$ — shows how the command on axis $j$ (e.g. roll) is distributed to each motor.
+- $n_{nz}$: number of motors with nonzero effectiveness for that axis.
+- Roll/pitch use RMS-norm for normalization (for clean symmetry); yaw uses max-norm because $c_m$ is small and needs a larger range.
+- Thrust uses mean-norm so that the total motor command always has the same magnitude as $T_z$.
 
-Sau đó zero-out các phần tử $|B^+_{ij}|<10^{-3}$ để tránh nhiễu số.
+Then zero out elements where $|B^+_{ij}|<10^{-3}$ to avoid numerical noise.
 
 ```@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocationPseudoInverse.cpp:100-122
 float roll_norm_scale = 1.f;
@@ -230,34 +230,34 @@ for (int i = 0; i < _num_actuators; i++) {
 }
 ```
 
-## 6.7. Sequential Desaturation (SD) — quad/hex bị thiếu DoF
+## 6.7. Sequential Desaturation (SD) — quad/hex with insufficient DoF
 
-File: `ControlAllocationSequentialDesaturation.cpp`. Ý tưởng: thêm vector trong nullspace của $\boldsymbol{B}$ vào $\boldsymbol{u}$ (không thay đổi $\boldsymbol{c}=\boldsymbol{B}\boldsymbol{u}$) sao cho $\boldsymbol{u}$ về vùng feasible $[u_{min},u_{max}]$. Khi không thể, **hi sinh** trục theo thứ tự ưu tiên.
+File: `ControlAllocationSequentialDesaturation.cpp`. Idea: add a vector in the nullspace of $\boldsymbol{B}$ to $\boldsymbol{u}$ (without changing $\boldsymbol{c}=\boldsymbol{B}\boldsymbol{u}$) so that $\boldsymbol{u}$ returns to the feasible region $[u_{min},u_{max}]$. When this is not possible, **sacrifice** axes in priority order.
 
-### Hàm `computeDesaturationGain`
+### `computeDesaturationGain` Function
 
-Cho desaturation vector $\boldsymbol{d}$ (thường là cột thrust, hoặc cột nullspace), tìm gain $k$:
+Given desaturation vector $\boldsymbol{d}$ (typically the thrust column, or a nullspace column), find gain $k$:
 
-Với mỗi motor saturate $u_i<u_{min,i}$:
+For each saturated motor $u_i<u_{min,i}$:
 $$
 k_i = \frac{u_{min,i}-u_i}{d_i}
 $$
-Tương tự cho $u_i>u_{max,i}$. Lấy:
+Similarly for $u_i>u_{max,i}$. Take:
 $$
-k = k_{min}+k_{max}\quad(\text{giảm tổng saturation}).
+k = k_{min}+k_{max}\quad(\text{reduce total saturation}).
 $$
 
-**Giải thích biến**:
-- $\boldsymbol{d}$: vector chỉ hướng "đẩy" $\boldsymbol{u}$ — nếu $\boldsymbol{d}\in\mathrm{Null}(\boldsymbol{B})$ thì $\boldsymbol{c}$ không đổi ("free move"), nếu không (vd. cột thrust) thì hy sinh trục $T_z$ để cứu tilt.
-- $k_i$: gain cần thiết để đưa motor $i$ về đúng biên (`min` hoặc `max`).
-- $k_{min},k_{max}$: gain âm nhỏ nhất và dương lớn nhất qua mọi motor — trung hòa hai chiều (nếu một motor saturate cao còn cái khác saturate thấp, trù trung bình).
-- Bỏ qua actuator có $|d_i|<0.2$ (effectiveness yếu) — tránh chia xấp xỉ 0 gây gain đột biến.
+**Variable explanation**:
+- $\boldsymbol{d}$: vector indicating the "push" direction for $\boldsymbol{u}$ — if $\boldsymbol{d}\in\mathrm{Null}(\boldsymbol{B})$ then $\boldsymbol{c}$ remains unchanged ("free move"); otherwise (e.g. thrust column) it sacrifices the $T_z$ axis to rescue tilt.
+- $k_i$: gain needed to bring motor $i$ exactly to its bound (`min` or `max`).
+- $k_{min},k_{max}$: smallest negative and largest positive gain across all motors — balances both directions (if one motor saturates high while another saturates low, averages them out).
+- Ignore actuators with $|d_i|<0.2$ (weak effectiveness) — avoids near-zero division causing gain spikes.
 
-Áp:
+Apply:
 $$
 \boldsymbol{u}\leftarrow\boldsymbol{u}+k\boldsymbol{d}
 $$
-Lặp 1 lần với $k\leftarrow 0.5\,k_{new}$ để hội tụ ổn định ("two-step bisection").
+Repeat once with $k\leftarrow 0.5\,k_{new}$ for stable convergence ("two-step bisection").
 
 ```@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocationSequentialDesaturation.cpp:67-86
 void ControlAllocationSequentialDesaturation::desaturateActuators(
@@ -317,14 +317,14 @@ float ControlAllocationSequentialDesaturation::computeDesaturationGain(const Act
 }
 ```
 
-### Airmode (chế độ ưu tiên)
+### Airmode (priority mode)
 
-`MC_AIRMODE` chọn:
-- `0` (disabled): khi mất thrust, *giảm tilt response* (ưu tiên thrust). Drone "dập đất" mềm hơn.
-- `1` (Roll/Pitch): cho phép thrust dao động để giữ tilt response.
-- `2` (Roll/Pitch/Yaw): cho phép cả yaw — aggressive nhất, dùng cho acro/race.
+`MC_AIRMODE` selects:
+- `0` (disabled): when thrust is insufficient, *reduce tilt response* (prioritize thrust). Drone lands more softly.
+- `1` (Roll/Pitch): allows thrust to vary in order to maintain tilt response.
+- `2` (Roll/Pitch/Yaw): also allows yaw — most aggressive, used for acro/race.
 
-Nội dung mỗi `mixAirmode*` là một chuỗi `desaturateActuators` với desaturation vector khác nhau (cột yaw, cột thrust, ...).
+Each `mixAirmode*` function consists of a sequence of `desaturateActuators` calls with different desaturation vectors (yaw column, thrust column, ...).
 
 ```@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocationSequentialDesaturation.cpp:44-65
 void
@@ -353,7 +353,7 @@ ControlAllocationSequentialDesaturation::allocate()
 
 ### Output saturation feedback
 
-Sau allocation, tính:
+After allocation, compute:
 $$
 \boldsymbol{c}_{achieved} = \boldsymbol{B}\boldsymbol{u}_{clipped}
 $$
@@ -361,29 +361,29 @@ $$
 \boldsymbol{c}_{unalloc} = \boldsymbol{c}-\boldsymbol{c}_{achieved}
 $$
 
-**Giải thích biến**:
-- $\boldsymbol{u}_{clipped}=\mathrm{clip}(\boldsymbol{u},u_{min},u_{max})$: motor command sau khi clip về vùng cho phép (có thể bị hạ $\boldsymbol{u}$).
-- $\boldsymbol{c}_{achieved}$: lệnh thực sự sinh được — nhân lại $\boldsymbol{B}$ để kiểm đối.
-- $\boldsymbol{c}_{unalloc}\ne 0$ nghĩa là saturation xảy ra — đầu vào feedback cho §5 anti-windup.
+**Variable explanation**:
+- $\boldsymbol{u}_{clipped}=\mathrm{clip}(\boldsymbol{u},u_{min},u_{max})$: motor command after clipping to the allowed range (may reduce $\boldsymbol{u}$).
+- $\boldsymbol{c}_{achieved}$: command actually produced — multiplied back by $\boldsymbol{B}$ for verification.
+- $\boldsymbol{c}_{unalloc}\ne 0$ means saturation occurred — fed back to §5 anti-windup.
 
-Publish `control_allocator_status.unallocated_torque/thrust` → rate controller dùng làm anti-windup §5.4(a).
+Publish `control_allocator_status.unallocated_torque/thrust` → rate controller uses this for anti-windup §5.4(a).
 
-## 6.8. Slew-rate giới hạn motor
+## 6.8. Motor Slew-Rate Limiting
 
-Trước khi gửi ra:
+Before outputting:
 $$
 u_i^{(k)}\leftarrow u_i^{(k-1)}+\mathrm{clip}\!\left(u_i^{(k)}-u_i^{(k-1)},-r_i\Delta t,\ r_i\Delta t\right)
 $$
 
-**Giải thích biến**:
-- $u_i^{(k)},u_i^{(k-1)}$: motor command ở bước hiện tại và trước.
-- $r_i$ = `CA_R{i}_SLEW`: tốc độ thay đổi max (1/s, vd. 0.4/s).
-- $r_i\Delta t$: ngưỡng change mỗi bước — step lớn hơn sẽ bị clip.
-- Bảo vệ ESC khỏi nhảy bậc, tránh cộng hưởng cơ, giảm amp spike.
+**Variable explanation**:
+- $u_i^{(k)},u_i^{(k-1)}$: motor command at current and previous step.
+- $r_i$ = `CA_R{i}_SLEW`: maximum rate of change (1/s, e.g. 0.4/s).
+- $r_i\Delta t$: maximum change per step — larger steps are clipped.
+- Protects ESCs from step jumps, avoids mechanical resonance, reduces current spikes.
 
-## 6.9. Cơ sở lý thuyết & keywords
+## 6.9. Theoretical Background & Keywords
 
-| Chủ đề | Keywords |
+| Topic | Keywords |
 |---|---|
 | Pseudo-inverse | `Moore-Penrose pseudoinverse`, `Greville recursive algorithm`, `weighted least squares` |
 | Control allocation | `Bodson 2002 control allocation evaluation`, `Härkegård quadratic programming allocation`, `daisy chain allocation`, `direct allocation` |
@@ -393,27 +393,27 @@ $$
 | Aerospace allocation | `aircraft pseudo-inverse mixing`, `thrust vectoring allocation`, `redundant actuator management` |
 | Saturation handling | `saturation-aware MPC`, `anti-windup with allocation feedback` |
 
-### Bài báo nền tảng
+### Foundational Papers
 - Bodson (2002) — *Evaluation of Optimization Methods for Control Allocation*. JGCD.
 - Härkegård (2002) — *Efficient Active Set Algorithms for Solving Constrained Least Squares Problems in Aircraft Control Allocation*.
-- Johansen & Fossen (2013) — *Control Allocation - A Survey*. Automatica (đọc nếu muốn tổng quan).
+- Johansen & Fossen (2013) — *Control Allocation - A Survey*. Automatica (read for an overview).
 - Faessler, Falanga, Scaramuzza (2017) — *Thrust Mixing, Saturation, and Body-Rate Control for Accurate Aggressive Quadrotor Flight*.
 
-### Sách
-- Oppenheimer, Doman, Bolender, *Control Allocation* — chương trong *The Control Handbook*.
+### Books
+- Oppenheimer, Doman, Bolender, *Control Allocation* — chapter in *The Control Handbook*.
 
-## 6.10. Tham số PX4
+## 6.10. PX4 Parameters
 
-| Tham số | Ý nghĩa |
+| Parameter | Meaning |
 |---|---|
-| `CA_AIRFRAME` | Loại airframe (quad, hex, ...) |
+| `CA_AIRFRAME` | Airframe type (quad, hex, ...) |
 | `CA_METHOD` | Allocation method (0=PseudoInverse, 1=SequentialDesaturation) |
-| `CA_R{0..N}_*` | Tham số motor i (vị trí, góc tilt, ...) |
-| `CA_R{i}_SLEW` | Slew-rate cho motor i |
-| `MC_AIRMODE` | Chiến lược desaturation |
+| `CA_R{0..N}_*` | Motor i parameters (position, tilt angle, ...) |
+| `CA_R{i}_SLEW` | Slew-rate for motor i |
+| `MC_AIRMODE` | Desaturation strategy |
 
-## 6.11. Tip debug
-- Log `actuator_motors.control[i]` xem motor có saturate không.
-- Log `control_allocator_status.unallocated_torque/thrust` để phát hiện thiếu authority.
-- Nếu yaw "yếu" lúc thrust cao: mặc định airmode 0 ưu tiên thrust → đổi sang 1/2 nếu cần.
-- Hiệu chuẩn `c_m` (mô-men cản): nếu yaw drift, có thể `CA_R*_KM` chưa đúng.
+## 6.11. Debug Tips
+- Log `actuator_motors.control[i]` to check if any motor is saturating.
+- Log `control_allocator_status.unallocated_torque/thrust` to detect insufficient authority.
+- If yaw is "weak" at high thrust: default airmode 0 prioritizes thrust → switch to 1/2 if needed.
+- Calibrate `c_m` (drag moment coefficient): if yaw drifts, `CA_R*_KM` may be incorrect.

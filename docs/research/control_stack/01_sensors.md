@@ -1,98 +1,98 @@
 # 1. Sensors & IMU Pipeline
 
-## 1.1. Vai trò trong stack
+## 1.1. Role in the Stack
 
-Tầng cảm biến chuyển dữ liệu thô từ chip (gyro, accel, mag, baro, GPS, range, optical flow, vision) → các topic uORB chuẩn hóa (đã hiệu chuẩn, lọc, vote) cấp cho **EKF2**. EKF2 mới là người gộp tất cả thành state estimate. Tầng này **không chứa controller**, nhưng chất lượng của nó quyết định trần hiệu năng của toàn bộ control stack.
+The sensor layer converts raw chip data (gyro, accel, mag, baro, GPS, range, optical flow, vision) → standardized uORB topics (calibrated, filtered, voted) to feed into **EKF2**. EKF2 is then responsible for fusing everything into a state estimate. This layer **contains no controller**, but its quality determines the performance ceiling of the entire control stack.
 
 ```
 chip raw → driver → sensor_xxx → vehicle_xxx (calibrated, filtered, voted) → EKF2
 ```
 
-## 1.2. Code chính
+## 1.2. Key Code
 
-| Vai trò | File |
+| Role | File |
 |---|---|
 | Module wrapper | `@/home/frank/tf-px4/src/modules/sensors/sensors.cpp` |
-| Vote multiple IMU | `@/home/frank/tf-px4/src/modules/sensors/voted_sensors_update.cpp` |
-| Gộp gyro + accel theo timestamp | `@/home/frank/tf-px4/src/modules/sensors/vehicle_imu/` |
-| Lọc gyro (LPF + notch + dynamic notch) | `@/home/frank/tf-px4/src/modules/sensors/vehicle_angular_velocity/` |
-| Lọc accel | `@/home/frank/tf-px4/src/modules/sensors/vehicle_acceleration/` |
+| Vote multiple IMUs | `@/home/frank/tf-px4/src/modules/sensors/voted_sensors_update.cpp` |
+| Merge gyro + accel by timestamp | `@/home/frank/tf-px4/src/modules/sensors/vehicle_imu/` |
+| Gyro filtering (LPF + notch + dynamic notch) | `@/home/frank/tf-px4/src/modules/sensors/vehicle_angular_velocity/` |
+| Accel filtering | `@/home/frank/tf-px4/src/modules/sensors/vehicle_acceleration/` |
 | Baro / GPS / Mag / Flow | `vehicle_air_data/`, `vehicle_gps_position/`, `vehicle_magnetometer/`, `vehicle_optical_flow/` |
-| Hiệu chuẩn (offline) | `@/home/frank/tf-px4/src/lib/sensor_calibration/` |
-| Tích phân coning/sculling | `@/home/frank/tf-px4/src/modules/sensors/Integrator.hpp` |
-| FFT động (gyro_fft) | `@/home/frank/tf-px4/src/modules/gyro_fft/` |
-| Thư viện filter | `@/home/frank/tf-px4/src/lib/mathlib/math/filter/` (LowPassFilter2pVector3f, NotchFilter, AlphaFilter) |
+| Calibration (offline) | `@/home/frank/tf-px4/src/lib/sensor_calibration/` |
+| Coning/sculling integration | `@/home/frank/tf-px4/src/modules/sensors/Integrator.hpp` |
+| Dynamic FFT (gyro_fft) | `@/home/frank/tf-px4/src/modules/gyro_fft/` |
+| Filter library | `@/home/frank/tf-px4/src/lib/mathlib/math/filter/` (LowPassFilter2pVector3f, NotchFilter, AlphaFilter) |
 
-## 1.3. Bảng ký hiệu dùng trong file này
+## 1.3. Notation Table Used in This File
 
-Để khỏi phải lật về `00_index.md` mỗi lần. Đồng nhất với toàn bộ control stack.
+For quick reference without switching back to `00_index.md`. Consistent with the entire control stack.
 
-### Khung tham chiếu
+### Reference Frames
 
-| Ký hiệu | Nghĩa |
+| Symbol | Meaning |
 |---|---|
 | $\{W\}$ | World frame, **NED** (x-North, y-East, z-Down) |
 | $\{B\}$ | Body frame, **FRD** (x-Forward, y-Right, z-Down) |
-| $\{S\}$ | Sensor frame (mỗi chip có thể lệch trục so với body) |
-| $\boldsymbol{R}_{WB}$ | DCM 3×3 quay $\{B\}\to\{W\}$ (cột 3 = $\hat{\boldsymbol{z}}_B$ biểu diễn trong $\{W\}$) |
-| $\boldsymbol{R}_{BW}=\boldsymbol{R}_{WB}^\top$ | DCM ngược, quay $\{W\}\to\{B\}$ |
-| $\boldsymbol{R}_{BS}$ | DCM cố định cấu hình phần cứng (sensor mounting), `_rotation` trong code calibration |
-| $\boldsymbol{q}$ | Quaternion Hamilton scalar-first $(q_w,q_x,q_y,q_z)$ |
+| $\{S\}$ | Sensor frame (each chip may have a different axis alignment relative to body) |
+| $\boldsymbol{R}_{WB}$ | DCM 3×3 rotating $\{B\}\to\{W\}$ (column 3 = $\hat{\boldsymbol{z}}_B$ expressed in $\{W\}$) |
+| $\boldsymbol{R}_{BW}=\boldsymbol{R}_{WB}^\top$ | Inverse DCM, rotating $\{W\}\to\{B\}$ |
+| $\boldsymbol{R}_{BS}$ | Fixed DCM for hardware mounting (sensor mounting), `_rotation` in calibration code |
+| $\boldsymbol{q}$ | Hamilton scalar-first quaternion $(q_w,q_x,q_y,q_z)$ |
 
-### Đại lượng động học
+### Kinematic Quantities
 
-| Ký hiệu | Nghĩa | Đơn vị |
+| Symbol | Meaning | Unit |
 |---|---|---|
-| $\boldsymbol{p}=(p_x,p_y,p_z)^\top$ | vị trí trong $\{W\}$ | m |
-| $\boldsymbol{v}$ | vận tốc tuyến tính trong $\{W\}$ | m/s |
-| $\boldsymbol{a}$ | gia tốc tuyến tính (vật lý, không có g) trong $\{W\}$ | m/s² |
-| $\boldsymbol{g}_W=(0,0,g)^\top$ | trọng trường, $g=9.80665$ | m/s² |
-| $\boldsymbol{\omega}=(p,q,r)^\top$ | tốc độ góc body | rad/s |
-| $\dot{\boldsymbol{\omega}}$ | gia tốc góc body | rad/s² |
+| $\boldsymbol{p}=(p_x,p_y,p_z)^\top$ | position in $\{W\}$ | m |
+| $\boldsymbol{v}$ | linear velocity in $\{W\}$ | m/s |
+| $\boldsymbol{a}$ | linear acceleration (physical, gravity-free) in $\{W\}$ | m/s² |
+| $\boldsymbol{g}_W=(0,0,g)^\top$ | gravitational field, $g=9.80665$ | m/s² |
+| $\boldsymbol{\omega}=(p,q,r)^\top$ | body angular rate | rad/s |
+| $\dot{\boldsymbol{\omega}}$ | body angular acceleration | rad/s² |
 
-### Đo lường (raw từ chip)
+### Measurements (raw from chip)
 
-| Ký hiệu | Nghĩa |
+| Symbol | Meaning |
 |---|---|
-| $\boldsymbol{\omega}_m$ | gyro raw (sau hiệu chuẩn nhà máy) — `sensor_gyro` |
+| $\boldsymbol{\omega}_m$ | gyro raw (after factory calibration) — `sensor_gyro` |
 | $\boldsymbol{a}_m$ | accel raw — `sensor_accel` |
 | $\boldsymbol{m}_m$ | mag raw — `sensor_mag` |
-| $p$ (vô hướng) | áp suất tĩnh — `sensor_baro` |
-| $\boldsymbol{p}_{GPS},\boldsymbol{v}_{GPS}$ | đo từ GPS đã chuyển sang NED |
-| $\boldsymbol{\omega}_{flow}$ | flow rate camera — `sensor_optical_flow` |
+| $p$ (scalar) | static pressure — `sensor_baro` |
+| $\boldsymbol{p}_{GPS},\boldsymbol{v}_{GPS}$ | GPS measurements converted to NED |
+| $\boldsymbol{\omega}_{flow}$ | camera flow rate — `sensor_optical_flow` |
 
-### Tham số sai số cảm biến
+### Sensor Error Parameters
 
-| Ký hiệu | Nghĩa | Code |
+| Symbol | Meaning | Code |
 |---|---|---|
-| $\boldsymbol{b}_{g}$ | bias gyro (drift) | `_offset` (Gyroscope.hpp) |
-| $\boldsymbol{b}_{a}$ | bias accel | `_offset` (Accelerometer.hpp) |
+| $\boldsymbol{b}_{g}$ | gyro bias (drift) | `_offset` (Gyroscope.hpp) |
+| $\boldsymbol{b}_{a}$ | accel bias | `_offset` (Accelerometer.hpp) |
 | $\boldsymbol{b}_{th}$ | thermal offset | `_thermal_offset` |
-| $\boldsymbol{S}_{g,a}$ | scale + cross-axis (3×3) | `_scale` (vector cho accel; ma trận cho mag) |
+| $\boldsymbol{S}_{g,a}$ | scale + cross-axis (3×3) | `_scale` (vector for accel; matrix for mag) |
 | $\boldsymbol{b}_m^{hard}$ | hard-iron mag offset | `_offset` (Magnetometer.hpp) |
 | $\boldsymbol{D}$ | soft-iron mag (3×3) | `_scale` (Magnetometer) |
-| $\boldsymbol{n}_*$ | nhiễu Gauss $\sim\mathcal{N}(0,\sigma^2)$ | `EKF2_*_NOISE` |
+| $\boldsymbol{n}_*$ | Gaussian noise $\sim\mathcal{N}(0,\sigma^2)$ | `EKF2_*_NOISE` |
 
-### Tham số filter
+### Filter Parameters
 
-| Ký hiệu | Nghĩa | Tham số PX4 |
+| Symbol | Meaning | PX4 Parameter |
 |---|---|---|
-| $f_s$ | sample frequency | tự động theo IMU |
-| $f_c$ | cutoff frequency LPF | `IMU_GYRO_CUTOFF`, `IMU_DGYRO_CUTOFF`, `IMU_ACCEL_CUTOFF` |
+| $f_s$ | sample frequency | auto-detected from IMU |
+| $f_c$ | LPF cutoff frequency | `IMU_GYRO_CUTOFF`, `IMU_DGYRO_CUTOFF`, `IMU_ACCEL_CUTOFF` |
 | $f_n$, $\omega_n=2\pi f_n$ | notch frequency | `IMU_GYRO_NF*_FRQ` |
 | $BW$ | notch bandwidth (-3 dB) | `IMU_GYRO_NF*_BW` |
-| $Q=f_n/BW$ | notch quality factor | dẫn xuất |
-| $\alpha\in[0,1]$ | hệ số AlphaFilter (1 = giữ nguyên input) | `_alpha`, $\alpha=\Delta t/(\tau+\Delta t)$ |
-| $\tau$ | time constant LPF bậc 1 | dẫn xuất từ $f_c$: $\tau=1/(2\pi f_c)$ |
-| $h_t$ | terrain height (cho optical flow) | EKF2 state |
+| $Q=f_n/BW$ | notch quality factor | derived |
+| $\alpha\in[0,1]$ | AlphaFilter coefficient (1 = pass input through) | `_alpha`, $\alpha=\Delta t/(\tau+\Delta t)$ |
+| $\tau$ | first-order LPF time constant | derived from $f_c$: $\tau=1/(2\pi f_c)$ |
+| $h_t$ | terrain height (for optical flow) | EKF2 state |
 
 ---
 
-## 1.4. Mô hình toán + code hiệu chuẩn
+## 1.4. Math Models + Calibration Code
 
 ### 1.4.1. IMU (gyro + accel)
 
-#### Mô hình đo
+#### Measurement Model
 
 $$
 \boldsymbol{\omega}_m = \boldsymbol{\omega} + \boldsymbol{b}_g + \boldsymbol{S}_g\boldsymbol{\omega} + \boldsymbol{n}_g
@@ -101,17 +101,17 @@ $$
 \boldsymbol{a}_m = \boldsymbol{R}_{BW}(\boldsymbol{a}-\boldsymbol{g}_W) + \boldsymbol{b}_a + \boldsymbol{S}_a\boldsymbol{a} + \boldsymbol{n}_a
 $$
 
-**Giải thích từng biến**:
-- $\boldsymbol{\omega}_m$: gyro raw (rad/s), sensor đo trong $\{S\}$.
-- $\boldsymbol{\omega}$: tốc độ góc thật (cái EKF muốn ước lượng).
-- $\boldsymbol{b}_g$: **bias gyro** — drift chậm theo nhiệt độ + thời gian. EKF2 ước lượng online (state `gyro_bias`).
-- $\boldsymbol{S}_g$: ma trận scale + cross-axis 3×3, gần đường chéo. PX4 hiện chỉ lưu vector đường chéo cho accel (`_scale: Vector3f`), bỏ qua cross-axis.
-- $\boldsymbol{n}_g\sim\mathcal{N}(0,\sigma_g^2 I)$: nhiễu trắng Gauss (giả định EKF).
-- $\boldsymbol{a}_m$: accel raw (m/s²) — đo **specific force** = lực không phải trọng lực chia khối lượng.
-- $\boldsymbol{R}_{BW}(\boldsymbol{a}-\boldsymbol{g}_W)$: chuyển gia tốc thật trong $\{W\}$ về $\{B\}$ rồi trừ $\boldsymbol{g}_W$ (vì specific force).
-- $\boldsymbol{b}_a$: **bias accel** — offset, EKF2 state `accel_bias`.
+**Variable descriptions**:
+- $\boldsymbol{\omega}_m$: gyro raw (rad/s), sensor measures in $\{S\}$.
+- $\boldsymbol{\omega}$: true angular rate (what EKF wants to estimate).
+- $\boldsymbol{b}_g$: **gyro bias** — slow drift with temperature + time. EKF2 estimates online (state `gyro_bias`).
+- $\boldsymbol{S}_g$: 3×3 scale + cross-axis matrix, nearly diagonal. PX4 currently only stores the diagonal vector for accel (`_scale: Vector3f`), ignoring cross-axis.
+- $\boldsymbol{n}_g\sim\mathcal{N}(0,\sigma_g^2 I)$: Gaussian white noise (EKF assumption).
+- $\boldsymbol{a}_m$: accel raw (m/s²) — measures **specific force** = non-gravitational force divided by mass.
+- $\boldsymbol{R}_{BW}(\boldsymbol{a}-\boldsymbol{g}_W)$: transforms true acceleration in $\{W\}$ to $\{B\}$ then subtracts $\boldsymbol{g}_W$ (due to specific force).
+- $\boldsymbol{b}_a$: **accel bias** — offset, EKF2 state `accel_bias`.
 
-#### Code hiệu chỉnh (đảo công thức trên để lấy lại $\boldsymbol{\omega},\boldsymbol{a}$)
+#### Correction Code (inverting the above to recover $\boldsymbol{\omega},\boldsymbol{a}$)
 
 Gyro:
 
@@ -129,12 +129,12 @@ inline matrix::Vector3f Uncorrect(const matrix::Vector3f &corrected_data) const
 }
 ```
 
-Đối chiếu công thức: $\boldsymbol{\omega}_{corr} = \boldsymbol{R}_{BS}(\boldsymbol{\omega}_m - \boldsymbol{b}_{th} - \boldsymbol{b}_g)$.
+Cross-referencing the formula: $\boldsymbol{\omega}_{corr} = \boldsymbol{R}_{BS}(\boldsymbol{\omega}_m - \boldsymbol{b}_{th} - \boldsymbol{b}_g)$.
 - `_rotation` = $\boldsymbol{R}_{BS}$ (sensor-to-body).
-- `_thermal_offset` = $\boldsymbol{b}_{th}$ (hiệu chỉnh nhiệt từ `sensor_correction` topic).
-- `_offset` = $\boldsymbol{b}_g$ (lưu trong tham số `CAL_GYROx_*OFF`).
+- `_thermal_offset` = $\boldsymbol{b}_{th}$ (thermal correction from `sensor_correction` topic).
+- `_offset` = $\boldsymbol{b}_g$ (stored in parameter `CAL_GYROx_*OFF`).
 
-Accel (có thêm scale):
+Accel (with additional scale):
 
 ```@/home/frank/tf-px4/src/lib/sensor_calibration/Accelerometer.hpp:80-85
 // apply offsets and scale
@@ -147,27 +147,27 @@ inline matrix::Vector3f Correct(const matrix::Vector3f &data) const
 
 $\boldsymbol{a}_{corr}=\boldsymbol{R}_{BS}\big(\mathrm{diag}(\boldsymbol{S}_a)(\boldsymbol{a}_m-\boldsymbol{b}_{th}-\boldsymbol{b}_a)\big)$.
 
-> **Lưu ý**: bias online ($\hat{\boldsymbol{b}}_g,\hat{\boldsymbol{b}}_a$ EKF2 ước lượng) được trừ tiếp trong EKF2 (file 02), KHÔNG ở đây. `_offset` chỉ là phần hiệu chuẩn offline lưu vào parameter.
+> **Note**: online bias ($\hat{\boldsymbol{b}}_g,\hat{\boldsymbol{b}}_a$ estimated by EKF2) is subtracted further inside EKF2 (file 02), NOT here. `_offset` is only the offline calibration portion stored in parameters.
 
 ---
 
 ### 1.4.2. Magnetometer
 
-#### Mô hình đo
+#### Measurement Model
 
 $$
 \boldsymbol{m}_m = \boldsymbol{D}\,\boldsymbol{R}_{BW}\boldsymbol{m}_W + \boldsymbol{b}_m^{hard} + \boldsymbol{n}_m
 $$
 
-**Giải thích biến**:
-- $\boldsymbol{m}_m$: vector từ trường raw (gauss hoặc tesla).
-- $\boldsymbol{m}_W$: từ trường địa lý tại vị trí bay (lookup từ World Magnetic Model — `world_magnetic_model/`).
-- $\boldsymbol{R}_{BW}$: chuyển về body.
-- $\boldsymbol{D}$ (3×3): **soft-iron** — biến dạng do vật liệu sắt từ gần cảm biến (khung, motor) làm méo vector từ trường thành ellipsoid. Lưu trong `_scale: Matrix3f`.
-- $\boldsymbol{b}_m^{hard}$: **hard-iron** — offset cố định do nam châm vĩnh cửu (motor, loa). Lưu trong `_offset`.
-- $\boldsymbol{n}_m$: nhiễu (đến từ EMI motor là chính).
+**Variable descriptions**:
+- $\boldsymbol{m}_m$: raw magnetic field vector (gauss or tesla).
+- $\boldsymbol{m}_W$: Earth's magnetic field at the flight location (looked up from the World Magnetic Model — `world_magnetic_model/`).
+- $\boldsymbol{R}_{BW}$: transforms to body frame.
+- $\boldsymbol{D}$ (3×3): **soft-iron** — distortion caused by ferromagnetic materials near the sensor (frame, motors) that distort the field vector into an ellipsoid. Stored in `_scale: Matrix3f`.
+- $\boldsymbol{b}_m^{hard}$: **hard-iron** — fixed offset due to permanent magnets (motors, speakers). Stored in `_offset`.
+- $\boldsymbol{n}_m$: noise (primarily from motor EMI).
 
-#### Code hiệu chỉnh
+#### Correction Code
 
 ```@/home/frank/tf-px4/src/lib/sensor_calibration/Magnetometer.hpp:96-101
 // apply offsets and scale
@@ -178,47 +178,47 @@ inline matrix::Vector3f Correct(const matrix::Vector3f &data) const
 }
 ```
 
-Đảo mô hình: $\boldsymbol{m}_{corr}=\boldsymbol{R}_{BS}\,\boldsymbol{D}^{-1}(\boldsymbol{m}_m+P\boldsymbol{c}_P-\boldsymbol{b}_m^{hard})$.
-- `_scale` = $\boldsymbol{D}^{-1}$ (PX4 lưu thẳng inverse cho rẻ tính).
+Inverting the model: $\boldsymbol{m}_{corr}=\boldsymbol{R}_{BS}\,\boldsymbol{D}^{-1}(\boldsymbol{m}_m+P\boldsymbol{c}_P-\boldsymbol{b}_m^{hard})$.
+- `_scale` = $\boldsymbol{D}^{-1}$ (PX4 stores the inverse directly for computational efficiency).
 - `_offset` = $\boldsymbol{b}_m^{hard}$.
-- `_power * _power_compensation` = bù dòng điện motor: $\boldsymbol{c}_P\cdot I$ (mag bị nhiễu tỉ lệ với dòng — `MagPowerCompensation`).
+- `_power * _power_compensation` = motor current compensation: $\boldsymbol{c}_P\cdot I$ (mag is disturbed proportionally to current — `MagPowerCompensation`).
 
-#### Hiệu chuẩn = ellipsoid fit
+#### Calibration = Ellipsoid Fit
 
-Khi xoay drone đủ hết hướng (4π sr), tập điểm $\boldsymbol{m}_m$ phải nằm trên một **mặt cầu** bán kính $\|\boldsymbol{m}_W\|$ tâm $\boldsymbol{0}$. Do hard/soft-iron, thực tế nó là **ellipsoid lệch tâm**. Ellipsoid fit giải bài toán:
+When the drone is rotated through all orientations (4π sr), the point cloud $\boldsymbol{m}_m$ should lie on a **sphere** of radius $\|\boldsymbol{m}_W\|$ centered at $\boldsymbol{0}$. Due to hard/soft-iron effects, it is in practice an **off-center ellipsoid**. Ellipsoid fitting solves the problem:
 $$
 \min_{\boldsymbol{D},\boldsymbol{b}}\sum_k\left|\,\|\boldsymbol{D}^{-1}(\boldsymbol{m}_{m,k}-\boldsymbol{b})\|^2 - 1\,\right|^2
 $$
-→ tìm $\boldsymbol{D},\boldsymbol{b}$ làm tập điểm thành mặt cầu đơn vị. Code calibration nằm trong `commander/calibration/mag_calibration.cpp`.
+→ finds $\boldsymbol{D},\boldsymbol{b}$ that transform the point cloud back to a unit sphere. Calibration code is in `commander/calibration/mag_calibration.cpp`.
 
 ---
 
 ### 1.4.3. Barometer (height)
 
-#### Công thức ICAO atmosphere
+#### ICAO Atmosphere Formula
 
 $$
 h = \frac{T_0}{L}\left[1-\left(\frac{p}{p_0}\right)^{LR/g}\right]
 $$
 
-**Giải thích biến**:
-- $h$: độ cao so với mức tham chiếu (m).
-- $p$: áp suất đo (Pa).
-- $p_0$: áp suất tham chiếu (Pa) — tại home, hoặc 1013.25 hPa nếu dùng MSL.
-- $T_0=288.15$ K: nhiệt độ chuẩn ICAO ở MSL.
-- $L=-0.0065$ K/m: lapse rate (suất giảm nhiệt độ theo độ cao).
-- $R=287.05$ J/(kg·K): hằng số khí riêng cho không khí khô.
+**Variable descriptions**:
+- $h$: altitude above reference level (m).
+- $p$: measured pressure (Pa).
+- $p_0$: reference pressure (Pa) — at home position, or 1013.25 hPa if using MSL.
+- $T_0=288.15$ K: ICAO standard temperature at MSL.
+- $L=-0.0065$ K/m: lapse rate (temperature decrease with altitude).
+- $R=287.05$ J/(kg·K): specific gas constant for dry air.
 - $g=9.80665$ m/s².
 
-> **Quan trọng**: do $T_0$ ở mẫu thực không bằng 288.15 K, công thức cho **altitude tuyệt đối sai** ±20–50 m. Nhưng **delta height** (chênh lệch ngắn hạn) thì rất chính xác (~10 cm) vì sai số $T_0$ triệt tiêu — đó là lý do baro chỉ dùng làm aiding cho **z** trong EKF.
+> **Important**: because the actual $T_0$ differs from 288.15 K, the formula gives **absolute altitude error** of ±20–50 m. However, **delta height** (short-term difference) is very accurate (~10 cm) because the $T_0$ error cancels out — this is why baro is only used as aiding for **z** in EKF.
 
-Code: `src/lib/atmosphere/atmosphere.cpp` (hàm `getAltitudeFromPressure`).
+Code: `src/lib/atmosphere/atmosphere.cpp` (function `getAltitudeFromPressure`).
 
 ---
 
 ### 1.4.4. GPS
 
-PX4 nhận LLA (lat/lon/alt) + ECEF velocity từ module GPS. Chuyển sang local NED bằng **azimuthal equidistant projection** quanh điểm home:
+PX4 receives LLA (lat/lon/alt) + ECEF velocity from the GPS module. Converts to local NED using **azimuthal equidistant projection** centered on the home point:
 $$
 \boldsymbol{p}_{GPS}^{NED} = \mathrm{geo\_project}(\mathrm{lat},\mathrm{lon},\mathrm{alt};\ \mathrm{lat}_0,\mathrm{lon}_0,\mathrm{alt}_0)
 $$
@@ -228,9 +228,9 @@ $$
 \boldsymbol{p}_{GPS} = \boldsymbol{p}_W + \boldsymbol{n}_{GPS},\qquad \boldsymbol{v}_{GPS}=\boldsymbol{v}_W + \boldsymbol{n}_v
 $$
 
-**Biến**:
-- $\boldsymbol{p}_{GPS}$: vị trí GPS đo (NED), $\boldsymbol{n}_{GPS}\sim\mathcal{N}(0,\sigma_{GPS}^2)$ với $\sigma_{GPS}$ lấy từ `eph` GPS module gửi lên.
-- $\boldsymbol{v}_{GPS}$: vận tốc, độc lập với position (GPS đo Doppler), thường chính xác hơn position. $\sigma_v$ lấy từ `epv`.
+**Variables**:
+- $\boldsymbol{p}_{GPS}$: GPS position measurement (NED), $\boldsymbol{n}_{GPS}\sim\mathcal{N}(0,\sigma_{GPS}^2)$ where $\sigma_{GPS}$ is taken from the `eph` field sent by the GPS module.
+- $\boldsymbol{v}_{GPS}$: velocity, independent of position (GPS measures Doppler), typically more accurate than position. $\sigma_v$ taken from `epv`.
 
 Code: `src/lib/geo/geo.cpp::project`.
 
@@ -238,58 +238,58 @@ Code: `src/lib/geo/geo.cpp::project`.
 
 ### 1.4.5. Optical Flow
 
-#### Mô hình flow rate
+#### Flow Rate Model
 
-Camera nhìn xuống đất; pixel di chuyển trong khung hình do hai nguồn: (a) máy bay tịnh tiến trên mặt đất, (b) máy bay quay (xoay camera).
+A downward-facing camera; pixels move in the frame due to two sources: (a) translational motion of the aircraft over the ground, (b) rotation of the aircraft (spinning the camera).
 
 $$
 \boldsymbol{\omega}_{flow} = -\frac{1}{h_t}(\boldsymbol{R}_{BW}\boldsymbol{v}_W)\times\hat{\boldsymbol{z}}_B + \boldsymbol{\omega} + \boldsymbol{n}_{flow}
 $$
 
-**Biến**:
-- $\boldsymbol{\omega}_{flow}$: "flow rate" 2D đo được (rad/s ở pixel quy đổi qua FOV camera).
-- $h_t$: **terrain height** (khoảng cách camera tới mặt đất). EKF2 có state `terrain` ước lượng từ range finder + flow.
-- $\boldsymbol{R}_{BW}\boldsymbol{v}_W$: vận tốc body (chiếu world velocity về body).
-- $\hat{\boldsymbol{z}}_B = (0,0,1)^\top$: trục dọc body (camera nhìn theo chiều này).
-- $\boldsymbol{\omega}$: tốc độ góc thật (cộng vào vì xoay drone cũng làm pixel chuyển động).
-- Tích chéo $\times\hat{\boldsymbol{z}}_B$ chỉ lấy 2 thành phần ngang (vì flow chỉ đo 2D).
+**Variables**:
+- $\boldsymbol{\omega}_{flow}$: measured 2D "flow rate" (rad/s in pixels converted through camera FOV).
+- $h_t$: **terrain height** (distance from camera to ground). EKF2 has a `terrain` state estimated from range finder + flow.
+- $\boldsymbol{R}_{BW}\boldsymbol{v}_W$: body velocity (world velocity projected onto body frame).
+- $\hat{\boldsymbol{z}}_B = (0,0,1)^\top$: body vertical axis (camera points in this direction).
+- $\boldsymbol{\omega}$: true angular rate (added because rotating the drone also causes pixel motion).
+- Cross product $\times\hat{\boldsymbol{z}}_B$ extracts only the 2 horizontal components (since flow only measures 2D).
 
-EKF dùng innovation = $\boldsymbol{\omega}_{flow,measured} - \boldsymbol{\omega}_{flow,predicted}$ để cập nhật $\boldsymbol{v}_W$ và $h_t$.
+EKF uses innovation = $\boldsymbol{\omega}_{flow,measured} - \boldsymbol{\omega}_{flow,predicted}$ to update $\boldsymbol{v}_W$ and $h_t$.
 
 Code: `src/modules/ekf2/EKF/aid_sources/optical_flow/optical_flow_control.cpp`.
 
 ---
 
-## 1.5. Pipeline lọc gyro (chi tiết với code)
+## 1.5. Gyro Filtering Pipeline (detailed with code)
 
-Trong `vehicle_angular_velocity/`, thứ tự xử lý: **calibrate → coning integrate → notch (static + dynamic) → LPF → derivative LPF → publish**.
+In `vehicle_angular_velocity/`, the processing order is: **calibrate → coning integrate → notch (static + dynamic) → LPF → derivative LPF → publish**.
 
-### 1.5.1. Coning integrator (Bortz / Savage)
+### 1.5.1. Coning Integrator (Bortz / Savage)
 
-#### Công thức
+#### Formula
 
-Khi gộp các sample gyro tốc độ cao thành tăng góc $\Delta\boldsymbol{\theta}_k$ trên một chu kỳ, nếu chỉ tích phân thường $\int\boldsymbol{\omega}\,dt$ sẽ sai khi trục quay không trùng với trục thân (hiện tượng *coning*, sinh sai số DC). Hiệu chỉnh Bortz:
+When accumulating high-rate gyro samples into an angular increment $\Delta\boldsymbol{\theta}_k$ over one cycle, simple integration $\int\boldsymbol{\omega}\,dt$ is erroneous when the rotation axis is not aligned with the body axis (the *coning* phenomenon, which generates DC error). Bortz correction:
 
 $$
 \Delta\boldsymbol{\theta}_k = \boldsymbol{\alpha}_k + \boldsymbol{\beta}_k
 $$
 $$
-\boldsymbol{\alpha}_k = \int_{t_{k-1}}^{t_k}\boldsymbol{\omega}\,dt\quad(\text{tích phân hình thang})
+\boldsymbol{\alpha}_k = \int_{t_{k-1}}^{t_k}\boldsymbol{\omega}\,dt\quad(\text{trapezoidal integration})
 $$
 $$
 \boldsymbol{\beta}_k = \tfrac{1}{2}\sum_i\Big(\boldsymbol{\alpha}_{prev} + \tfrac{1}{6}\Delta\boldsymbol{\alpha}_{prev}\Big)\times \Delta\boldsymbol{\alpha}_i
 $$
 
-**Biến**:
-- $\boldsymbol{\omega}$: gyro đã hiệu chuẩn ở §1.4.1.
-- $\boldsymbol{\alpha}_k$: tích phân thô (góc quay vector, rad).
-- $\boldsymbol{\beta}_k$: số hạng coning correction (lũy kế qua các sub-sample).
-- $\Delta\boldsymbol{\alpha}_i$: tăng tích phân giữa 2 sub-sample liên tiếp.
-- $\Delta\boldsymbol{\theta}_k$: **delta-angle** xuất ra ($\approx\boldsymbol{\omega}\cdot\Delta t$ + correction).
+**Variables**:
+- $\boldsymbol{\omega}$: calibrated gyro from §1.4.1.
+- $\boldsymbol{\alpha}_k$: raw integral (rotation vector, rad).
+- $\boldsymbol{\beta}_k$: coning correction term (accumulated over sub-samples).
+- $\Delta\boldsymbol{\alpha}_i$: integration increment between two consecutive sub-samples.
+- $\Delta\boldsymbol{\theta}_k$: output **delta-angle** ($\approx\boldsymbol{\omega}\cdot\Delta t$ + correction).
 
 #### Code
 
-Tích phân hình thang (lớp gốc):
+Trapezoidal integration (base class):
 
 ```@/home/frank/tf-px4/src/modules/sensors/Integrator.hpp:130-139
 inline matrix::Vector3f integrate(const matrix::Vector3f &val, const float dt)
@@ -303,9 +303,9 @@ inline matrix::Vector3f integrate(const matrix::Vector3f &val, const float dt)
 	return delta_alpha;
 }
 ```
-$\Delta\boldsymbol{\alpha} = \tfrac{1}{2}(\boldsymbol{\omega}_k+\boldsymbol{\omega}_{k-1})\Delta t$ — đó là `(val + _last_val)*dt*0.5f`.
+$\Delta\boldsymbol{\alpha} = \tfrac{1}{2}(\boldsymbol{\omega}_k+\boldsymbol{\omega}_{k-1})\Delta t$ — that is `(val + _last_val)*dt*0.5f`.
 
-Coning correction (lớp dẫn xuất `IntegratorConing`):
+Coning correction (derived class `IntegratorConing`):
 
 ```@/home/frank/tf-px4/src/modules/sensors/Integrator.hpp:164-187
 inline void put(const matrix::Vector3f &val, const float dt)
@@ -332,34 +332,34 @@ inline void put(const matrix::Vector3f &val, const float dt)
 	}
 }
 ```
-- `_alpha` = $\boldsymbol{\alpha}$ tích lũy.
-- `_beta` = $\boldsymbol{\beta}$ tích lũy.
-- `_last_alpha`, `_last_delta_alpha` = giá trị chu kỳ trước.
-- Toán tử `%` trong matrix lib PX4 = tích chéo $\times$.
+- `_alpha` = accumulated $\boldsymbol{\alpha}$.
+- `_beta` = accumulated $\boldsymbol{\beta}$.
+- `_last_alpha`, `_last_delta_alpha` = values from previous cycle.
+- Operator `%` in PX4's matrix lib = cross product $\times$.
 
-Khi reset: trả về $\boldsymbol{\alpha}+\boldsymbol{\beta}$ (line 207).
+On reset: returns $\boldsymbol{\alpha}+\boldsymbol{\beta}$ (line 207).
 
 ---
 
-### 1.5.2. Low-Pass Filter (Butterworth bậc 2, biquad Direct Form II)
+### 1.5.2. Low-Pass Filter (2nd-order Butterworth, biquad Direct Form II)
 
-#### Hàm truyền liên tục
+#### Continuous Transfer Function
 
 $$
 H(s)=\frac{\omega_c^2}{s^2+\sqrt{2}\,\omega_c\,s+\omega_c^2},\quad \omega_c=2\pi f_c
 $$
 
-**Biến**:
+**Variables**:
 - $\omega_c$: cutoff angular frequency (rad/s).
-- $f_c$: cutoff (Hz), tham số `IMU_GYRO_CUTOFF`.
-- Hệ số damping $\zeta=\sqrt{2}/2$ → đáp ứng Butterworth (phẳng nhất ở passband).
+- $f_c$: cutoff (Hz), parameter `IMU_GYRO_CUTOFF`.
+- Damping coefficient $\zeta=\sqrt{2}/2$ → Butterworth response (maximally flat passband).
 
-Rời rạc hóa bằng **bilinear transform** $s\to\omega_c\tan(\pi/(f_s/f_c))\cdot\frac{z-1}{z+1}$ thành biquad:
+Discretized using **bilinear transform** $s\to\omega_c\tan(\pi/(f_s/f_c))\cdot\frac{z-1}{z+1}$ into a biquad:
 $$
 y_k = b_0 x_k + b_1 x_{k-1} + b_2 x_{k-2} - a_1 y_{k-1} - a_2 y_{k-2}
 $$
 
-#### Code tính hệ số
+#### Coefficient Computation Code
 
 ```@/home/frank/tf-px4/src/lib/mathlib/math/filter/LowPassFilter2p.hpp:74-90
 _cutoff_freq = math::max(cutoff_freq, sample_freq * 0.001f);
@@ -377,11 +377,11 @@ _a1 = 2.f * (ohm * ohm - 1.f) / c;
 _a2 = (1.f - 2.f * cosf(M_PI_F / 4.f) * ohm + ohm * ohm) / c;
 ```
 
-- `ohm` = $\Omega = \tan(\pi f_c/f_s)$ (warping factor của bilinear transform).
-- `cosf(M_PI_F/4.f)` = $\cos(\pi/4)=\sqrt{2}/2$ = damping Butterworth.
-- `c` = chuẩn hóa $a_0$ về 1.
+- `ohm` = $\Omega = \tan(\pi f_c/f_s)$ (bilinear transform warping factor).
+- `cosf(M_PI_F/4.f)` = $\cos(\pi/4)=\sqrt{2}/2$ = Butterworth damping.
+- `c` = normalizes $a_0$ to 1.
 
-#### Code áp filter (Direct Form II)
+#### Filter Application Code (Direct Form II)
 
 ```@/home/frank/tf-px4/src/lib/mathlib/math/filter/LowPassFilter2p.hpp:98-109
 inline T apply(const T &sample)
@@ -397,26 +397,26 @@ inline T apply(const T &sample)
 	return output;
 }
 ```
-Direct Form II tiết kiệm bộ nhớ (chỉ 2 phần tử trễ thay vì 4 như Form I).
+Direct Form II is memory-efficient (only 2 delay elements instead of 4 as in Form I).
 
 ---
 
-### 1.5.3. Notch Filter (cố định + động)
+### 1.5.3. Notch Filter (static + dynamic)
 
-#### Hàm truyền
+#### Transfer Function
 
 $$
 H_{notch}(s)=\frac{s^2+\omega_n^2}{s^2+\frac{\omega_n}{Q}s+\omega_n^2},\quad Q=\frac{f_n}{BW},\ \omega_n=2\pi f_n
 $$
 
-**Biến**:
-- $f_n$: tần số notch cần cắt (Hz). Cố định: `IMU_GYRO_NF0_FRQ`. Động: lấy từ FFT realtime.
-- $BW$: bandwidth -3 dB (Hz). `IMU_GYRO_NF0_BW`.
-- $Q$: quality factor — $Q$ lớn → notch hẹp/sâu, $Q$ nhỏ → rộng/nông.
+**Variables**:
+- $f_n$: notch frequency to suppress (Hz). Static: `IMU_GYRO_NF0_FRQ`. Dynamic: taken from realtime FFT.
+- $BW$: -3 dB bandwidth (Hz). `IMU_GYRO_NF0_BW`.
+- $Q$: quality factor — large $Q$ → narrow/deep notch, small $Q$ → wide/shallow notch.
 
-Tại $\omega=\omega_n$: $|H|=0$ (zero hoàn hảo). Xa $\omega_n$: $|H|\to 1$ (pass-through).
+At $\omega=\omega_n$: $|H|=0$ (perfect zero). Away from $\omega_n$: $|H|\to 1$ (pass-through).
 
-#### Code tính hệ số
+#### Coefficient Computation Code
 
 ```@/home/frank/tf-px4/src/lib/mathlib/math/filter/NotchFilter.hpp:267-279
 _sample_freq = sample_freq;
@@ -435,9 +435,9 @@ _a1 = _b1;
 ```
 - `alpha` = $\tan(\pi BW/f_s)$.
 - `beta` = $-\cos(2\pi f_n/f_s)$.
-- Note: `_a2 = (1 - alpha) * a0_inv` (xem dòng kế tiếp trong file gốc, không in vào đây để gọn).
+- Note: `_a2 = (1 - alpha) * a0_inv` (see next line in the source file, omitted here for brevity).
 
-#### Code áp (Direct Form I)
+#### Application Code (Direct Form I)
 
 ```@/home/frank/tf-px4/src/lib/mathlib/math/filter/NotchFilter.hpp:173-188
 inline T applyInternal(const T &sample)
@@ -457,32 +457,32 @@ inline T applyInternal(const T &sample)
 	return output;
 }
 ```
-Direct Form I (chứ không phải II như LPF) vì cần giữ history khi dynamically đổi $f_n$ (notch động) — Form II sẽ phá history khi đổi hệ số.
+Direct Form I (rather than Form II as in LPF) is used because history must be preserved when dynamically changing $f_n$ (dynamic notch) — Form II would corrupt history when coefficients change.
 
 ---
 
 ### 1.5.4. Dynamic Notch (gyro_fft)
 
-#### Cơ chế
+#### Mechanism
 
-1. Đẩy mẫu gyro vào ring buffer ~ 512 mẫu.
-2. Áp Hann window rồi FFT thực ⇒ phổ.
-3. Tìm 3 đỉnh phổ mạnh nhất trong dải [`IMU_GYRO_FFT_MIN`, `IMU_GYRO_FFT_MAX`] Hz.
-4. Smooth bằng AlphaFilter để tránh giật → set vào notch realtime.
+1. Push gyro samples into a ring buffer of ~512 samples.
+2. Apply Hann window then real FFT ⇒ spectrum.
+3. Find the 3 strongest spectral peaks in the range [`IMU_GYRO_FFT_MIN`, `IMU_GYRO_FFT_MAX`] Hz.
+4. Smooth using AlphaFilter to avoid jitter → set into notch realtime.
 
-#### Công thức peak picking
+#### Peak Picking Formula
 $$
 f_{peak,i} = \arg\max_{f\in[f_{min},f_{max}]\setminus\{\text{near previous peaks}\}} |X(f)|
 $$
-với $X(f)$ = magnitude spectrum, $i=1,2,3$.
+where $X(f)$ = magnitude spectrum, $i=1,2,3$.
 
-Code: `src/modules/gyro_fft/GyroFFT.cpp` (cần xem riêng nếu muốn đào sâu).
+Code: `src/modules/gyro_fft/GyroFFT.cpp` (see separately for deeper investigation).
 
 ---
 
-### 1.5.5. Đạo hàm $\dot{\boldsymbol{\omega}}$ — AlphaFilter
+### 1.5.5. Derivative $\dot{\boldsymbol{\omega}}$ — AlphaFilter
 
-#### Công thức
+#### Formula
 
 $$
 \dot{\boldsymbol{\omega}}_k^{raw} = \frac{\boldsymbol{\omega}_k - \boldsymbol{\omega}_{k-1}}{\Delta t}
@@ -491,12 +491,12 @@ $$
 \dot{\boldsymbol{\omega}}_k = \dot{\boldsymbol{\omega}}_{k-1} + \alpha(\dot{\boldsymbol{\omega}}_k^{raw}-\dot{\boldsymbol{\omega}}_{k-1}),\quad \alpha=\frac{\Delta t}{\tau+\Delta t}
 $$
 
-**Biến**:
-- $\dot{\boldsymbol{\omega}}_k^{raw}$: đạo hàm thô (chênh lệch hữu hạn) — rất nhiễu.
-- $\alpha$: weight cho input mới. $\tau=1/(2\pi f_c)$ với $f_c$ = `IMU_DGYRO_CUTOFF`.
-- Khi $\alpha=1$ → không lọc; $\alpha=0$ → output đứng yên.
+**Variables**:
+- $\dot{\boldsymbol{\omega}}_k^{raw}$: raw derivative (finite difference) — very noisy.
+- $\alpha$: weight for new input. $\tau=1/(2\pi f_c)$ where $f_c$ = `IMU_DGYRO_CUTOFF`.
+- When $\alpha=1$ → no filtering; $\alpha=0$ → output frozen.
 
-Đây chính là **leaky integrator** / first-order IIR / "exponentially weighted moving average".
+This is a **leaky integrator** / first-order IIR / "exponentially weighted moving average".
 
 #### Code
 
@@ -518,33 +518,33 @@ void setParameters(float sample_interval, float time_constant)
 }
 ```
 
-Đối chiếu: `_filter_state + _alpha*(sample - _filter_state)` chính là $y_{k-1}+\alpha(x_k-y_{k-1})$.
+Cross-reference: `_filter_state + _alpha*(sample - _filter_state)` is exactly $y_{k-1}+\alpha(x_k-y_{k-1})$.
 
 ---
 
-### 1.5.6. Voting nhiều IMU
+### 1.5.6. Multi-IMU Voting
 
-Khi airframe có 2-3 IMU, mỗi IMU chạy đường ống §1.4-§1.5 độc lập. `data_validator/DataValidatorGroup` tính error metric cho từng cảm biến:
+When the airframe has 2–3 IMUs, each IMU runs its own pipeline from §1.4–§1.5 independently. `data_validator/DataValidatorGroup` computes an error metric for each sensor:
 $$
 e_i = \alpha_e\,e_i^{(prev)} + (1-\alpha_e)\,(\boldsymbol{y}_i - \mathrm{median}_j\boldsymbol{y}_j)^2
 $$
 
-**Biến**:
-- $e_i$: error tích lũy cho IMU $i$.
+**Variables**:
+- $e_i$: accumulated error for IMU $i$.
 - $\alpha_e$: smoothing factor (~0.95).
-- $\mathrm{median}_j\boldsymbol{y}_j$: trung vị của các IMU khác.
+- $\mathrm{median}_j\boldsymbol{y}_j$: median of the other IMUs.
 
-Sensor có $e_i$ thấp nhất + priority cao nhất được chọn làm primary. Code: `src/lib/systemlib/data_validator/DataValidatorGroup.cpp`.
+The sensor with the lowest $e_i$ and highest priority is selected as primary. Code: `src/lib/systemlib/data_validator/DataValidatorGroup.cpp`.
 
 ---
 
-## 1.6. Cơ sở lý thuyết & keywords
+## 1.6. Theoretical Background & Keywords
 
-| Chủ đề | Keywords để tra cứu |
+| Topic | Keywords for Reference |
 |---|---|
 | Coning/sculling integration | `Bortz strapdown attitude algorithm`, `Savage strapdown algorithm`, `coning compensation` |
 | IMU error model | `Allan variance`, `noise density`, `random walk gyro`, `bias instability`, `IEEE-952 gyro spec` |
-| Hiệu chuẩn IMU | `multi-position calibration`, `TRIAD method`, `least-squares calibration` |
+| IMU calibration | `multi-position calibration`, `TRIAD method`, `least-squares calibration` |
 | Mag calibration | `ellipsoid fitting`, `hard-iron soft-iron correction`, `Merayo's algorithm` |
 | Notch / IIR filter | `biquad filter`, `Butterworth`, `bilinear transform`, `Direct Form II` |
 | Dynamic notch | `motor RPM tracking notch`, `Betaflight dynamic filter`, `peak detection FFT` |
@@ -552,16 +552,16 @@ Sensor có $e_i$ thấp nhất + priority cao nhất được chọn làm primar
 | Optical flow model | `image-plane optical flow`, `Lucas-Kanade`, `egomotion` |
 | Barometric altitude | `ICAO standard atmosphere`, `barometric formula`, `temperature compensation` |
 
-### Tài liệu nên đọc
-- Titterton & Weston, *Strapdown Inertial Navigation Technology* (chương 11 — coning, sculling).
+### Recommended Reading
+- Titterton & Weston, *Strapdown Inertial Navigation Technology* (chapter 11 — coning, sculling).
 - Farrell, *Aided Navigation*.
 - Groves, *Principles of GNSS, Inertial, and Multisensor Integrated Navigation*.
 - IEEE Std 952-1997 (gyro performance specification).
-- Renaudin et al. — hiệu chuẩn mag bằng ellipsoid fitting.
+- Renaudin et al. — mag calibration using ellipsoid fitting.
 
-## 1.7. Tham số PX4 cần biết
+## 1.7. PX4 Parameters to Know
 - `IMU_GYRO_CUTOFF`, `IMU_DGYRO_CUTOFF`, `IMU_ACCEL_CUTOFF`
 - `IMU_GYRO_NF0_FRQ/BW`, `IMU_GYRO_NF1_FRQ/BW`
-- `IMU_GYRO_DYN_NOTCH` (bật dynamic notch)
-- `CAL_GYRO*_ID`, `CAL_ACC*_ID`, `CAL_MAG*_ID` — id sau hiệu chuẩn.
-- `EKF2_IMU_CTRL` — cờ bật bias estimation.
+- `IMU_GYRO_DYN_NOTCH` (enable dynamic notch)
+- `CAL_GYRO*_ID`, `CAL_ACC*_ID`, `CAL_MAG*_ID` — IDs after calibration.
+- `EKF2_IMU_CTRL` — flag to enable bias estimation.
