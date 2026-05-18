@@ -1,73 +1,73 @@
 # 4. Attitude Control (Quaternion P-controller, tilt-prioritized)
 
-## 4.1. Vai trò
+## 4.1. Role
 
-Vòng giữa của cascade. Nhận `vehicle_attitude_setpoint` ($\boldsymbol{q}_{sp}, \boldsymbol{T}^{body}, \dot{\psi}_{sp}$) từ position controller, cùng `vehicle_attitude` ($\boldsymbol{q}$) từ EKF2. Output là `vehicle_rates_setpoint` ($\boldsymbol{\omega}_{sp}, \boldsymbol{T}^{body}$) cho rate controller.
+The middle loop of the cascade. Receives `vehicle_attitude_setpoint` ($\boldsymbol{q}_{sp}, \boldsymbol{T}^{body}, \dot{\psi}_{sp}$) from the position controller, along with `vehicle_attitude` ($\boldsymbol{q}$) from EKF2. Output is `vehicle_rates_setpoint` ($\boldsymbol{\omega}_{sp}, \boldsymbol{T}^{body}$) for the rate controller.
 
-Triết lý: **chỉ là P-controller** (không I/D); việc bù bias do rate controller phía dưới làm. Nhưng tinh tế ở chỗ **tách yaw khỏi tilt** vì lực đẩy chỉ phụ thuộc tilt — sai yaw không nguy hiểm bằng sai tilt.
+Philosophy: **pure P-controller** (no I/D); bias compensation is handled by the rate controller below. The subtle point is **separating yaw from tilt** because thrust depends only on tilt — yaw error is less dangerous than tilt error.
 
-## 4.2. Code chính
+## 4.2. Main Code
 
-| Vai trò | File |
+| Role | File |
 |---|---|
-| Wrapper uORB + manual stick | `@/home/frank/tf-px4/src/modules/mc_att_control/mc_att_control_main.cpp` |
-| Header tham số | `@/home/frank/tf-px4/src/modules/mc_att_control/mc_att_control.hpp` |
-| **Lõi thuật toán** | `@/home/frank/tf-px4/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp` |
-| Helper toán (VTOL tilt correction) | `AttitudeControl/AttitudeControlMath.hpp` |
+| uORB wrapper + manual stick | `@/home/frank/tf-px4/src/modules/mc_att_control/mc_att_control_main.cpp` |
+| Parameter header | `@/home/frank/tf-px4/src/modules/mc_att_control/mc_att_control.hpp` |
+| **Algorithm core** | `@/home/frank/tf-px4/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp` |
+| Math helper (VTOL tilt correction) | `AttitudeControl/AttitudeControlMath.hpp` |
 | Yaw stick handler | `@/home/frank/tf-px4/src/lib/stick_yaw/` |
 | Test | `AttitudeControl/AttitudeControlTest.cpp` |
 
-Hàm cần đọc:
-- `MulticopterAttitudeControl::Run()` — orchestrator (line 206 trở đi).
-- `MulticopterAttitudeControl::generate_attitude_setpoint(q, dt)` — sinh $\boldsymbol{q}_{sp}$ từ stick (Stabilized mode).
-- `AttitudeControl::update(q)` — luật điều khiển chính.
+Functions to read:
+- `MulticopterAttitudeControl::Run()` — orchestrator (line 206 onward).
+- `MulticopterAttitudeControl::generate_attitude_setpoint(q, dt)` — generates $\boldsymbol{q}_{sp}$ from stick (Stabilized mode).
+- `AttitudeControl::update(q)` — main control law.
 
-## 4.3. Bảng ký hiệu
+## 4.3. Symbol Table
 
 ### Input / state
 
-| Ký hiệu | Code | Nghĩa |
+| Symbol | Code | Meaning |
 |---|---|---|
-| $\boldsymbol{q}$ | `q` | quaternion tư thế hiện tại (body→world, Hamilton scalar-first) |
-| $\boldsymbol{q}_{sp}$ | `_attitude_setpoint_q` / `qd` | quaternion setpoint từ pos control |
-| $\dot{\psi}_{sp}$ | `_yawspeed_setpoint` | feed-forward yaw rate (rad/s, trong $\{W\}$) |
-| $\boldsymbol{e}_z=\boldsymbol{R}(\boldsymbol{q})\hat{\boldsymbol{z}}_W$ | `e_z` (`q.dcm_z()`) | trục z body biểu diễn trong $\{W\}$ |
-| $\boldsymbol{e}_z^{sp}=\boldsymbol{R}(\boldsymbol{q}_{sp})\hat{\boldsymbol{z}}_W$ | `e_z_d` | trục z body mong muốn trong $\{W\}$ |
+| $\boldsymbol{q}$ | `q` | current attitude quaternion (body→world, Hamilton scalar-first) |
+| $\boldsymbol{q}_{sp}$ | `_attitude_setpoint_q` / `qd` | attitude setpoint from position control |
+| $\dot{\psi}_{sp}$ | `_yawspeed_setpoint` | feed-forward yaw rate (rad/s, in $\{W\}$) |
+| $\boldsymbol{e}_z=\boldsymbol{R}(\boldsymbol{q})\hat{\boldsymbol{z}}_W$ | `e_z` (`q.dcm_z()`) | body z-axis expressed in $\{W\}$ |
+| $\boldsymbol{e}_z^{sp}=\boldsymbol{R}(\boldsymbol{q}_{sp})\hat{\boldsymbol{z}}_W$ | `e_z_d` | desired body z-axis in $\{W\}$ |
 
-### Trung gian
+### Intermediate
 
-| Ký hiệu | Code | Nghĩa |
+| Symbol | Code | Meaning |
 |---|---|---|
-| $\boldsymbol{q}_{red}$ | `qd_red` | reduced desired attitude — chỉ lo tilt, bỏ qua yaw |
-| $\boldsymbol{q}_{\delta\psi}$ | `qd_dyaw` | phần yaw còn lại $\boldsymbol{q}_{red}^{-1}\!\otimes\!\boldsymbol{q}_{sp}$ |
-| $\boldsymbol{q}_d$ | `qd` (sau scale) | desired attitude lai (full tilt + weighted yaw) |
-| $\boldsymbol{q}_e=\boldsymbol{q}^{-1}\!\otimes\!\boldsymbol{q}_d$ | `qe` | quaternion error |
-| $\boldsymbol{e}_q=2\,\mathrm{Im}(\boldsymbol{q}_e^{canonical})$ | `eq` | rotation vector error (≈ $\alpha\hat{\boldsymbol{r}}$ với $\alpha$ nhỏ) |
-| $\boldsymbol{\omega}_{sp}$ | `rate_setpoint` (output) | rate setpoint xuất cho rate controller |
+| $\boldsymbol{q}_{red}$ | `qd_red` | reduced desired attitude — cares only about tilt, ignores yaw |
+| $\boldsymbol{q}_{\delta\psi}$ | `qd_dyaw` | remaining yaw component $\boldsymbol{q}_{red}^{-1}\!\otimes\!\boldsymbol{q}_{sp}$ |
+| $\boldsymbol{q}_d$ | `qd` (after scaling) | blended desired attitude (full tilt + weighted yaw) |
+| $\boldsymbol{q}_e=\boldsymbol{q}^{-1}\!\otimes\!\boldsymbol{q}_d$ | `qe` | attitude error quaternion |
+| $\boldsymbol{e}_q=2\,\mathrm{Im}(\boldsymbol{q}_e^{canonical})$ | `eq` | rotation vector error (≈ $\alpha\hat{\boldsymbol{r}}$ for small $\alpha$) |
+| $\boldsymbol{\omega}_{sp}$ | `rate_setpoint` (output) | rate setpoint output to rate controller |
 
-### Gain & tham số
+### Gains & parameters
 
-| Ký hiệu | Code / param | Nghĩa |
+| Symbol | Code / param | Meaning |
 |---|---|---|
 | $\boldsymbol{K}_p^{att}$ | `_proportional_gain` | (`MC_ROLL_P`, `MC_PITCH_P`, `MC_YAW_P/`$w_\psi$) |
-| $w_\psi\in[0,1]$ | `_yaw_w` / `MC_YAW_WEIGHT` | trọng số yaw vs tilt (mặc định 0.4) |
-| $\omega_{max,i}$ | `_rate_limit` / `MC_*RATE_MAX` | giới hạn rate output |
-| $\theta_{max}$ | `MPC_MAN_TILT_MAX` | tilt max khi ở manual |
+| $w_\psi\in[0,1]$ | `_yaw_w` / `MC_YAW_WEIGHT` | yaw vs tilt weight (default 0.4) |
+| $\omega_{max,i}$ | `_rate_limit` / `MC_*RATE_MAX` | rate output limit |
+| $\theta_{max}$ | `MPC_MAN_TILT_MAX` | maximum tilt in manual mode |
 
-### Toán tử
+### Operators
 
-| Ký hiệu | Nghĩa |
+| Symbol | Meaning |
 |---|---|
-| $\otimes$ | nhân quaternion Hamilton |
-| $\mathrm{Im}(\boldsymbol{q})$ | phần vector $(q_x,q_y,q_z)$ |
-| $\mathrm{canonical}(\boldsymbol{q})$ | chọn nghiệm có $q_w\ge 0$ (tránh antipodal) |
-| `q.dcm_z()` | cột 3 của $\boldsymbol{R}(\boldsymbol{q})$ — chính là $\boldsymbol{R}\hat{\boldsymbol{z}}_W$ |
+| $\otimes$ | Hamilton quaternion multiplication |
+| $\mathrm{Im}(\boldsymbol{q})$ | vector part $(q_x,q_y,q_z)$ |
+| $\mathrm{canonical}(\boldsymbol{q})$ | choose the solution with $q_w\ge 0$ (avoid antipodal) |
+| `q.dcm_z()` | column 3 of $\boldsymbol{R}(\boldsymbol{q})$ — which is $\boldsymbol{R}\hat{\boldsymbol{z}}_W$ |
 
 ---
 
-## 4.4. Công thức chi tiết
+## 4.4. Detailed Formulas
 
-Toàn bộ luật điều khiển nằm trong hàm `update`:
+The full control law is in the `update` function:
 
 ```@/home/frank/tf-px4/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp:55-114
 matrix::Vector3f AttitudeControl::update(const Quatf &q) const
@@ -126,31 +126,31 @@ matrix::Vector3f AttitudeControl::update(const Quatf &q) const
 }
 ```
 
-Bên dưới tách nhỏ từng bước ánh xạ với công thức.
+Each step is broken down below and mapped to its formula.
 
-### Bước 1 — Reduced attitude (chỉ điều chỉnh tilt)
+### Step 1 — Reduced attitude (tilt-only correction)
 
-Trục Z body hiện tại và mong muốn (cùng biểu diễn trong $\{W\}$):
+Current and desired body Z-axis (both expressed in $\{W\}$):
 $$
 \boldsymbol{e}_z = \boldsymbol{R}(\boldsymbol{q})\hat{\boldsymbol{z}}_W,\qquad
 \boldsymbol{e}_z^{sp}=\boldsymbol{R}(\boldsymbol{q}_{sp})\hat{\boldsymbol{z}}_W
 $$
 
-Quaternion quay tối thiểu giữa hai trục:
+Minimum-rotation quaternion between the two axes:
 $$
 \boldsymbol{q}_{red}^{(W)} = \mathrm{quat\_from\_two\_vectors}(\boldsymbol{e}_z,\boldsymbol{e}_z^{sp})
 $$
 
-Đây là rotation trong world frame; right-multiply với $\boldsymbol{q}$:
+This is a rotation in the world frame; right-multiply by $\boldsymbol{q}$:
 $$
 \boldsymbol{q}_{red}=\boldsymbol{q}_{red}^{(W)}\otimes\boldsymbol{q}
 $$
 
-**Giải thích biến**:
-- $\hat{\boldsymbol{z}}_W=(0,0,1)^\top$ (NED, hướng xuống).
-- $\boldsymbol{e}_z,\boldsymbol{e}_z^{sp}$: cho biết trục dọc body đang chỉ đâu so với mong muốn. Nếu chúng trùng nhau → tilt OK.
-- $\boldsymbol{q}_{red}^{(W)}$: rotation "ít" nhất (axis vuông góc cả hai vector) đem $\boldsymbol{e}_z\to\boldsymbol{e}_z^{sp}$ — chỉ quay tilt, không đổi yaw.
-- Right-multiply với $\boldsymbol{q}$: ghép rotation tilt (trong $\{W\}$) với attitude hiện tại → ra reduced desired attitude $\boldsymbol{q}_{red}$ (yaw của nó = yaw của $\boldsymbol{q}$ — tức "giữ nguyên yaw hiện tại").
+**Variable explanation**:
+- $\hat{\boldsymbol{z}}_W=(0,0,1)^\top$ (NED, pointing down).
+- $\boldsymbol{e}_z,\boldsymbol{e}_z^{sp}$: indicate where the body vertical axis currently points versus where it should point. If they coincide → tilt is OK.
+- $\boldsymbol{q}_{red}^{(W)}$: the minimum rotation (axis perpendicular to both vectors) that takes $\boldsymbol{e}_z\to\boldsymbol{e}_z^{sp}$ — rotates tilt only, does not change yaw.
+- Right-multiply by $\boldsymbol{q}$: combines the tilt rotation (in $\{W\}$) with the current attitude → produces reduced desired attitude $\boldsymbol{q}_{red}$ (its yaw equals the yaw of $\boldsymbol{q}$ — i.e., "keeps current yaw").
 
 Code:
 
@@ -165,33 +165,33 @@ if (fabsf(qd_red(1)) > (1.f - 1e-5f) || fabsf(qd_red(2)) > (1.f - 1e-5f)) {
 	qd_red *= q;
 }
 ```
-$\boldsymbol{q}_{red}$ = "desired attitude nếu chỉ quan tâm tilt" — đem trục Z body trùng setpoint, để yaw tự do.
+$\boldsymbol{q}_{red}$ = "desired attitude if only tilt is considered" — aligns the body Z-axis with the setpoint, leaving yaw free.
 
-**Edge case**: khi $\boldsymbol{e}_z\approx-\boldsymbol{e}_z^{sp}$ (180° lệch trục), code chuyển sang `q_red = q_sp` để tránh kỳ dị (singular axis).
+**Edge case**: when $\boldsymbol{e}_z\approx-\boldsymbol{e}_z^{sp}$ (180° axis divergence), the code falls back to `q_red = q_sp` to avoid singularity (singular axis).
 
-### Bước 2 — Phần yaw chênh lệch + scale theo $w_\psi$
+### Step 2 — Yaw delta component + scaling by $w_\psi$
 
 $$
 \boldsymbol{q}_{\delta\psi} = \boldsymbol{q}_{red}^{-1}\otimes\boldsymbol{q}_{sp}
 $$
 
-Theo định lý phân rã, $\boldsymbol{q}_{\delta\psi}$ chỉ chứa yaw quanh $\hat{\boldsymbol{z}}_B$ → có dạng $(\cos(\alpha/2),0,0,\sin(\alpha/2))$.
+By the decomposition theorem, $\boldsymbol{q}_{\delta\psi}$ contains only yaw around $\hat{\boldsymbol{z}}_B$ → has the form $(\cos(\alpha/2),0,0,\sin(\alpha/2))$.
 
-Áp trọng số $w_\psi$ = `MC_YAW_WEIGHT` (mặc định 0.4 — đặt < 1 để khi yaw lệch nhiều, tilt vẫn được ưu tiên):
+Apply weight $w_\psi$ = `MC_YAW_WEIGHT` (default 0.4 — set < 1 so that tilt is still prioritized when yaw deviation is large):
 $$
 \boldsymbol{q}_{\delta\psi}^{(w)} = \big(\cos(w_\psi\arccos q_{\delta\psi,w}),\ 0,\ 0,\ \sin(w_\psi\arcsin q_{\delta\psi,z})\big)
 $$
 
-Desired attitude lai (mix tilt full priority + yaw weighted):
+Blended desired attitude (full tilt priority + weighted yaw):
 $$
 \boldsymbol{q}_d = \boldsymbol{q}_{red}\otimes\boldsymbol{q}_{\delta\psi}^{(w)}
 $$
 
-**Giải thích biến**:
-- $q_{\delta\psi,w}=\cos(\alpha/2)$, $q_{\delta\psi,z}=\sin(\alpha/2)$ với $\alpha$ = góc yaw lech.
-- $\arccos q_{\delta\psi,w}=\alpha/2$ → nhân $w_\psi$ → $\cos(w_\psi\alpha/2)$ = scale yaw error về phần $w_\psi\alpha$ ("đi chậm hơn" so với tilt).
-- Việc dùng `acosf(qd_dyaw(0))` và `asinf(qd_dyaw(3))` riêng nhau là để bền số quanh $\alpha\approx\pi$ (acos mất độ chính xác ở $\pm 1$, asin mất độ chính xác ở 0).
-- $\boldsymbol{q}_d$: "dịch" từ $\boldsymbol{q}_{red}$ thêm phần yaw scaled → ưu tiên tilt (full gain) hơn yaw (gain * $w_\psi$).
+**Variable explanation**:
+- $q_{\delta\psi,w}=\cos(\alpha/2)$, $q_{\delta\psi,z}=\sin(\alpha/2)$ where $\alpha$ = yaw deviation angle.
+- $\arccos q_{\delta\psi,w}=\alpha/2$ → multiply by $w_\psi$ → $\cos(w_\psi\alpha/2)$ = scales yaw error to $w_\psi\alpha$ ("moves slower" compared to tilt).
+- Using `acosf(qd_dyaw(0))` and `asinf(qd_dyaw(3))` separately improves numerical stability near $\alpha\approx\pi$ (acos loses precision at $\pm 1$, asin loses precision near 0).
+- $\boldsymbol{q}_d$: "shifts" from $\boldsymbol{q}_{red}$ adding scaled yaw → prioritizes tilt (full gain) over yaw (gain * $w_\psi$).
 
 Code:
 
@@ -206,22 +206,22 @@ qd_dyaw(3) = math::constrain(qd_dyaw(3), -1.f, 1.f);
 qd = qd_red * Quatf(cosf(_yaw_w * acosf(qd_dyaw(0))), 0.f, 0.f, sinf(_yaw_w * asinf(qd_dyaw(3))));
 ```
 
-### Bước 3 — Quaternion error → angular rate setpoint
+### Step 3 — Quaternion error → angular rate setpoint
 
 $$
 \boldsymbol{q}_e = \boldsymbol{q}^{-1}\otimes\boldsymbol{q}_d,\quad \boldsymbol{q}_e\leftarrow\mathrm{sign}(q_{e,w})\boldsymbol{q}_e\quad(\text{canonicalize})
 $$
 
-Định lý: với rotation nhỏ, $\mathrm{Im}(\boldsymbol{q}_e)=\sin(\alpha/2)\hat{\boldsymbol{r}}\approx(\alpha/2)\hat{\boldsymbol{r}}$. Luật P:
+Theorem: for small rotations, $\mathrm{Im}(\boldsymbol{q}_e)=\sin(\alpha/2)\hat{\boldsymbol{r}}\approx(\alpha/2)\hat{\boldsymbol{r}}$. P law:
 $$
 \boxed{\ \boldsymbol{\omega}_{sp} = 2\,\boldsymbol{K}_p^{att}\odot\mathrm{Im}(\boldsymbol{q}_e)\ }
 $$
 
-**Giải thích biến**:
-- $\boldsymbol{q}_e$ trong **body frame** (vì $\boldsymbol{q}^{-1}\otimes\boldsymbol{q}_d$) → $\mathrm{Im}(\boldsymbol{q}_e)$ trực tiếp dùng để cấp rate trong body frame.
-- `canonicalize`: đảo dấu toàn bộ quaternion nếu $q_{e,w}<0$ — vì $\boldsymbol{q}$ và $-\boldsymbol{q}$ biểu diễn cùng rotation, chọn nghiệm "qua đường ngắn".
-- Hệ số $2$ đến từ $\sin(\alpha/2)\to\alpha/2$: nhân 2 để ra rotation vector $\alpha\hat{\boldsymbol{r}}$ (đơn vị radian).
-- $\boldsymbol{K}_p^{att}=(K_p^\phi, K_p^\theta, K_p^\psi/w_\psi)$: yaw gain được *chia ngược* cho $w_\psi$ để kết quả cuối có rate response tương đương dù đã scale yaw error ở Bước 2 (bù ngược).
+**Variable explanation**:
+- $\boldsymbol{q}_e$ is in the **body frame** (because $\boldsymbol{q}^{-1}\otimes\boldsymbol{q}_d$) → $\mathrm{Im}(\boldsymbol{q}_e)$ is directly used to command rate in the body frame.
+- `canonicalize`: flips the sign of the entire quaternion if $q_{e,w}<0$ — since $\boldsymbol{q}$ and $-\boldsymbol{q}$ represent the same rotation, this selects the "short path" solution.
+- The factor $2$ comes from $\sin(\alpha/2)\to\alpha/2$: multiplied by 2 to get rotation vector $\alpha\hat{\boldsymbol{r}}$ (unit: radians).
+- $\boldsymbol{K}_p^{att}=(K_p^\phi, K_p^\theta, K_p^\psi/w_\psi)$: yaw gain is *divided back* by $w_\psi$ so that the final rate response is equivalent even though the yaw error was scaled in Step 2 (inverse compensation).
 
 Code:
 
@@ -237,7 +237,7 @@ const Vector3f eq = 2.f * qe.canonical().imag();
 Vector3f rate_setpoint = eq.emult(_proportional_gain);
 ```
 
-Lưu ý: việc chia ngược yaw gain cho $w_\psi$ xảy ra trong `setProportionalGain`:
+Note: the inverse division of yaw gain by $w_\psi$ happens in `setProportionalGain`:
 
 ```@/home/frank/tf-px4/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp:44-53
 void AttitudeControl::setProportionalGain(const matrix::Vector3f &proportional_gain, const float yaw_weight)
@@ -252,17 +252,17 @@ void AttitudeControl::setProportionalGain(const matrix::Vector3f &proportional_g
 }
 ```
 
-### Bước 4 — Feed-forward yaw rate
+### Step 4 — Feed-forward yaw rate
 
-$\dot{\psi}_{sp}$ là tốc độ quay quanh $\hat{\boldsymbol{z}}_W$. Để cộng vào $\boldsymbol{\omega}_{sp}$ (body frame), chiếu trục $\hat{\boldsymbol{z}}_W$ về body:
+$\dot{\psi}_{sp}$ is the angular rate around $\hat{\boldsymbol{z}}_W$. To add it to $\boldsymbol{\omega}_{sp}$ (body frame), project $\hat{\boldsymbol{z}}_W$ into the body:
 $$
 \boldsymbol{\omega}_{sp}\mathrel{+}= \boldsymbol{R}^\top(\boldsymbol{q})\hat{\boldsymbol{z}}_W\,\dot{\psi}_{sp}
 $$
 
-**Giải thích biến**:
-- $\boldsymbol{R}(\boldsymbol{q})=\boldsymbol{R}_{WB}$ → $\boldsymbol{R}^\top=\boldsymbol{R}_{BW}$ chuyển vector từ $\{W\}$ về $\{B\}$.
-- $\boldsymbol{R}^\top\hat{\boldsymbol{z}}_W$ = cột 3 của $\boldsymbol{R}^\top$ = $\hat{\boldsymbol{z}}_W$ biểu diễn trong body. Khi tilt = 0: $=\hat{\boldsymbol{z}}_B=(0,0,1)$ → yaw rate chỉ cộng vào trục r body. Khi tilt: thay cả ba thành phần.
-- Công thức đảm bảo yaw FF đúng nghĩa *world-frame yaw rate*, không bị sai khi tilt cao (khắc phục gimbal lock của Euler-rate FF).
+**Variable explanation**:
+- $\boldsymbol{R}(\boldsymbol{q})=\boldsymbol{R}_{WB}$ → $\boldsymbol{R}^\top=\boldsymbol{R}_{BW}$ transforms a vector from $\{W\}$ to $\{B\}$.
+- $\boldsymbol{R}^\top\hat{\boldsymbol{z}}_W$ = column 3 of $\boldsymbol{R}^\top$ = $\hat{\boldsymbol{z}}_W$ expressed in the body. When tilt = 0: $=\hat{\boldsymbol{z}}_B=(0,0,1)$ → yaw rate is added only to the body r-axis. When tilted: all three components are affected.
+- This formula ensures yaw FF correctly represents *world-frame yaw rate*, without error at high tilt (fixes the gimbal lock issue of Euler-rate FF).
 
 Code:
 
@@ -272,12 +272,12 @@ if (std::isfinite(_yawspeed_setpoint)) {
 }
 ```
 
-### Bước 5 — Giới hạn rate
+### Step 5 — Rate limiting
 $$
 \omega_{sp,i}\leftarrow\mathrm{clip}(\omega_{sp,i},-\omega_{max,i},\omega_{max,i})
 $$
-- $\omega_{max,i}$: giới hạn rate từng trục (`MC_{ROLL,PITCH,YAW}RATE_MAX`, rad/s).
-- Bảo vệ rate controller khỏi cấp tốc độ góc vô lý (vd. khi error attitude > 180°).
+- $\omega_{max,i}$: per-axis rate limit (`MC_{ROLL,PITCH,YAW}RATE_MAX`, rad/s).
+- Protects the rate controller from unreasonable angular velocity commands (e.g. when attitude error > 180°).
 
 ```@/home/frank/tf-px4/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp:108-111
 // limit rates
@@ -286,59 +286,59 @@ for (int i = 0; i < 3; i++) {
 }
 ```
 
-## 4.5. Generate attitude setpoint từ stick (Stabilized mode)
+## 4.5. Generate attitude setpoint from stick (Stabilized mode)
 
-Khi không có pos control, tự sinh $\boldsymbol{q}_{sp}$ từ RC. Xem `mc_att_control_main.cpp:136-203`.
+When there is no position control, $\boldsymbol{q}_{sp}$ is generated from RC. See `mc_att_control_main.cpp:136-203`.
 
-Tilt từ stick:
+Tilt from stick:
 $$
-\boldsymbol{v}=(roll\cdot\theta_{max},\ -pitch\cdot\theta_{max})\quad\text{sau khi qua filter time-constant }\tau_{tilt}
+\boldsymbol{v}=(roll\cdot\theta_{max},\ -pitch\cdot\theta_{max})\quad\text{after passing through filter time-constant }\tau_{tilt}
 $$
 $$
 \|\boldsymbol{v}\|>\theta_{max}\Rightarrow \boldsymbol{v}\leftarrow\boldsymbol{v}\frac{\theta_{max}}{\|\boldsymbol{v}\|}
 $$
 
-**Giải thích biến**:
-- $roll, pitch\in[-1,1]$: stick value (đã expo + deadzone).
+**Variable explanation**:
+- $roll, pitch\in[-1,1]$: stick values (with expo + deadzone applied).
 - $\theta_{max}$ = `MPC_MAN_TILT_MAX` (rad).
-- $\boldsymbol{v}=(v_x,v_y)$: rotation vector tilt 2D — độ dài = góc tilt, hướng = trục quay tilt trong $\{W\}$ ngang.
-- Dấu trừ trên pitch vì stick pitch dương = nghề mũi xuống = quay quanh $-\hat{\boldsymbol{e}}_y$.
-- $\tau_{tilt}$ = `MC_MAN_TILT_TAU` — lowpass filter tránh shock tilt khi stick giật.
+- $\boldsymbol{v}=(v_x,v_y)$: 2D tilt rotation vector — magnitude = tilt angle, direction = tilt rotation axis in horizontal $\{W\}$.
+- The negative sign on pitch because positive pitch stick = nose down = rotation around $-\hat{\boldsymbol{e}}_y$.
+- $\tau_{tilt}$ = `MC_MAN_TILT_TAU` — low-pass filter to avoid tilt shock when stick is jerked.
 
-Quaternion roll-pitch dưới dạng axis-angle:
+Roll-pitch quaternion in axis-angle form:
 $$
 \boldsymbol{q}_{rp} = \mathrm{AxisAngle}(v_x,v_y,0)
 $$
-- $\mathrm{AxisAngle}(\boldsymbol{u})=(\cos(\|\boldsymbol{u}\|/2),\ \mathrm{sinc}(\|\boldsymbol{u}\|/2)\boldsymbol{u}/2)$ — không có thành phần yaw vì $u_z=0$.
+- $\mathrm{AxisAngle}(\boldsymbol{u})=(\cos(\|\boldsymbol{u}\|/2),\ \mathrm{sinc}(\|\boldsymbol{u}\|/2)\boldsymbol{u}/2)$ — no yaw component because $u_z=0$.
 
-Yaw từ stick (xem `StickYaw` lib): integrate yaw stick với expo + deadzone:
+Yaw from stick (see `StickYaw` lib): integrate yaw stick with expo + deadzone:
 $$
 \boldsymbol{q}_{yaw}=(\cos(\psi_{sp}/2),0,0,\sin(\psi_{sp}/2))
 $$
-- $\psi_{sp}$ được tích phân từ yaw stick rate × $\Delta t$ → “hold last yaw” khi stick = 0.
+- $\psi_{sp}$ is integrated from yaw stick rate × $\Delta t$ → "hold last yaw" when stick = 0.
 
-Setpoint cuối:
+Final setpoint:
 $$
 \boldsymbol{q}_{sp}=\boldsymbol{q}_{yaw}\otimes\boldsymbol{q}_{rp}
 $$
-- Thứ tự: yaw trước (lên $\hat{\boldsymbol{z}}_W$), rồi tilt — tương đương quay trong frame $\{W\}$ trung gian đã yaw.
+- Order: yaw first (around $\hat{\boldsymbol{z}}_W$), then tilt — equivalent to rotating in intermediate yawed $\{W\}$ frame.
 
-Throttle stick → `thrust_body[2] = -throttle_curve(stick)` với `MPC_THR_CURVE` chọn dạng curve (linear/HTE-rescaled).
+Throttle stick → `thrust_body[2] = -throttle_curve(stick)` with `MPC_THR_CURVE` selecting the curve shape (linear/HTE-rescaled).
 
-## 4.6. EKF reset handling
+## 4.6. EKF Reset Handling
 
-Khi EKF reset yaw (`quat_reset_counter` tăng), nhận `delta_q_reset`:
+When EKF resets yaw (`quat_reset_counter` increments), receive `delta_q_reset`:
 $$
 \psi_{sp,stab}\leftarrow\mathrm{wrap}_\pi(\psi_{sp,stab}+\delta\psi)
 $$
 $$
 \boldsymbol{q}_{sp}\leftarrow \delta\boldsymbol{q}_{reset}\otimes\boldsymbol{q}_{sp}
 $$
-→ tránh giật khi EKF nhảy yaw.
+→ avoids jerk when EKF jumps yaw.
 
-## 4.7. Cơ sở lý thuyết & keywords
+## 4.7. Theoretical Background & Keywords
 
-| Chủ đề | Keywords |
+| Topic | Keywords |
 |---|---|
 | Quaternion attitude control | `Brescianini Hehn D'Andrea ETH 2013 nonlinear quadrocopter attitude control`, `quaternion P-controller` |
 | Tilt-prioritized | `tilt prioritization`, `reduced attitude control`, `attitude decomposition tilt-yaw` |
@@ -346,26 +346,26 @@ $$
 | Quaternion math | `Hamilton convention`, `right vs left composition`, `axis-angle exponential`, `slerp` |
 | Singularity avoidance | `gimbal lock`, `quaternion antipodal`, `canonicalization` |
 
-### Bài báo nền tảng
-- Brescianini, Hehn, D'Andrea (2013) — *Nonlinear Quadrocopter Attitude Control*. ETH tech report — **chính xác là thuật toán PX4 đang dùng**. Link gốc trong comment đầu file `mc_att_control_main.cpp`.
+### Foundational Papers
+- Brescianini, Hehn, D'Andrea (2013) — *Nonlinear Quadrocopter Attitude Control*. ETH tech report — **this is precisely the algorithm PX4 currently uses**. Original link in the comment at the top of `mc_att_control_main.cpp`.
 - Mahony, Hua, Hamel (2011) — *Multirotor Aerial Vehicles: Modeling, Estimation, and Control*. IEEE RAM.
 - Fresk & Nikolakopoulos (2013) — *Full Quaternion Based Attitude Control for a Quadrotor*.
 
-### Tài liệu mở rộng
-- Markley & Crassidis, *Fundamentals of Spacecraft Attitude Determination and Control* — chương quaternion.
-- Sola tutorial (đã nhắc ở §2) cho phép phân rã quaternion.
+### Further Reading
+- Markley & Crassidis, *Fundamentals of Spacecraft Attitude Determination and Control* — quaternion chapter.
+- Sola tutorial (referenced in §2) for quaternion decomposition.
 
-## 4.8. Tham số PX4
+## 4.8. PX4 Parameters
 
-| Tham số | Ý nghĩa |
+| Parameter | Meaning |
 |---|---|
 | `MC_ROLL_P`, `MC_PITCH_P`, `MC_YAW_P` | Attitude P gains |
-| `MC_YAW_WEIGHT` | Trọng số yaw vs tilt (mặc định 0.4) |
-| `MC_ROLLRATE_MAX`, `MC_PITCHRATE_MAX`, `MC_YAWRATE_MAX` | Giới hạn rate output |
-| `MPC_MAN_TILT_MAX`, `MC_MAN_TILT_TAU` | Tilt max + filter constant cho stick |
-| `MPC_THR_CURVE`, `MPC_THR_HOVER` | Throttle curve manual |
+| `MC_YAW_WEIGHT` | Yaw vs tilt weight (default 0.4) |
+| `MC_ROLLRATE_MAX`, `MC_PITCHRATE_MAX`, `MC_YAWRATE_MAX` | Rate output limits |
+| `MPC_MAN_TILT_MAX`, `MC_MAN_TILT_TAU` | Max tilt + filter constant for stick |
+| `MPC_THR_CURVE`, `MPC_THR_HOVER` | Manual throttle curve |
 
-## 4.9. Tip debug
-- Log: `vehicle_attitude_setpoint.q_d` vs `vehicle_attitude.q` → tính error angle bằng $2\arccos|q_e\cdot q|$.
-- Nếu yaw chậm: tăng `MC_YAW_P` hoặc giảm `MC_YAW_WEIGHT` (paradox — weight nhỏ tiêu thụ ít trục yaw nhưng response chậm).
-- Nếu drone wobble lúc tilt cao: thường do tilt-priority hoạt động → bình thường, KHÔNG tăng gain att.
+## 4.9. Debug Tips
+- Log: `vehicle_attitude_setpoint.q_d` vs `vehicle_attitude.q` → compute error angle with $2\arccos|q_e\cdot q|$.
+- If yaw is slow: increase `MC_YAW_P` or decrease `MC_YAW_WEIGHT` (paradox — smaller weight consumes less yaw axis budget but response is slower).
+- If drone wobbles at high tilt: usually because tilt-priority is active → normal, do NOT increase att gain.
