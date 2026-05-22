@@ -9,6 +9,7 @@ Each file below explains **one layer** of the PX4 multicopter control stack: for
 | 2b | KF → EKF2: theory vs practice | `02b_kf_to_ekf2_theory.md` |
 | 2c | Guide to reading EKF2 source (quadcopter path) | `02c_ekf2_source_guide.md` |
 | 2d | EKF2 limitations & improvement directions | `02d_ekf2_limitations.md` |
+| 2e | Gaussian → KF → EKF → ESKF → EKF2 PX4 (full derivation) | `02e_gaussian_to_ekf2_full.md` |
 | 3 | Position Control | `03_position_control.md` |
 | 4 | Attitude Control | `04_attitude_control.md` |
 | 5 | Rate Control | `05_rate_control.md` |
