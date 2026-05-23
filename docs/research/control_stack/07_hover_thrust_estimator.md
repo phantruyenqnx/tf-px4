@@ -3,9 +3,11 @@
 ## 7.1. Role
 
 The parameter $T_h$ — "hover thrust" = normalized thrust [0,1] sufficient to hover (i.e. counteract gravity) — depends on mass, payload, air density, and motor lift capacity (battery voltage drop). The position controller uses $T_h$ in §3 to convert the acceleration setpoint to a thrust setpoint:
+
 $$
 T_z^{NED}=a_{sp,z}\frac{T_h}{g}-T_h
 $$
+
 An incorrect $T_h$ → biased thrust → the velocity controller integrator must compensate → poor vertical tracking, oscillations during takeoff/landing.
 
 HTE is a **scalar zero-order EKF** that estimates $T_h$ online from acceleration + thrust output.
@@ -93,14 +95,19 @@ void ZeroOrderHoverThrustEkf::predict(const float dt)
 ### Measurement Model
 
 Physical relationship: for the current normalized thrust $u\in[0,1]$, the measured vertical acceleration in NED is:
+
 $$
 a_z^W = g\frac{u}{T_h} - g + \eta
 $$
+
 (at hover $u=T_h\Rightarrow a_z=0$). Measurement function:
+
 $$
 h(T_h) = g\frac{u}{T_h} - g
 $$
+
 Jacobian:
+
 $$
 H = \frac{\partial h}{\partial T_h} = -g\frac{u}{T_h^2}
 $$
@@ -137,15 +144,19 @@ float ZeroOrderHoverThrustEkf::computePredictedAccZ(const float thrust) const
 $$
 y = a_z^{W,measured} - h(\hat{T}_h)
 $$
+
 $$
 S = H P H + R,\quad R = \sigma_a^2\cdot s_{R}
 $$
+
 $$
 K = \frac{P\cdot H}{S}
 $$
+
 $$
 \hat{T}_h \leftarrow \mathrm{clip}(\hat{T}_h + K y,\ T_{h,min},\ T_{h,max})
 $$
+
 $$
 P\leftarrow \mathrm{clip}((1-KH)P,\ 10^{-10},\ 1)
 $$
@@ -263,9 +274,11 @@ inline void ZeroOrderHoverThrustEkf::bumpStateVariance()
 ### Adaptive Measurement Noise
 
 LPF the residual then learn $\sigma_a^2$:
+
 $$
 \bar y\leftarrow(1-\alpha)\bar y+\alpha y,\quad \alpha=\frac{\Delta t}{\tau_{lpf}+\Delta t}
 $$
+
 $$
 \sigma_a^2\leftarrow\mathrm{clip}\!\left((1-\alpha')\sigma_a^2 + \alpha'((y-\bar y)^2+H P H),\ 1,\ 400\right)
 $$
@@ -302,14 +315,17 @@ inline void ZeroOrderHoverThrustEkf::updateMeasurementNoise(const float residual
 When $T_h$ changes, applying it directly to the formula $T_z^{NED}=a_{sp,z}T_h/g - T_h$ causes a thrust jump and a vehicle jolt. The difference must be "absorbed" into the velocity controller integrator so that the output remains unchanged:
 
 Derivation: to keep $T'_z=T_z$ when $T_h\to T_h'$:
+
 $$
 a_{sp,z}'\frac{T_h'}{g}-T_h' = a_{sp,z}\frac{T_h}{g}-T_h
 $$
+
 $$
 \Rightarrow a_{sp,z}' = (a_{sp,z}-g)\frac{T_h}{T_h'}+g
 $$
 
 Since $a_{sp,z}=I_{v,z}+(\text{other terms})$, push the difference $\Delta a = a_{sp,z}'-a_{sp,z}$ into $I_{v,z}$:
+
 $$
 I_{v,z}\leftarrow I_{v,z}+(a_{sp,z}-g)\frac{T_h^{old}}{T_h^{new}}+g-a_{sp,z}
 $$

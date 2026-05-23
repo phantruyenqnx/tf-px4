@@ -63,6 +63,7 @@ Converts the 6-axis command vector $\boldsymbol{c}=[\boldsymbol{\tau};\boldsymbo
 ## 6.4. Mathematical Problem
 
 Normalized command vector:
+
 $$
 \boldsymbol{c}=\begin{bmatrix}\tau_x\\ \tau_y\\ \tau_z\\ T_x\\ T_y\\ T_z\end{bmatrix}\in[-1,1]^6
 $$
@@ -70,9 +71,11 @@ $$
 Output per motor $\boldsymbol{u}\in[u_{min},u_{max}]^{n_m}$ (default $[0,1]$).
 
 Linear actuator model:
+
 $$
 \boldsymbol{c} = \boldsymbol{B}\boldsymbol{u}
 $$
+
 $\boldsymbol{B}\in\mathbb{R}^{6\times n_m}$ is the **effectiveness matrix** generated from the airframe geometry.
 
 **Variable explanation**:
@@ -88,6 +91,7 @@ Given:
 - Drag moment (yaw): coefficient $c_m$, alternating CW/CCW sign.
 
 Column $i$ of $\boldsymbol{B}$:
+
 $$
 \boldsymbol{B}_{:,i} = \begin{bmatrix}
 -r\sin\theta_i & \text{(roll)}\\
@@ -111,6 +115,7 @@ $\boldsymbol{B}$ is generated in `ActuatorEffectivenessRotors.cpp`.
 ## 6.5. Moore–Penrose Pseudo-inverse
 
 When $n_m\ge 6$ and $\boldsymbol{B}$ has full rank:
+
 $$
 \boldsymbol{B}^+ = \boldsymbol{B}^\top(\boldsymbol{B}\boldsymbol{B}^\top)^{-1}
 $$
@@ -144,6 +149,7 @@ ControlAllocationPseudoInverse::updatePseudoInverse()
 ```
 
 Allocation law:
+
 $$
 \boxed{\ \boldsymbol{u} = \boldsymbol{u}_{trim} + \boldsymbol{B}^+(\boldsymbol{c}-\boldsymbol{c}_{trim})\ }
 $$
@@ -175,18 +181,19 @@ ControlAllocationPseudoInverse::allocate()
 
 ### Moore-Penrose Properties
 $\boldsymbol{u}=\boldsymbol{B}^+\boldsymbol{c}$ is the **minimum-energy solution** ($\ell_2$ norm) in the space:
+
 $$
-\min_\boldsymbol{u}\|\boldsymbol{u}\|^2\quad\text{s.t.}\quad \boldsymbol{B}\boldsymbol{u}=\boldsymbol{c}
+\min_\boldsymbol{u}\lVert\boldsymbol{u}\rVert^2\quad\text{s.t.}\quad \boldsymbol{B}\boldsymbol{u}=\boldsymbol{c}
 $$
 
-- If under-actuated ($n_m\ge 6$, $\boldsymbol{B}$ full row-rank): infinitely many solutions, PI selects the one with smallest $\|\boldsymbol{u}\|$ (minimum motor effort).
-- When over-determined ($n_m<6$, rank<6) → NO exact solution, PI gives a **least-squares** approximation $\min\|\boldsymbol{B}\boldsymbol{u}-\boldsymbol{c}\|^2$ — "best pursuit" of the command, with the residual marked as $\boldsymbol{c}_{unalloc}$.
+- If under-actuated ($n_m\ge 6$, $\boldsymbol{B}$ full row-rank): infinitely many solutions, PI selects the one with smallest $\lVert\boldsymbol{u}\rVert$ (minimum motor effort).
+- When over-determined ($n_m<6$, rank<6) → NO exact solution, PI gives a **least-squares** approximation $\min\lVert\boldsymbol{B}\boldsymbol{u}-\boldsymbol{c}\rVert^2$ — "best pursuit" of the command, with the residual marked as $\boldsymbol{c}_{unalloc}$.
 
 ## 6.6. Column Normalization of $\boldsymbol{B}^+$
 
 Purpose: the same value $\tau_x=1$ must produce the same "total motor deviation" regardless of the number of motors (4-quad vs 6-hex).
 
-- Roll/Pitch (same scale): $\sqrt{\|\boldsymbol{B}^+_{:,0}\|^2/(n_{nz}/2)}$.
+- Roll/Pitch (same scale): $\sqrt{\lVert\boldsymbol{B}^+_{:,0}\rVert^2/(n_{nz}/2)}$.
 - Yaw: $\max_i|B^+_{i,2}|$.
 - Thrust per axis: $\frac{1}{n_{nz}}\sum_i|B^+_{i,3+axis}|$.
 
@@ -239,10 +246,13 @@ File: `ControlAllocationSequentialDesaturation.cpp`. Idea: add a vector in the n
 Given desaturation vector $\boldsymbol{d}$ (typically the thrust column, or a nullspace column), find gain $k$:
 
 For each saturated motor $u_i<u_{min,i}$:
+
 $$
 k_i = \frac{u_{min,i}-u_i}{d_i}
 $$
+
 Similarly for $u_i>u_{max,i}$. Take:
+
 $$
 k = k_{min}+k_{max}\quad(\text{reduce total saturation}).
 $$
@@ -254,9 +264,11 @@ $$
 - Ignore actuators with $|d_i|<0.2$ (weak effectiveness) — avoids near-zero division causing gain spikes.
 
 Apply:
+
 $$
 \boldsymbol{u}\leftarrow\boldsymbol{u}+k\boldsymbol{d}
 $$
+
 Repeat once with $k\leftarrow 0.5\,k_{new}$ for stable convergence ("two-step bisection").
 
 ```@/home/frank/tf-px4/src/lib/control_allocation/control_allocation/ControlAllocationSequentialDesaturation.cpp:67-86
@@ -354,9 +366,11 @@ ControlAllocationSequentialDesaturation::allocate()
 ### Output saturation feedback
 
 After allocation, compute:
+
 $$
 \boldsymbol{c}_{achieved} = \boldsymbol{B}\boldsymbol{u}_{clipped}
 $$
+
 $$
 \boldsymbol{c}_{unalloc} = \boldsymbol{c}-\boldsymbol{c}_{achieved}
 $$
@@ -371,6 +385,7 @@ Publish `control_allocator_status.unallocated_torque/thrust` → rate controller
 ## 6.8. Motor Slew-Rate Limiting
 
 Before outputting:
+
 $$
 u_i^{(k)}\leftarrow u_i^{(k-1)}+\mathrm{clip}\!\left(u_i^{(k)}-u_i^{(k-1)},-r_i\Delta t,\ r_i\Delta t\right)
 $$

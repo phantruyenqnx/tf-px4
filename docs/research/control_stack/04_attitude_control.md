@@ -131,17 +131,20 @@ Each step is broken down below and mapped to its formula.
 ### Step 1 — Reduced attitude (tilt-only correction)
 
 Current and desired body Z-axis (both expressed in $\{W\}$):
+
 $$
 \boldsymbol{e}_z = \boldsymbol{R}(\boldsymbol{q})\hat{\boldsymbol{z}}_W,\qquad
 \boldsymbol{e}_z^{sp}=\boldsymbol{R}(\boldsymbol{q}_{sp})\hat{\boldsymbol{z}}_W
 $$
 
 Minimum-rotation quaternion between the two axes:
+
 $$
 \boldsymbol{q}_{red}^{(W)} = \mathrm{quat\_from\_two\_vectors}(\boldsymbol{e}_z,\boldsymbol{e}_z^{sp})
 $$
 
 This is a rotation in the world frame; right-multiply by $\boldsymbol{q}$:
+
 $$
 \boldsymbol{q}_{red}=\boldsymbol{q}_{red}^{(W)}\otimes\boldsymbol{q}
 $$
@@ -178,11 +181,13 @@ $$
 By the decomposition theorem, $\boldsymbol{q}_{\delta\psi}$ contains only yaw around $\hat{\boldsymbol{z}}_B$ → has the form $(\cos(\alpha/2),0,0,\sin(\alpha/2))$.
 
 Apply weight $w_\psi$ = `MC_YAW_WEIGHT` (default 0.4 — set < 1 so that tilt is still prioritized when yaw deviation is large):
+
 $$
 \boldsymbol{q}_{\delta\psi}^{(w)} = \big(\cos(w_\psi\arccos q_{\delta\psi,w}),\ 0,\ 0,\ \sin(w_\psi\arcsin q_{\delta\psi,z})\big)
 $$
 
 Blended desired attitude (full tilt priority + weighted yaw):
+
 $$
 \boldsymbol{q}_d = \boldsymbol{q}_{red}\otimes\boldsymbol{q}_{\delta\psi}^{(w)}
 $$
@@ -213,6 +218,7 @@ $$
 $$
 
 Theorem: for small rotations, $\mathrm{Im}(\boldsymbol{q}_e)=\sin(\alpha/2)\hat{\boldsymbol{r}}\approx(\alpha/2)\hat{\boldsymbol{r}}$. P law:
+
 $$
 \boxed{\ \boldsymbol{\omega}_{sp} = 2\,\boldsymbol{K}_p^{att}\odot\mathrm{Im}(\boldsymbol{q}_e)\ }
 $$
@@ -255,6 +261,7 @@ void AttitudeControl::setProportionalGain(const matrix::Vector3f &proportional_g
 ### Step 4 — Feed-forward yaw rate
 
 $\dot{\psi}_{sp}$ is the angular rate around $\hat{\boldsymbol{z}}_W$. To add it to $\boldsymbol{\omega}_{sp}$ (body frame), project $\hat{\boldsymbol{z}}_W$ into the body:
+
 $$
 \boldsymbol{\omega}_{sp}\mathrel{+}= \boldsymbol{R}^\top(\boldsymbol{q})\hat{\boldsymbol{z}}_W\,\dot{\psi}_{sp}
 $$
@@ -273,9 +280,11 @@ if (std::isfinite(_yawspeed_setpoint)) {
 ```
 
 ### Step 5 — Rate limiting
+
 $$
 \omega_{sp,i}\leftarrow\mathrm{clip}(\omega_{sp,i},-\omega_{max,i},\omega_{max,i})
 $$
+
 - $\omega_{max,i}$: per-axis rate limit (`MC_{ROLL,PITCH,YAW}RATE_MAX`, rad/s).
 - Protects the rate controller from unreasonable angular velocity commands (e.g. when attitude error > 180°).
 
@@ -291,11 +300,13 @@ for (int i = 0; i < 3; i++) {
 When there is no position control, $\boldsymbol{q}_{sp}$ is generated from RC. See `mc_att_control_main.cpp:136-203`.
 
 Tilt from stick:
+
 $$
 \boldsymbol{v}=(roll\cdot\theta_{max},\ -pitch\cdot\theta_{max})\quad\text{after passing through filter time-constant }\tau_{tilt}
 $$
+
 $$
-\|\boldsymbol{v}\|>\theta_{max}\Rightarrow \boldsymbol{v}\leftarrow\boldsymbol{v}\frac{\theta_{max}}{\|\boldsymbol{v}\|}
+\lVert\boldsymbol{v}\rVert>\theta_{max}\Rightarrow \boldsymbol{v}\leftarrow\boldsymbol{v}\frac{\theta_{max}}{\lVert\boldsymbol{v}\rVert}
 $$
 
 **Variable explanation**:
@@ -306,21 +317,27 @@ $$
 - $\tau_{tilt}$ = `MC_MAN_TILT_TAU` — low-pass filter to avoid tilt shock when stick is jerked.
 
 Roll-pitch quaternion in axis-angle form:
+
 $$
 \boldsymbol{q}_{rp} = \mathrm{AxisAngle}(v_x,v_y,0)
 $$
-- $\mathrm{AxisAngle}(\boldsymbol{u})=(\cos(\|\boldsymbol{u}\|/2),\ \mathrm{sinc}(\|\boldsymbol{u}\|/2)\boldsymbol{u}/2)$ — no yaw component because $u_z=0$.
+
+- $\mathrm{AxisAngle}(\boldsymbol{u})=(\cos(\lVert\boldsymbol{u}\rVert/2),\ \mathrm{sinc}(\lVert\boldsymbol{u}\rVert/2)\boldsymbol{u}/2)$ — no yaw component because $u_z=0$.
 
 Yaw from stick (see `StickYaw` lib): integrate yaw stick with expo + deadzone:
+
 $$
 \boldsymbol{q}_{yaw}=(\cos(\psi_{sp}/2),0,0,\sin(\psi_{sp}/2))
 $$
+
 - $\psi_{sp}$ is integrated from yaw stick rate × $\Delta t$ → "hold last yaw" when stick = 0.
 
 Final setpoint:
+
 $$
 \boldsymbol{q}_{sp}=\boldsymbol{q}_{yaw}\otimes\boldsymbol{q}_{rp}
 $$
+
 - Order: yaw first (around $\hat{\boldsymbol{z}}_W$), then tilt — equivalent to rotating in intermediate yawed $\{W\}$ frame.
 
 Throttle stick → `thrust_body[2] = -throttle_curve(stick)` with `MPC_THR_CURVE` selecting the curve shape (linear/HTE-rescaled).
@@ -328,12 +345,15 @@ Throttle stick → `thrust_body[2] = -throttle_curve(stick)` with `MPC_THR_CURVE
 ## 4.6. EKF Reset Handling
 
 When EKF resets yaw (`quat_reset_counter` increments), receive `delta_q_reset`:
+
 $$
 \psi_{sp,stab}\leftarrow\mathrm{wrap}_\pi(\psi_{sp,stab}+\delta\psi)
 $$
+
 $$
 \boldsymbol{q}_{sp}\leftarrow \delta\boldsymbol{q}_{reset}\otimes\boldsymbol{q}_{sp}
 $$
+
 → avoids jerk when EKF jumps yaw.
 
 ## 4.7. Theoretical Background & Keywords

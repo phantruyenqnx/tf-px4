@@ -51,7 +51,7 @@ The `predictState()` integration is exact (no linearization), but the **covarian
 
 ### Impact
 
-- Filter may **diverge** during flip maneuvers or rapid attitude changes where $\|\delta\boldsymbol{\theta}\|$ is large.
+- Filter may **diverge** during flip maneuvers or rapid attitude changes where $\lVert\delta\boldsymbol{\theta}\rVert$ is large.
 - Covariance $\boldsymbol{P}$ shrinks faster than the true error — filter becomes overconfident (see §2).
 - For typical quadcopter hover/cruise: negligible. For aggressive acrobatics: significant.
 

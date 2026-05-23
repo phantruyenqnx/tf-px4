@@ -79,6 +79,7 @@ Functions to read carefully:
 $$
 \boldsymbol{v}_{sp,P} = \boldsymbol{K}_p^{pos}\odot(\boldsymbol{p}_{sp}-\boldsymbol{p})
 $$
+
 $$
 \boldsymbol{v}_{sp} \leftarrow \boldsymbol{v}_{sp,P} + \boldsymbol{v}_{sp,FF}
 $$
@@ -110,10 +111,12 @@ void PositionControl::_positionControl()
 
 Parameters: `MPC_XY_P` (~0.95), `MPC_Z_P` (~1.0).
 
-**Horizontal speed limit prioritizes P-term over FF** (`constrainXY`): given $\boldsymbol{v}_0=\boldsymbol{v}_{sp,P}^{xy}$ as priority, find $s\ge 0$ such that $\|\boldsymbol{v}_0+s\hat{\boldsymbol{v}}_{1}\|\le V_{max}$:
+**Horizontal speed limit prioritizes P-term over FF** (`constrainXY`): given $\boldsymbol{v}_0=\boldsymbol{v}_{sp,P}^{xy}$ as priority, find $s\ge 0$ such that $\lVert\boldsymbol{v}_0+s\hat{\boldsymbol{v}}_{1}\rVert\le V_{max}$:
+
 $$
-s = -\hat{\boldsymbol{v}}_1\!\cdot\!\boldsymbol{v}_0 + \sqrt{(\hat{\boldsymbol{v}}_1\!\cdot\!\boldsymbol{v}_0)^2 - (\|\boldsymbol{v}_0\|^2-V_{max}^2)}
+s = -\hat{\boldsymbol{v}}_1\!\cdot\!\boldsymbol{v}_0 + \sqrt{(\hat{\boldsymbol{v}}_1\!\cdot\!\boldsymbol{v}_0)^2 - (\lVert\boldsymbol{v}_0\rVert^2-V_{max}^2)}
 $$
+
 (positive root of quadratic equation). Code:
 
 ```@/home/frank/tf-px4/src/modules/mc_pos_control/PositionControl/ControlMath.cpp:172-176
@@ -131,9 +134,11 @@ Z axis: $v_{sp,z}\leftarrow\mathrm{clip}(v_{sp,z},-V_{up},V_{down})$.
 $$
 \boldsymbol{e}_v=\boldsymbol{v}_{sp}-\boldsymbol{v}
 $$
+
 $$
 \boldsymbol{a}_{sp,PID} = \boldsymbol{K}_p^v\odot\boldsymbol{e}_v + \boldsymbol{I}_v - \boldsymbol{K}_d^v\odot\dot{\boldsymbol{v}}
 $$
+
 $$
 \boldsymbol{a}_{sp}\leftarrow \boldsymbol{a}_{sp,PID}+\boldsymbol{a}_{sp,FF}
 $$
@@ -168,11 +173,13 @@ if ((_thr_sp(2) >= -_lim_thr_min && vel_error(2) >= 0.f) ||
 ```
 
 **Horizontal Anti-Reset Windup (Rundqwist 1990)**:
+
 $$
 \boldsymbol{a}_{prod}^{xy} = \boldsymbol{T}^{xy}\frac{g}{T_h}
 $$
+
 $$
-\text{When }\|\boldsymbol{a}_{sp}^{xy}\| > \|\boldsymbol{a}_{prod}^{xy}\|:\quad
+\text{When }\lVert\boldsymbol{a}_{sp}^{xy}\rVert > \lVert\boldsymbol{a}_{prod}^{xy}\rVert:\quad
 \boldsymbol{e}_v^{xy}\leftarrow\boldsymbol{e}_v^{xy}-K_{arw}(\boldsymbol{a}_{sp}^{xy}-\boldsymbol{a}_{prod}^{xy}),\ K_{arw}=\frac{2}{K_p^{v,x}}.
 $$
 
@@ -205,6 +212,7 @@ _vel_int += vel_error.emult(_gain_vel_i) * dt;
 ```
 
 Euler integration:
+
 $$
 \boldsymbol{I}_v^{(k+1)}=\boldsymbol{I}_v^{(k)}+\boldsymbol{K}_i^v\odot\boldsymbol{e}_v\Delta t,\quad I_{v,z}\in[-g,g].
 $$
@@ -217,6 +225,7 @@ Parameters: `MPC_{XY,Z}_VEL_{P,I,D}_ACC`.
 ### Step 3 — Acceleration → Thrust Vector
 
 Required acceleration (specific force):
+
 $$
 \boldsymbol{a}_{cmd}=\boldsymbol{a}_{sp}-\boldsymbol{g}_W=\begin{bmatrix}a_{sp,x}\\a_{sp,y}\\a_{sp,z}+g\end{bmatrix}
 $$
@@ -228,21 +237,25 @@ $$
 - The minus sign on the z axis becomes plus because $-(g\cdot 1)= -g$ → at hover ($a_{sp,z}=0$): $a_{cmd,z}=-g<0$, pointing up.
 
 Desired body Z axis (NED, thrust direction upward = $-\hat{\boldsymbol{z}}_W$):
+
 $$
-\hat{\boldsymbol{z}}_B^* = -\boldsymbol{a}_{cmd}/\|\boldsymbol{a}_{cmd}\|
+\hat{\boldsymbol{z}}_B^* = -\boldsymbol{a}_{cmd}/\lVert\boldsymbol{a}_{cmd}\rVert
 $$
+
 - Minus sign because thrust pushes along $-\hat{\boldsymbol{z}}_B$ (rotor pushes down → reaction force pushes body up).
 - $\hat{\boldsymbol{z}}_B^*$: raw body z axis (before tilt limit).
 
 **Decouple flag** (`MPC_ACC_DECOUPLE`): if enabled, uses fixed $z_{spec}=-g$, ignores $a_{sp,z}$ when computing tilt → avoids tilting due to vertical acceleration.
 
 **Tilt limit** (`limitTilt`):
+
 $$
 \theta = \min(\arccos(\hat{\boldsymbol{z}}_B^*\!\cdot\!\hat{\boldsymbol{z}}_W), \theta_{max})
 $$
+
 $$
 \hat{\boldsymbol{z}}_B^\dagger = \cos\theta\,\hat{\boldsymbol{z}}_W + \sin\theta\,\hat{\boldsymbol{r}},\quad
-\hat{\boldsymbol{r}}=\frac{\hat{\boldsymbol{z}}_B^*-(\hat{\boldsymbol{z}}_B^*\!\cdot\!\hat{\boldsymbol{z}}_W)\hat{\boldsymbol{z}}_W}{\|\cdot\|}
+\hat{\boldsymbol{r}}=\frac{\hat{\boldsymbol{z}}_B^*-(\hat{\boldsymbol{z}}_B^*\!\cdot\!\hat{\boldsymbol{z}}_W)\hat{\boldsymbol{z}}_W}{\lVert\cdot\rVert}
 $$
 
 - $\theta$: total tilt angle (rad), clipped to $\theta_{max}$.
@@ -250,6 +263,7 @@ $$
 - $\hat{\boldsymbol{z}}_B^\dagger$: body z axis after limit, preserving tilt direction but constraining magnitude.
 
 **Convert acceleration → thrust** via hover thrust:
+
 $$
 T_z^{NED} = a_{sp,z}\frac{T_h}{g} - T_h
 $$
@@ -259,6 +273,7 @@ $$
 - Formula is symmetric around hover: positive acceleration ($a_{sp,z}>0$, wanting to descend) → $|T_z^{NED}|<T_h$ (reduced thrust); and vice versa.
 
 Project onto the limited body axis:
+
 $$
 T_{coll}=\min\!\left(\frac{T_z^{NED}}{\hat{\boldsymbol{z}}_W\!\cdot\!\hat{\boldsymbol{z}}_B^\dagger},-T_{min}\right),\quad
 \boldsymbol{T}=T_{coll}\,\hat{\boldsymbol{z}}_B^\dagger
@@ -293,33 +308,39 @@ void PositionControl::_accelerationControl()
 ```
 
 **Thrust saturation prioritizes vertical**:
+
 $$
-T_{xy,alloc}=\min(\|\boldsymbol{T}^{xy}\|,M_{xy}),\quad T_z\ge -\sqrt{T_{max}^2-T_{xy,alloc}^2}
+T_{xy,alloc}=\min(\lVert\boldsymbol{T}^{xy}\rVert,M_{xy}),\quad T_z\ge -\sqrt{T_{max}^2-T_{xy,alloc}^2}
 $$
+
 $$
 T_{xy,max}=\sqrt{T_{max}^2-T_z^2}
 $$
+
 $$
-\boldsymbol{T}^{xy}\leftarrow \boldsymbol{T}^{xy}\frac{T_{xy,max}}{\|\boldsymbol{T}^{xy}\|}\quad(\text{if exceeded})
+\boldsymbol{T}^{xy}\leftarrow \boldsymbol{T}^{xy}\frac{T_{xy,max}}{\lVert\boldsymbol{T}^{xy}\rVert}\quad(\text{if exceeded})
 $$
 
 - $M_{xy}$: horizontal margin (`MPC_THR_XY_MARG`).
 - $T_{xy,alloc}$: horizontal thrust pre-allocated.
-- $T_z$ is given enough budget so that $\|\boldsymbol{T}\|\le T_{max}$ (altitude tracking is priority #1).
+- $T_z$ is given enough budget so that $\lVert\boldsymbol{T}\rVert\le T_{max}$ (altitude tracking is priority #1).
 - Once $T_z$ is fixed, $T_{xy,max}$ is allocated from the remaining budget — horizontal thrust is scaled down if needed.
 
 ### Step 4 — Thrust Vector → Quaternion (`ControlMath::thrustToAttitude`)
 
 $$
-\hat{\boldsymbol{z}}_B = -\boldsymbol{T}/\|\boldsymbol{T}\|
+\hat{\boldsymbol{z}}_B = -\boldsymbol{T}/\lVert\boldsymbol{T}\rVert
 $$
+
 $$
 \boldsymbol{y}_C=(-\sin\psi_{sp},\cos\psi_{sp},0)^\top
 $$
+
 $$
-\hat{\boldsymbol{x}}_B = \frac{\boldsymbol{y}_C\times\hat{\boldsymbol{z}}_B}{\|\boldsymbol{y}_C\times\hat{\boldsymbol{z}}_B\|},\quad
+\hat{\boldsymbol{x}}_B = \frac{\boldsymbol{y}_C\times\hat{\boldsymbol{z}}_B}{\lVert\boldsymbol{y}_C\times\hat{\boldsymbol{z}}_B\rVert},\quad
 \hat{\boldsymbol{y}}_B = \hat{\boldsymbol{z}}_B\times\hat{\boldsymbol{x}}_B
 $$
+
 $$
 \boldsymbol{R}_{sp}=[\hat{\boldsymbol{x}}_B\ \hat{\boldsymbol{y}}_B\ \hat{\boldsymbol{z}}_B]\Rightarrow\boldsymbol{q}_{sp}
 $$

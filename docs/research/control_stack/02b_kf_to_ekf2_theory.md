@@ -38,6 +38,7 @@ Measurement model: $\boldsymbol{y}_k = \boldsymbol{H}\boldsymbol{x}_k + \boldsym
 $$
 \hat{\boldsymbol{x}}_{k+1|k} = \boldsymbol{F}\hat{\boldsymbol{x}}_{k|k} + \boldsymbol{B}\boldsymbol{u}_k
 $$
+
 $$
 \boldsymbol{P}_{k+1|k} = \boldsymbol{F}\boldsymbol{P}_{k|k}\boldsymbol{F}^\top + \boldsymbol{Q}
 $$
@@ -47,15 +48,19 @@ $$
 $$
 \boldsymbol{z} = \boldsymbol{y}_{k+1} - \boldsymbol{H}\hat{\boldsymbol{x}}_{k+1|k} \quad\text{(innovation)}
 $$
+
 $$
 \boldsymbol{S} = \boldsymbol{H}\boldsymbol{P}_{k+1|k}\boldsymbol{H}^\top + \boldsymbol{R}
 $$
+
 $$
 \boldsymbol{K} = \boldsymbol{P}_{k+1|k}\boldsymbol{H}^\top\boldsymbol{S}^{-1} \quad\text{(Kalman gain)}
 $$
+
 $$
 \hat{\boldsymbol{x}}_{k+1|k+1} = \hat{\boldsymbol{x}}_{k+1|k} + \boldsymbol{K}\boldsymbol{z}
 $$
+
 $$
 \boldsymbol{P}_{k+1|k+1} = (\boldsymbol{I}-\boldsymbol{K}\boldsymbol{H})\boldsymbol{P}_{k+1|k}
 $$
@@ -98,6 +103,7 @@ Both Jacobians $\boldsymbol{F},\boldsymbol{H}$ **must be recomputed at each step
 $$
 \hat{\boldsymbol{x}}_{k+1|k} = f(\hat{\boldsymbol{x}}_{k|k}, \boldsymbol{u}_k)
 $$
+
 $$
 \boldsymbol{P}_{k+1|k} = \boldsymbol{F}_k\boldsymbol{P}_{k|k}\boldsymbol{F}_k^\top + \boldsymbol{G}_k\boldsymbol{Q}\boldsymbol{G}_k^\top
 $$
@@ -107,13 +113,16 @@ $$
 $$
 \boldsymbol{z} = \boldsymbol{y} - h(\hat{\boldsymbol{x}}_{k+1|k})
 $$
+
 $$
 \boldsymbol{S} = \boldsymbol{H}\boldsymbol{P}_{k+1|k}\boldsymbol{H}^\top + \boldsymbol{R}, \quad
 \boldsymbol{K} = \boldsymbol{P}_{k+1|k}\boldsymbol{H}^\top\boldsymbol{S}^{-1}
 $$
+
 $$
 \hat{\boldsymbol{x}}_{k+1|k+1} = \hat{\boldsymbol{x}}_{k+1|k} + \boldsymbol{K}\boldsymbol{z}
 $$
+
 $$
 \boldsymbol{P}_{k+1|k+1} = (\boldsymbol{I}-\boldsymbol{K}\boldsymbol{H})\boldsymbol{P}_{k+1|k}
 $$
@@ -128,7 +137,7 @@ $$
 
 This is **incorrect** for quaternions because:
 
-1. **Quaternion is not a vector space**: $\boldsymbol{q}+\delta\boldsymbol{q}$ may no longer be a unit quaternion ($\|\boldsymbol{q}\|\neq 1$).
+1. **Quaternion is not a vector space**: $\boldsymbol{q}+\delta\boldsymbol{q}$ may no longer be a unit quaternion ($\lVert\boldsymbol{q}\rVert\neq 1$).
 2. **Over-parameterization**: 4 real numbers represent 3 DoF — a 4×4 covariance is singular (rank 3).
 3. **Poor linearization**: for large angles, $\partial(\boldsymbol{q}_{k+1})/\partial\boldsymbol{q}_k$ poorly represents large rotations.
 
