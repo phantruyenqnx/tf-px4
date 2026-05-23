@@ -199,7 +199,8 @@ struct imuSample {
 IMU hardware does not output instantaneous rad/s and m/s². It outputs **pre-integrated** increments over a sampling window — the integration is done inside the IMU firmware or the driver:
 
 $$
-\Delta\boldsymbol{\theta} = \int_{t_0}^{t_1}\boldsymbol{\omega}\,dt \quad\text{[rad]}, \qquad \Delta\mathbf{v} = \int_{t_0}^{t_1}\mathbf{a}\,dt \quad\text{[m/s]}
+\Delta\boldsymbol{\theta} = \int_{t_0}^{t_1}\boldsymbol{\omega}\,dt \quad[\mathrm{rad}], \qquad
+\Delta\mathbf{v} = \int_{t_0}^{t_1}\mathbf{a}\,dt \quad[\mathrm{m/s}]
 $$
 
 `delta_ang` is a rotation vector (rad), not an angular velocity. `delta_vel` is a velocity increment (m/s), not an acceleration.
@@ -368,18 +369,23 @@ Naively adding a Gaussian perturbation $\mathbf{q}+\delta\mathbf{q}$ violates th
 Split the state:
 
 $$
-\mathbf{x}_\text{true} = \mathbf{x}_\text{nom} \boxplus \delta\mathbf{x}
+\mathbf{x}_{\mathrm{true}} = \mathbf{x}_{\mathrm{nom}} \boxplus \delta\mathbf{x}
 $$
 
 | Component | Space | Update rule | Role |
 |---|---|---|---|
-| $\mathbf{x}_\text{nom}$ | SO(3) × $\mathbb{R}^{21}$ | Full nonlinear kinematics | Best current guess |
+| $\mathbf{x}_{\mathrm{nom}}$ | SO(3) × $\mathbb{R}^{21}$ | Full nonlinear kinematics | Best current guess |
 | $\delta\mathbf{x} \in \mathbb{R}^{24}$ | Flat tangent space | Linear Gaussian KF | Uncertainty around guess |
 
 For attitude specifically:
 
 $$
-\mathbf{q}_\text{true} = \mathbf{q}_\text{nom} \otimes \delta\mathbf{q}(\delta\boldsymbol{\theta})\,, \qquad \delta\mathbf{q}(\delta\boldsymbol{\theta}) \approx \begin{bmatrix}1\\\delta\boldsymbol{\theta}/2\end{bmatrix}
+\mathbf{q}_{\mathrm{true}} = \mathbf{q}_{\mathrm{nom}} \otimes \delta\mathbf{q}(\delta\boldsymbol{\theta}), \qquad
+\delta\mathbf{q}(\delta\boldsymbol{\theta}) \approx
+\begin{bmatrix}
+1 \\
+\delta\boldsymbol{\theta}/2
+\end{bmatrix}
 $$
 
 $\delta\boldsymbol{\theta} \in \mathbb{R}^3$ is a rotation vector — always small by design (reset to zero after every update) — so the linearization of the error dynamics is always accurate regardless of the nominal attitude magnitude.
@@ -387,17 +393,31 @@ $\delta\boldsymbol{\theta} \in \mathbb{R}^3$ is a rotation vector — always sma
 | Aspect | Naive EKF on $\mathbf{q}\in\mathbb{R}^4$ | ESKF on $\delta\boldsymbol{\theta}\in\mathbb{R}^3$ |
 |---|---|---|
 | Covariance | 4×4, rank-deficient | 3×3, full rank |
-| Norm constraint | Violated by KF update | Enforced: $\mathbf{q}_\text{nom}$ never leaves the sphere |
+| Norm constraint | Violated by KF update | Enforced: $\mathbf{q}_{\mathrm{nom}}$ never leaves the sphere |
 | Linearization point | Around current (possibly large) $\mathbf{q}$ | Always around $\delta\mathbf{x}=0$ (always small) |
 
 ---
 
 ## 2.3 The 24-State Error Vector
 
-The error state $\delta\mathbf{x}\in\mathbb{R}^{24}$ is the vector whose covariance matrix $\mathbf{P}$ (24×24) the filter maintains. The nominal state $\mathbf{x}_\text{nom}$ is a parallel `StateSample` struct in physical units.
-$$\delta\mathbf{x} = \begin{bmatrix}
-\delta\boldsymbol{\theta} \\ \delta\mathbf{v} \\ \delta\mathbf{p} \\ \delta\mathbf{b}_g \\ \delta\mathbf{b}_a \\ \delta\mathbf{m}_I \\ \delta\mathbf{m}_B \\ \delta\mathbf{w} \\ \delta h
-\end{bmatrix} \in\mathbb{R}^{24}$$
+The error state $\delta\mathbf{x}\in\mathbb{R}^{24}$ is the vector whose covariance matrix $\mathbf{P}$ (24×24) the filter maintains. The nominal state $\mathbf{x}_{\mathrm{nom}}$ is a parallel `StateSample` struct in physical units.
+
+$$
+\delta\mathbf{x} =
+\begin{bmatrix}
+\delta\boldsymbol{\theta} \\
+\delta\mathbf{v} \\
+\delta\mathbf{p} \\
+\delta\mathbf{b}_g \\
+\delta\mathbf{b}_a \\
+\delta\mathbf{m}_I \\
+\delta\mathbf{m}_B \\
+\delta\mathbf{w} \\
+\delta h
+\end{bmatrix}
+\in\mathbb{R}^{24}
+$$
+
 | Component | Indices | DoF | Physical meaning | Why included |
 |---|---|---|---|---|
 | $\delta\boldsymbol{\theta}$ | 0–2 | 3 | Attitude error (rotation vector, body frame) | Minimum for dead-reckoning |
@@ -465,7 +485,25 @@ $$
 \boxed{\hat{\mathbf{q}}_{k+1} = \hat{\mathbf{q}}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega}_c\,\Delta t)}
 $$
 
-where $\Delta\mathbf{q}(\boldsymbol{\phi}) = \begin{bmatrix}\cos(\lVert\boldsymbol{\phi}\rVert/2)\\\sin(\lVert\boldsymbol{\phi}\rVert/2)\,\hat{\boldsymbol{\phi}}\end{bmatrix}$; for small $\lVert\boldsymbol{\phi}\rVert$: $\Delta\mathbf{q}\approx\begin{bmatrix}1\\\boldsymbol{\phi}/2\end{bmatrix}$.
+where:
+
+$$
+\Delta\mathbf{q}(\boldsymbol{\phi}) =
+\begin{bmatrix}
+\cos(\lVert\boldsymbol{\phi}\rVert/2) \\
+\sin(\lVert\boldsymbol{\phi}\rVert/2)\,\hat{\boldsymbol{\phi}}
+\end{bmatrix}
+$$
+
+For small $\lVert\boldsymbol{\phi}\rVert$:
+
+$$
+\Delta\mathbf{q}\approx
+\begin{bmatrix}
+1 \\
+\boldsymbol{\phi}/2
+\end{bmatrix}
+$$
 
 | Symbol | Meaning |
 |---|---|
@@ -500,11 +538,16 @@ $$
 $$
 
 The rotation matrix $\mathbf{R}(\mathbf{q})$ in terms of quaternion components $[q_w,q_x,q_y,q_z]$:
-$$\mathbf{R}(\mathbf{q}) = \begin{bmatrix}
+
+$$
+\mathbf{R}(\mathbf{q}) =
+\begin{bmatrix}
 1-2(q_y^2+q_z^2) & 2(q_xq_y-q_wq_z) & 2(q_xq_z+q_wq_y) \\
 2(q_xq_y+q_wq_z) & 1-2(q_x^2+q_z^2) & 2(q_yq_z-q_wq_x) \\
 2(q_xq_z-q_wq_y) & 2(q_yq_z+q_wq_x) & 1-2(q_x^2+q_y^2)
-\end{bmatrix}$$
+\end{bmatrix}
+$$
+
 This is the primary source of nonlinearity — $\mathbf{R}$ is quadratic in the quaternion components.
 
 | Symbol | Meaning |
@@ -623,15 +666,15 @@ $$
 
 #### $\mathbf{F}_{v\theta}$ — attitude error drives velocity error
 
-From the rotation-matrix perturbation $\mathbf{R}(\mathbf{q}_\text{true})\approx\mathbf{R}_\text{nom}(\mathbf{I}+[\delta\boldsymbol{\theta}]_\times)$ and the identity $[\mathbf{u}]_\times\mathbf{v}=-[\mathbf{v}]_\times\mathbf{u}$:
+From the rotation-matrix perturbation $\mathbf{R}(\mathbf{q}_{\mathrm{true}})\approx\mathbf{R}_{\mathrm{nom}}(\mathbf{I}+[\delta\boldsymbol{\theta}]_\times)$ and the identity $[\mathbf{u}]_\times\mathbf{v}=-[\mathbf{v}]_\times\mathbf{u}$:
 
 $$
-\boxed{\mathbf{F}_{v\theta} = -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\Delta t\,, \qquad \mathbf{a}_b = \tilde{\mathbf{a}} - \hat{\mathbf{b}}_a}
+\boxed{\mathbf{F}_{v\theta} = -\mathbf{R}_{\mathrm{nom}}\,[\mathbf{a}_b]_\times\,\Delta t\,, \qquad \mathbf{a}_b = \tilde{\mathbf{a}} - \hat{\mathbf{b}}_a}
 $$
 
 | Symbol | Meaning |
 |---|---|
-| $\mathbf{R}_\text{nom}$ | DCM body→NED at current nominal attitude |
+| $\mathbf{R}_{\mathrm{nom}}$ | DCM body→NED at current nominal attitude |
 | $[\mathbf{a}_b]_\times$ | Skew-symmetric matrix of corrected specific force |
 
 **Physical meaning**: An attitude error mis-projects the accelerometer into the wrong NED direction, creating a spurious velocity increment. The larger the specific force (aggressive maneuver), the stronger this coupling.
@@ -639,10 +682,10 @@ $$
 #### $\mathbf{F}_{vb_a}$ — accel bias drives velocity drift
 
 $$
-\boxed{\mathbf{F}_{vb_a} = -\mathbf{R}_\text{nom}\,\Delta t}
+\boxed{\mathbf{F}_{vb_a} = -\mathbf{R}_{\mathrm{nom}}\,\Delta t}
 $$
 
-**Physical meaning**: An accelerometer bias of $b_a$ m/s² causes velocity to drift at $\mathbf{R}_\text{nom}\,b_a$ m/s (after rotation to NED). Without estimating $b_a$, position error grows as $\frac{1}{2}b_a t^2$ — at 0.05 m/s² bias, that is 2.5 m in 10 seconds.
+**Physical meaning**: An accelerometer bias of $b_a$ m/s² causes velocity to drift at $\mathbf{R}_{\mathrm{nom}}\,b_a$ m/s (after rotation to NED). Without estimating $b_a$, position error grows as $\frac{1}{2}b_a t^2$ — at 0.05 m/s² bias, that is 2.5 m in 10 seconds.
 
 #### $\mathbf{F}_{pv}$ — velocity error drives position drift
 
@@ -653,7 +696,10 @@ $$
 #### All other blocks
 
 All diagonal blocks: $\mathbf{I}$ (state carries forward). All remaining off-diagonal blocks: $\mathbf{0}$ (no direct coupling). The full $24\times 24$ structure:
-$$\mathbf{F}_k = \begin{bmatrix}
+
+$$
+\mathbf{F}_k =
+\begin{bmatrix}
 (\mathbf{I}-[\Delta\boldsymbol{\phi}]_\times) & 0 & 0 & -\Delta t\mathbf{I} & 0 & 0 & 0 & 0 & 0 \\
 -\mathbf{R}[\mathbf{a}_b]_\times\Delta t & \mathbf{I} & 0 & 0 & -\mathbf{R}\Delta t & 0 & 0 & 0 & 0 \\
 0 & \Delta t\mathbf{I} & \mathbf{I} & 0 & 0 & 0 & 0 & 0 & 0 \\
@@ -663,8 +709,26 @@ $$\mathbf{F}_k = \begin{bmatrix}
 0 & 0 & 0 & 0 & 0 & 0 & \mathbf{I} & 0 & 0 \\
 0 & 0 & 0 & 0 & 0 & 0 & 0 & \mathbf{I} & 0 \\
 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
-\end{bmatrix}$$
-Rows/columns: $[\delta\boldsymbol{\theta}\;|\;\delta\mathbf{v}\;|\;\delta\mathbf{p}\;|\;\delta\mathbf{b}_g\;|\;\delta\mathbf{b}_a\;|\;\delta\mathbf{m}_I\;|\;\delta\mathbf{m}_B\;|\;\delta\mathbf{w}\;|\;\delta h]$, $\mathbf{R}\equiv\mathbf{R}_\text{nom}$.
+\end{bmatrix}
+$$
+
+Rows/columns are ordered as:
+
+$$
+\left[
+\delta\boldsymbol{\theta},\;
+\delta\mathbf{v},\;
+\delta\mathbf{p},\;
+\delta\mathbf{b}_g,\;
+\delta\mathbf{b}_a,\;
+\delta\mathbf{m}_I,\;
+\delta\mathbf{m}_B,\;
+\delta\mathbf{w},\;
+\delta h
+\right]
+$$
+
+Here $\mathbf{R}\equiv\mathbf{R}_{\mathrm{nom}}$.
 
 ### How PX4 computes $\mathbf{F}\mathbf{P}\mathbf{F}^\top + \mathbf{Q}$
 
@@ -729,21 +793,25 @@ void Ekf::predictCovariance(const imuSample &imu_delayed)
 
 ## 2.6 UPDATE — Observation Models
 
-For each sensor, the UPDATE step requires: (1) an observation function $h(\mathbf{x}_\text{nom})$ that predicts the reading, and (2) its Jacobian $\mathbf{H}=\partial h/\partial\delta\mathbf{x}$ mapping the error state to measurement error.
+For each sensor, the UPDATE step requires: (1) an observation function $h(\mathbf{x}_{\mathrm{nom}})$ that predicts the reading, and (2) its Jacobian $\mathbf{H}=\partial h/\partial\delta\mathbf{x}$ mapping the error state to measurement error.
 
 PX4 fuses **one scalar at a time** (sequential scalar fusion). For a GPS with 3 position components, `measurementUpdate()` is called 3 times. Each call: $\mathbf{H}\in\mathbb{R}^{1\times 24}$, $\mathbf{K}\in\mathbb{R}^{24\times 1}$, $S = \mathbf{H}\mathbf{P}\mathbf{H}^\top + R$ is a scalar. This eliminates the $m\times m$ matrix inversion, reducing cost from $O(m^3)$ to $O(1)$ per measurement.
 
 ### GPS Position
 
-Predicted measurement: $\hat{\mathbf{z}} = \hat{\mathbf{p}}_\text{nom}$ (position directly from nominal state).
+Predicted measurement: $\hat{\mathbf{z}} = \hat{\mathbf{p}}_{\mathrm{nom}}$ (position directly from nominal state).
 
 $$
-\mathbf{H}_\text{GPS\text{-}pos} = \begin{bmatrix}\mathbf{0}_{3\times 6} & \mathbf{I}_3 & \mathbf{0}_{3\times 15}\end{bmatrix} \in \mathbb{R}^{3\times 24}
+\mathbf{H}_{\mathrm{GPS,pos}} =
+\begin{bmatrix}
+\mathbf{0}_{3\times 6} & \mathbf{I}_3 & \mathbf{0}_{3\times 15}
+\end{bmatrix}
+\in \mathbb{R}^{3\times 24}
 $$
 
 Columns 6–8 (position error $\delta\mathbf{p}$) are identity; all others zero.
 
-Innovation: $\boldsymbol{\nu} = \mathbf{z}_\text{GPS} - \hat{\mathbf{p}}_\text{nom}$
+Innovation: $\boldsymbol{\nu} = \mathbf{z}_{\mathrm{GPS}} - \hat{\mathbf{p}}_{\mathrm{nom}}$
 
 > **File**: [src/modules/ekf2/EKF/aid_sources/gnss/gps_control.cpp](../../../src/modules/ekf2/EKF/aid_sources/gnss/gps_control.cpp) — `updateGnssPos()`
 
@@ -756,10 +824,14 @@ Innovation: $\boldsymbol{\nu} = \mathbf{z}_\text{GPS} - \hat{\mathbf{p}}_\text{n
 
 ### GPS Velocity
 
-Predicted measurement: $\hat{\mathbf{z}} = \hat{\mathbf{v}}_\text{nom}$ (velocity directly).
+Predicted measurement: $\hat{\mathbf{z}} = \hat{\mathbf{v}}_{\mathrm{nom}}$ (velocity directly).
 
 $$
-\mathbf{H}_\text{GPS\text{-}vel} = \begin{bmatrix}\mathbf{0}_{3\times 3} & \mathbf{I}_3 & \mathbf{0}_{3\times 18}\end{bmatrix} \in \mathbb{R}^{3\times 24}
+\mathbf{H}_{\mathrm{GPS,vel}} =
+\begin{bmatrix}
+\mathbf{0}_{3\times 3} & \mathbf{I}_3 & \mathbf{0}_{3\times 18}
+\end{bmatrix}
+\in \mathbb{R}^{3\times 24}
 $$
 
 Columns 3–5 (velocity error $\delta\mathbf{v}$) are identity.
@@ -769,7 +841,11 @@ Columns 3–5 (velocity error $\delta\mathbf{v}$) are identity.
 Predicted measurement: $\hat{z} = \hat{p}_D$ (Down component of position, scalar).
 
 $$
-\mathbf{H}_\text{baro} = \begin{bmatrix}0,\ldots,0,\underbrace{1}_{\text{index 8}},0,\ldots,0\end{bmatrix} \in \mathbb{R}^{1\times 24}
+\mathbf{H}_{\mathrm{baro}} =
+\begin{bmatrix}
+0,\ldots,0,\underbrace{1}_{\mathrm{index}\;8},0,\ldots,0
+\end{bmatrix}
+\in \mathbb{R}^{1\times 24}
 $$
 
 > **File**: [src/modules/ekf2/EKF/aid_sources/barometer/baro_height_control.cpp](../../../src/modules/ekf2/EKF/aid_sources/barometer/baro_height_control.cpp)
@@ -779,11 +855,19 @@ $$
 Predicted measurement: $\hat{\mathbf{z}} = \mathbf{R}(\hat{\mathbf{q}})^\top\hat{\mathbf{m}}_I + \hat{\mathbf{m}}_B$ (field in body frame). The Jacobian couples three error-state groups:
 
 $$
-\mathbf{H}_\text{mag}\big|_{\delta\boldsymbol{\theta}} = [\mathbf{R}^\top\mathbf{m}_I]_\times \quad(3\times 3,\;\text{cols 0–2})
+\mathbf{H}_{\mathrm{mag}}\big|_{\delta\boldsymbol{\theta}} =
+[\mathbf{R}^\top\mathbf{m}_I]_\times
+\quad(3\times 3,\;\mathrm{cols}\;0{-}2)
 $$
 
 $$
-\mathbf{H}_\text{mag}\big|_{\delta\mathbf{m}_I} = \mathbf{R}^\top \quad(\text{cols 15–17})\,, \qquad \mathbf{H}_\text{mag}\big|_{\delta\mathbf{m}_B} = \mathbf{I} \quad(\text{cols 18–20})
+\mathbf{H}_{\mathrm{mag}}\big|_{\delta\mathbf{m}_I} =
+\mathbf{R}^\top
+\quad(\mathrm{cols}\;15{-}17),
+\qquad
+\mathbf{H}_{\mathrm{mag}}\big|_{\delta\mathbf{m}_B} =
+\mathbf{I}
+\quad(\mathrm{cols}\;18{-}20)
 $$
 
 > **File**: [src/modules/ekf2/EKF/aid_sources/magnetometer/mag_control.cpp](../../../src/modules/ekf2/EKF/aid_sources/magnetometer/mag_control.cpp) — calls generated Jacobian:
@@ -803,7 +887,7 @@ When measurement $\mathbf{z}_k$ arrives:
 **Innovation:**
 
 $$
-\boxed{\boldsymbol{\nu}_k = \mathbf{z}_k - h(\mathbf{x}_\text{nom,k})}
+\boxed{\boldsymbol{\nu}_k = \mathbf{z}_k - h(\mathbf{x}_{\mathrm{nom},k})}
 $$
 
 **Innovation covariance** (Property 4 — joint Gaussian):
@@ -817,7 +901,8 @@ $\mathbf{H}\mathbf{P}\mathbf{H}^\top$: state uncertainty projected to sensor spa
 **Kalman Gain** (Property 5 — Woodbury identity):
 
 $$
-\boxed{\mathbf{K}_k = \mathbf{P}_k\,\mathbf{H}_k^\top\,S_k^{-1}} \quad (24\times 1\text{ for scalar fusion})
+\boxed{\mathbf{K}_k = \mathbf{P}_k\,\mathbf{H}_k^\top\,S_k^{-1}}
+\quad (24\times 1\;\mathrm{for\ scalar\ fusion})
 $$
 
 **Joseph-stabilized covariance update:**
@@ -875,7 +960,7 @@ bool Ekf::measurementUpdate(VectorState &K, const VectorState &H, const float R,
 
 ## 2.8 UPDATE — State Injection
 
-After computing $\delta\hat{\mathbf{x}} = \mathbf{K}\cdot\boldsymbol{\nu}$, the correction is injected into the nominal state via $\mathbf{x}_\text{nom} \leftarrow \mathbf{x}_\text{nom} \boxplus \delta\hat{\mathbf{x}}$:
+After computing $\delta\hat{\mathbf{x}} = \mathbf{K}\cdot\boldsymbol{\nu}$, the correction is injected into the nominal state via $\mathbf{x}_{\mathrm{nom}} \leftarrow \mathbf{x}_{\mathrm{nom}} \boxplus \delta\hat{\mathbf{x}}$:
 
 $$
 \hat{\mathbf{q}}_{k|k} = \delta\mathbf{q}(\delta\hat{\boldsymbol{\theta}}) \otimes \hat{\mathbf{q}}_{k|k-1} \tag{multiplicative}
@@ -1023,7 +1108,7 @@ The developer TODO comment in `output_predictor.cpp:281` — *"there is no guara
 | Covariance predict | $\mathbf{P}\leftarrow\mathbf{F}\mathbf{P}\mathbf{F}^\top+\mathbf{Q}$ | [covariance.cpp:137](../../../src/modules/ekf2/EKF/covariance.cpp) | `sym::PredictCovariance()` |
 | Process noise (biases) | Added separately per group | [covariance.cpp:146–230](../../../src/modules/ekf2/EKF/covariance.cpp) | After `sym::PredictCovariance` |
 | Sensor dispatcher | `controlFusionModes()` | [control.cpp:46](../../../src/modules/ekf2/EKF/control.cpp) | All guarded by `#if CONFIG_*` |
-| Innovation | $\boldsymbol{\nu}=\mathbf{z}-h(\mathbf{x}_\text{nom})$ | `aid_sources/*/control.cpp` | Per-sensor `update*()` |
+| Innovation | $\boldsymbol{\nu}=\mathbf{z}-h(\mathbf{x}_{\mathrm{nom}})$ | `aid_sources/*/control.cpp` | Per-sensor `update*()` |
 | Kalman gain | $\mathbf{K}=\mathbf{P}\mathbf{H}^\top S^{-1}$ | [ekf_helper.cpp:1089](../../../src/modules/ekf2/EKF/ekf_helper.cpp) | `measurementUpdate()` |
 | Joseph form | $\mathbf{P}=(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}(\mathbf{I}-\mathbf{K}\mathbf{H})^\top+\mathbf{K}R\mathbf{K}^\top$ | [ekf_helper.cpp:1104–1128](../../../src/modules/ekf2/EKF/ekf_helper.cpp) | `measurementUpdate()` |
 | Attitude injection | $\mathbf{q}\leftarrow\delta\mathbf{q}\otimes\mathbf{q}$ (left-multiply) | [ekf_helper.cpp:739–742](../../../src/modules/ekf2/EKF/ekf_helper.cpp) | `fuse()` |
