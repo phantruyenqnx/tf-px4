@@ -97,6 +97,7 @@ For quick reference without switching back to `00_index.md`. Consistent with the
 $$
 \boldsymbol{\omega}_m = \boldsymbol{\omega} + \boldsymbol{b}_g + \boldsymbol{S}_g\boldsymbol{\omega} + \boldsymbol{n}_g
 $$
+
 $$
 \boldsymbol{a}_m = \boldsymbol{R}_{BW}(\boldsymbol{a}-\boldsymbol{g}_W) + \boldsymbol{b}_a + \boldsymbol{S}_a\boldsymbol{a} + \boldsymbol{n}_a
 $$
@@ -185,10 +186,12 @@ Inverting the model: $\boldsymbol{m}_{corr}=\boldsymbol{R}_{BS}\,\boldsymbol{D}^
 
 #### Calibration = Ellipsoid Fit
 
-When the drone is rotated through all orientations (4π sr), the point cloud $\boldsymbol{m}_m$ should lie on a **sphere** of radius $\|\boldsymbol{m}_W\|$ centered at $\boldsymbol{0}$. Due to hard/soft-iron effects, it is in practice an **off-center ellipsoid**. Ellipsoid fitting solves the problem:
+When the drone is rotated through all orientations (4π sr), the point cloud $\boldsymbol{m}_m$ should lie on a **sphere** of radius $\lVert\boldsymbol{m}_W\rVert$ centered at $\boldsymbol{0}$. Due to hard/soft-iron effects, it is in practice an **off-center ellipsoid**. Ellipsoid fitting solves the problem:
+
 $$
-\min_{\boldsymbol{D},\boldsymbol{b}}\sum_k\left|\,\|\boldsymbol{D}^{-1}(\boldsymbol{m}_{m,k}-\boldsymbol{b})\|^2 - 1\,\right|^2
+\min_{\boldsymbol{D},\boldsymbol{b}}\sum_k\left|\,\lVert\boldsymbol{D}^{-1}(\boldsymbol{m}_{m,k}-\boldsymbol{b})\rVert^2 - 1\,\right|^2
 $$
+
 → finds $\boldsymbol{D},\boldsymbol{b}$ that transform the point cloud back to a unit sphere. Calibration code is in `commander/calibration/mag_calibration.cpp`.
 
 ---
@@ -219,11 +222,13 @@ Code: `src/lib/atmosphere/atmosphere.cpp` (function `getAltitudeFromPressure`).
 ### 1.4.4. GPS
 
 PX4 receives LLA (lat/lon/alt) + ECEF velocity from the GPS module. Converts to local NED using **azimuthal equidistant projection** centered on the home point:
+
 $$
 \boldsymbol{p}_{GPS}^{NED} = \mathrm{geo\_project}(\mathrm{lat},\mathrm{lon},\mathrm{alt};\ \mathrm{lat}_0,\mathrm{lon}_0,\mathrm{alt}_0)
 $$
 
 EKF observation:
+
 $$
 \boldsymbol{p}_{GPS} = \boldsymbol{p}_W + \boldsymbol{n}_{GPS},\qquad \boldsymbol{v}_{GPS}=\boldsymbol{v}_W + \boldsymbol{n}_v
 $$
@@ -273,9 +278,11 @@ When accumulating high-rate gyro samples into an angular increment $\Delta\bolds
 $$
 \Delta\boldsymbol{\theta}_k = \boldsymbol{\alpha}_k + \boldsymbol{\beta}_k
 $$
+
 $$
 \boldsymbol{\alpha}_k = \int_{t_{k-1}}^{t_k}\boldsymbol{\omega}\,dt\quad(\text{trapezoidal integration})
 $$
+
 $$
 \boldsymbol{\beta}_k = \tfrac{1}{2}\sum_i\Big(\boldsymbol{\alpha}_{prev} + \tfrac{1}{6}\Delta\boldsymbol{\alpha}_{prev}\Big)\times \Delta\boldsymbol{\alpha}_i
 $$
@@ -355,6 +362,7 @@ $$
 - Damping coefficient $\zeta=\sqrt{2}/2$ → Butterworth response (maximally flat passband).
 
 Discretized using **bilinear transform** $s\to\omega_c\tan(\pi/(f_s/f_c))\cdot\frac{z-1}{z+1}$ into a biquad:
+
 $$
 y_k = b_0 x_k + b_1 x_{k-1} + b_2 x_{k-2} - a_1 y_{k-1} - a_2 y_{k-2}
 $$
@@ -471,9 +479,11 @@ Direct Form I (rather than Form II as in LPF) is used because history must be pr
 4. Smooth using AlphaFilter to avoid jitter → set into notch realtime.
 
 #### Peak Picking Formula
+
 $$
 f_{peak,i} = \arg\max_{f\in[f_{min},f_{max}]\setminus\{\text{near previous peaks}\}} |X(f)|
 $$
+
 where $X(f)$ = magnitude spectrum, $i=1,2,3$.
 
 Code: `src/modules/gyro_fft/GyroFFT.cpp` (see separately for deeper investigation).
@@ -487,6 +497,7 @@ Code: `src/modules/gyro_fft/GyroFFT.cpp` (see separately for deeper investigatio
 $$
 \dot{\boldsymbol{\omega}}_k^{raw} = \frac{\boldsymbol{\omega}_k - \boldsymbol{\omega}_{k-1}}{\Delta t}
 $$
+
 $$
 \dot{\boldsymbol{\omega}}_k = \dot{\boldsymbol{\omega}}_{k-1} + \alpha(\dot{\boldsymbol{\omega}}_k^{raw}-\dot{\boldsymbol{\omega}}_{k-1}),\quad \alpha=\frac{\Delta t}{\tau+\Delta t}
 $$
@@ -525,6 +536,7 @@ Cross-reference: `_filter_state + _alpha*(sample - _filter_state)` is exactly $y
 ### 1.5.6. Multi-IMU Voting
 
 When the airframe has 2–3 IMUs, each IMU runs its own pipeline from §1.4–§1.5 independently. `data_validator/DataValidatorGroup` computes an error metric for each sensor:
+
 $$
 e_i = \alpha_e\,e_i^{(prev)} + (1-\alpha_e)\,(\boldsymbol{y}_i - \mathrm{median}_j\boldsymbol{y}_j)^2
 $$

@@ -198,7 +198,9 @@ struct imuSample {
 
 IMU hardware does not output instantaneous rad/s and m/s². It outputs **pre-integrated** increments over a sampling window — the integration is done inside the IMU firmware or the driver:
 
-$$\Delta\boldsymbol{\theta} = \int_{t_0}^{t_1}\boldsymbol{\omega}\,dt \quad\text{[rad]}, \qquad \Delta\mathbf{v} = \int_{t_0}^{t_1}\mathbf{a}\,dt \quad\text{[m/s]}$$
+$$
+\Delta\boldsymbol{\theta} = \int_{t_0}^{t_1}\boldsymbol{\omega}\,dt \quad\text{[rad]}, \qquad \Delta\mathbf{v} = \int_{t_0}^{t_1}\mathbf{a}\,dt \quad\text{[m/s]}
+$$
 
 `delta_ang` is a rotation vector (rad), not an angular velocity. `delta_vel` is a velocity increment (m/s), not an acceleration.
 
@@ -347,13 +349,15 @@ _output_predictor.correctOutputStates(...);       // bridge delayed → now
 
 The KF's closure guarantee (Gaussian → Gaussian through the filter) requires **Property 1: linear transform of a Gaussian is Gaussian**. Real drone dynamics break this:
 
-$$\mathbf{q}_{k+1} = \mathbf{q}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega})\,, \qquad \mathbf{v}_{k+1} = \mathbf{v}_k + \mathbf{R}(\mathbf{q}_k)\,\mathbf{a}\,\Delta t + \mathbf{g}\,\Delta t$$
+$$
+\mathbf{q}_{k+1} = \mathbf{q}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega})\,, \qquad \mathbf{v}_{k+1} = \mathbf{v}_k + \mathbf{R}(\mathbf{q}_k)\,\mathbf{a}\,\Delta t + \mathbf{g}\,\Delta t
+$$
 
 The rotation matrix $\mathbf{R}(\mathbf{q})$ is quadratic in the quaternion components — after passing a Gaussian $\mathbf{q}$ through $\mathbf{R}(\cdot)$, the result is non-Gaussian. The EKF solution is a first-order Taylor expansion at each step.
 
 ### Problem 2 — SO(3) manifold
 
-Attitude lives on the **Special Orthogonal group** SO(3), not $\mathbb{R}^n$. A unit quaternion $\mathbf{q} = (q_w,q_x,q_y,q_z)$ with $\|\mathbf{q}\|=1$ has:
+Attitude lives on the **Special Orthogonal group** SO(3), not $\mathbb{R}^n$. A unit quaternion $\mathbf{q} = (q_w,q_x,q_y,q_z)$ with $\lVert\mathbf{q}\rVert=1$ has:
 - 4 stored numbers, but only 3 degrees of freedom
 - Composition by multiplication $\mathbf{q}_1\otimes\mathbf{q}_2$, not addition
 
@@ -363,7 +367,9 @@ Naively adding a Gaussian perturbation $\mathbf{q}+\delta\mathbf{q}$ violates th
 
 Split the state:
 
-$$\mathbf{x}_\text{true} = \mathbf{x}_\text{nom} \boxplus \delta\mathbf{x}$$
+$$
+\mathbf{x}_\text{true} = \mathbf{x}_\text{nom} \boxplus \delta\mathbf{x}
+$$
 
 | Component | Space | Update rule | Role |
 |---|---|---|---|
@@ -372,7 +378,9 @@ $$\mathbf{x}_\text{true} = \mathbf{x}_\text{nom} \boxplus \delta\mathbf{x}$$
 
 For attitude specifically:
 
-$$\mathbf{q}_\text{true} = \mathbf{q}_\text{nom} \otimes \delta\mathbf{q}(\delta\boldsymbol{\theta})\,, \qquad \delta\mathbf{q}(\delta\boldsymbol{\theta}) \approx \begin{bmatrix}1\\\delta\boldsymbol{\theta}/2\end{bmatrix}$$
+$$
+\mathbf{q}_\text{true} = \mathbf{q}_\text{nom} \otimes \delta\mathbf{q}(\delta\boldsymbol{\theta})\,, \qquad \delta\mathbf{q}(\delta\boldsymbol{\theta}) \approx \begin{bmatrix}1\\\delta\boldsymbol{\theta}/2\end{bmatrix}
+$$
 
 $\delta\boldsymbol{\theta} \in \mathbb{R}^3$ is a rotation vector — always small by design (reset to zero after every update) — so the linearization of the error dynamics is always accurate regardless of the nominal attitude magnitude.
 
@@ -387,11 +395,9 @@ $\delta\boldsymbol{\theta} \in \mathbb{R}^3$ is a rotation vector — always sma
 ## 2.3 The 24-State Error Vector
 
 The error state $\delta\mathbf{x}\in\mathbb{R}^{24}$ is the vector whose covariance matrix $\mathbf{P}$ (24×24) the filter maintains. The nominal state $\mathbf{x}_\text{nom}$ is a parallel `StateSample` struct in physical units.
-
 $$\delta\mathbf{x} = \begin{bmatrix}
 \delta\boldsymbol{\theta} \\ \delta\mathbf{v} \\ \delta\mathbf{p} \\ \delta\mathbf{b}_g \\ \delta\mathbf{b}_a \\ \delta\mathbf{m}_I \\ \delta\mathbf{m}_B \\ \delta\mathbf{w} \\ \delta h
 \end{bmatrix} \in\mathbb{R}^{24}$$
-
 | Component | Indices | DoF | Physical meaning | Why included |
 |---|---|---|---|---|
 | $\delta\boldsymbol{\theta}$ | 0–2 | 3 | Attitude error (rotation vector, body frame) | Minimum for dead-reckoning |
@@ -445,7 +451,9 @@ The nominal state is propagated by the full nonlinear kinematics — no lineariz
 
 The corrected IMU measurements (after bias removal):
 
-$$\boldsymbol{\omega}_c = \tilde{\boldsymbol{\omega}} - \hat{\mathbf{b}}_g - \mathbf{R}^\top\boldsymbol{\omega}_e\,, \qquad \mathbf{a}_c = \tilde{\mathbf{a}} - \hat{\mathbf{b}}_a$$
+$$
+\boldsymbol{\omega}_c = \tilde{\boldsymbol{\omega}} - \hat{\mathbf{b}}_g - \mathbf{R}^\top\boldsymbol{\omega}_e\,, \qquad \mathbf{a}_c = \tilde{\mathbf{a}} - \hat{\mathbf{b}}_a
+$$
 
 where $\boldsymbol{\omega}_e$ is the Earth rotation rate in NED frame (computed and cached when latitude changes by > 1°).
 
@@ -453,13 +461,15 @@ where $\boldsymbol{\omega}_e$ is the Earth rotation rate in NED frame (computed 
 
 ### Eq. F1 — Attitude Kinematics
 
-$$\boxed{\hat{\mathbf{q}}_{k+1} = \hat{\mathbf{q}}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega}_c\,\Delta t)}$$
+$$
+\boxed{\hat{\mathbf{q}}_{k+1} = \hat{\mathbf{q}}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega}_c\,\Delta t)}
+$$
 
-where $\Delta\mathbf{q}(\boldsymbol{\phi}) = \begin{bmatrix}\cos(\|\boldsymbol{\phi}\|/2)\\\sin(\|\boldsymbol{\phi}\|/2)\,\hat{\boldsymbol{\phi}}\end{bmatrix}$; for small $\|\boldsymbol{\phi}\|$: $\Delta\mathbf{q}\approx\begin{bmatrix}1\\\boldsymbol{\phi}/2\end{bmatrix}$.
+where $\Delta\mathbf{q}(\boldsymbol{\phi}) = \begin{bmatrix}\cos(\lVert\boldsymbol{\phi}\rVert/2)\\\sin(\lVert\boldsymbol{\phi}\rVert/2)\,\hat{\boldsymbol{\phi}}\end{bmatrix}$; for small $\lVert\boldsymbol{\phi}\rVert$: $\Delta\mathbf{q}\approx\begin{bmatrix}1\\\boldsymbol{\phi}/2\end{bmatrix}$.
 
 | Symbol | Meaning |
 |---|---|
-| $\hat{\mathbf{q}}_k\in\mathbb{H}_1$ | Nominal quaternion at step $k$, $\|\mathbf{q}\|=1$ |
+| $\hat{\mathbf{q}}_k\in\mathbb{H}_1$ | Nominal quaternion at step $k$, $\lVert\mathbf{q}\rVert=1$ |
 | $\otimes$ | Quaternion multiplication (Hamilton product) |
 | $\boldsymbol{\omega}_c$ | Angular rate with gyro bias and Earth rate removed |
 | $\Delta t$ | `imu_delayed.delta_ang_dt` |
@@ -485,16 +495,16 @@ _R_to_earth = Dcmf(_state.quat_nominal);   // update DCM immediately
 
 ### Eq. F2 — Velocity Kinematics
 
-$$\boxed{\hat{\mathbf{v}}_{k+1} = \hat{\mathbf{v}}_k + \mathbf{R}(\hat{\mathbf{q}}_k)\,\mathbf{a}_c\,\Delta t + \mathbf{g}\,\Delta t}$$
+$$
+\boxed{\hat{\mathbf{v}}_{k+1} = \hat{\mathbf{v}}_k + \mathbf{R}(\hat{\mathbf{q}}_k)\,\mathbf{a}_c\,\Delta t + \mathbf{g}\,\Delta t}
+$$
 
 The rotation matrix $\mathbf{R}(\mathbf{q})$ in terms of quaternion components $[q_w,q_x,q_y,q_z]$:
-
 $$\mathbf{R}(\mathbf{q}) = \begin{bmatrix}
 1-2(q_y^2+q_z^2) & 2(q_xq_y-q_wq_z) & 2(q_xq_z+q_wq_y) \\
 2(q_xq_y+q_wq_z) & 1-2(q_x^2+q_z^2) & 2(q_yq_z-q_wq_x) \\
 2(q_xq_z-q_wq_y) & 2(q_yq_z+q_wq_x) & 1-2(q_x^2+q_y^2)
 \end{bmatrix}$$
-
 This is the primary source of nonlinearity — $\mathbf{R}$ is quadratic in the quaternion components.
 
 | Symbol | Meaning |
@@ -530,7 +540,9 @@ _state.vel += (gravity_acceleration + coriolis_acceleration + transport_rate) * 
 
 ### Eq. F3 — Position Kinematics
 
-$$\boxed{\hat{\mathbf{p}}_{k+1} = \hat{\mathbf{p}}_k + \tfrac{1}{2}(\hat{\mathbf{v}}_k + \hat{\mathbf{v}}_{k+1})\,\Delta t}$$
+$$
+\boxed{\hat{\mathbf{p}}_{k+1} = \hat{\mathbf{p}}_k + \tfrac{1}{2}(\hat{\mathbf{v}}_k + \hat{\mathbf{v}}_{k+1})\,\Delta t}
+$$
 
 Trapezoidal integration — more accurate than Euler for velocity integration over one IMU step.
 
@@ -554,7 +566,9 @@ _state.pos(2) = -_gpos.altitude();   // Down = negative altitude
 
 All biases and auxiliary states are **random walks** — no deterministic evolution:
 
-$$\hat{\mathbf{b}}_{g,k+1} = \hat{\mathbf{b}}_{g,k}\,, \quad \hat{\mathbf{b}}_{a,k+1} = \hat{\mathbf{b}}_{a,k}\,, \quad \hat{\mathbf{m}}_{I,k+1} = \hat{\mathbf{m}}_{I,k}\,, \quad \ldots$$
+$$
+\hat{\mathbf{b}}_{g,k+1} = \hat{\mathbf{b}}_{g,k}\,, \quad \hat{\mathbf{b}}_{a,k+1} = \hat{\mathbf{b}}_{a,k}\,, \quad \hat{\mathbf{m}}_{I,k+1} = \hat{\mathbf{m}}_{I,k}\,, \quad \ldots
+$$
 
 Their uncertainty growth is captured entirely by the process noise $\mathbf{Q}$ added in the covariance step. `predictState()` does not touch these fields.
 
@@ -564,11 +578,15 @@ Their uncertainty growth is captured entirely by the process noise $\mathbf{Q}$ 
 
 The linearized error dynamics around $\delta\mathbf{x}=0$:
 
-$$\delta\mathbf{x}_{k+1} \approx \mathbf{F}_k\,\delta\mathbf{x}_k + \mathbf{G}_k\,\mathbf{n}_k$$
+$$
+\delta\mathbf{x}_{k+1} \approx \mathbf{F}_k\,\delta\mathbf{x}_k + \mathbf{G}_k\,\mathbf{n}_k
+$$
 
 By Property 1 + Property 2 (linear transform + sum of independent Gaussians):
 
-$$\boxed{\mathbf{P}_{k+1} = \mathbf{F}_k\,\mathbf{P}_k\,\mathbf{F}_k^\top + \mathbf{Q}}$$
+$$
+\boxed{\mathbf{P}_{k+1} = \mathbf{F}_k\,\mathbf{P}_k\,\mathbf{F}_k^\top + \mathbf{Q}}
+$$
 
 | Symbol | Size | Meaning |
 |---|---|---|
@@ -584,7 +602,9 @@ $\mathbf{F}_k$ is sparse. The non-zero off-diagonal blocks derive from the kinem
 
 From error quaternion propagation ($\delta\mathbf{q}$ conjugated by the nominal rotation $\Delta\mathbf{q}$):
 
-$$\boxed{\mathbf{F}_{\theta\theta} = \mathbf{I} - [\Delta\boldsymbol{\phi}]_\times\,, \qquad \Delta\boldsymbol{\phi} = \boldsymbol{\omega}_c\,\Delta t}$$
+$$
+\boxed{\mathbf{F}_{\theta\theta} = \mathbf{I} - [\Delta\boldsymbol{\phi}]_\times\,, \qquad \Delta\boldsymbol{\phi} = \boldsymbol{\omega}_c\,\Delta t}
+$$
 
 | Symbol | Meaning |
 |---|---|
@@ -595,7 +615,9 @@ $$\boxed{\mathbf{F}_{\theta\theta} = \mathbf{I} - [\Delta\boldsymbol{\phi}]_\tim
 
 #### $\mathbf{F}_{\theta b_g}$ — gyro bias drives attitude drift
 
-$$\boxed{\mathbf{F}_{\theta b_g} = -\Delta t\,\mathbf{I}_{3\times 3}}$$
+$$
+\boxed{\mathbf{F}_{\theta b_g} = -\Delta t\,\mathbf{I}_{3\times 3}}
+$$
 
 **Physical meaning**: A gyro bias error of 1 rad/s accumulates 1·Δt rad of attitude error per step. This is the dominant long-term drift source.
 
@@ -603,7 +625,9 @@ $$\boxed{\mathbf{F}_{\theta b_g} = -\Delta t\,\mathbf{I}_{3\times 3}}$$
 
 From the rotation-matrix perturbation $\mathbf{R}(\mathbf{q}_\text{true})\approx\mathbf{R}_\text{nom}(\mathbf{I}+[\delta\boldsymbol{\theta}]_\times)$ and the identity $[\mathbf{u}]_\times\mathbf{v}=-[\mathbf{v}]_\times\mathbf{u}$:
 
-$$\boxed{\mathbf{F}_{v\theta} = -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\Delta t\,, \qquad \mathbf{a}_b = \tilde{\mathbf{a}} - \hat{\mathbf{b}}_a}$$
+$$
+\boxed{\mathbf{F}_{v\theta} = -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\Delta t\,, \qquad \mathbf{a}_b = \tilde{\mathbf{a}} - \hat{\mathbf{b}}_a}
+$$
 
 | Symbol | Meaning |
 |---|---|
@@ -614,18 +638,21 @@ $$\boxed{\mathbf{F}_{v\theta} = -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\
 
 #### $\mathbf{F}_{vb_a}$ — accel bias drives velocity drift
 
-$$\boxed{\mathbf{F}_{vb_a} = -\mathbf{R}_\text{nom}\,\Delta t}$$
+$$
+\boxed{\mathbf{F}_{vb_a} = -\mathbf{R}_\text{nom}\,\Delta t}
+$$
 
 **Physical meaning**: An accelerometer bias of $b_a$ m/s² causes velocity to drift at $\mathbf{R}_\text{nom}\,b_a$ m/s (after rotation to NED). Without estimating $b_a$, position error grows as $\frac{1}{2}b_a t^2$ — at 0.05 m/s² bias, that is 2.5 m in 10 seconds.
 
 #### $\mathbf{F}_{pv}$ — velocity error drives position drift
 
-$$\boxed{\mathbf{F}_{pv} = \Delta t\,\mathbf{I}_{3\times 3}}$$
+$$
+\boxed{\mathbf{F}_{pv} = \Delta t\,\mathbf{I}_{3\times 3}}
+$$
 
 #### All other blocks
 
 All diagonal blocks: $\mathbf{I}$ (state carries forward). All remaining off-diagonal blocks: $\mathbf{0}$ (no direct coupling). The full $24\times 24$ structure:
-
 $$\mathbf{F}_k = \begin{bmatrix}
 (\mathbf{I}-[\Delta\boldsymbol{\phi}]_\times) & 0 & 0 & -\Delta t\mathbf{I} & 0 & 0 & 0 & 0 & 0 \\
 -\mathbf{R}[\mathbf{a}_b]_\times\Delta t & \mathbf{I} & 0 & 0 & -\mathbf{R}\Delta t & 0 & 0 & 0 & 0 \\
@@ -637,7 +664,6 @@ $$\mathbf{F}_k = \begin{bmatrix}
 0 & 0 & 0 & 0 & 0 & 0 & 0 & \mathbf{I} & 0 \\
 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
 \end{bmatrix}$$
-
 Rows/columns: $[\delta\boldsymbol{\theta}\;|\;\delta\mathbf{v}\;|\;\delta\mathbf{p}\;|\;\delta\mathbf{b}_g\;|\;\delta\mathbf{b}_a\;|\;\delta\mathbf{m}_I\;|\;\delta\mathbf{m}_B\;|\;\delta\mathbf{w}\;|\;\delta h]$, $\mathbf{R}\equiv\mathbf{R}_\text{nom}$.
 
 ### How PX4 computes $\mathbf{F}\mathbf{P}\mathbf{F}^\top + \mathbf{Q}$
@@ -711,7 +737,9 @@ PX4 fuses **one scalar at a time** (sequential scalar fusion). For a GPS with 3 
 
 Predicted measurement: $\hat{\mathbf{z}} = \hat{\mathbf{p}}_\text{nom}$ (position directly from nominal state).
 
-$$\mathbf{H}_\text{GPS\text{-}pos} = \begin{bmatrix}\mathbf{0}_{3\times 6} & \mathbf{I}_3 & \mathbf{0}_{3\times 15}\end{bmatrix} \in \mathbb{R}^{3\times 24}$$
+$$
+\mathbf{H}_\text{GPS\text{-}pos} = \begin{bmatrix}\mathbf{0}_{3\times 6} & \mathbf{I}_3 & \mathbf{0}_{3\times 15}\end{bmatrix} \in \mathbb{R}^{3\times 24}
+$$
 
 Columns 6–8 (position error $\delta\mathbf{p}$) are identity; all others zero.
 
@@ -730,7 +758,9 @@ Innovation: $\boldsymbol{\nu} = \mathbf{z}_\text{GPS} - \hat{\mathbf{p}}_\text{n
 
 Predicted measurement: $\hat{\mathbf{z}} = \hat{\mathbf{v}}_\text{nom}$ (velocity directly).
 
-$$\mathbf{H}_\text{GPS\text{-}vel} = \begin{bmatrix}\mathbf{0}_{3\times 3} & \mathbf{I}_3 & \mathbf{0}_{3\times 18}\end{bmatrix} \in \mathbb{R}^{3\times 24}$$
+$$
+\mathbf{H}_\text{GPS\text{-}vel} = \begin{bmatrix}\mathbf{0}_{3\times 3} & \mathbf{I}_3 & \mathbf{0}_{3\times 18}\end{bmatrix} \in \mathbb{R}^{3\times 24}
+$$
 
 Columns 3–5 (velocity error $\delta\mathbf{v}$) are identity.
 
@@ -738,7 +768,9 @@ Columns 3–5 (velocity error $\delta\mathbf{v}$) are identity.
 
 Predicted measurement: $\hat{z} = \hat{p}_D$ (Down component of position, scalar).
 
-$$\mathbf{H}_\text{baro} = \begin{bmatrix}0,\ldots,0,\underbrace{1}_{\text{index 8}},0,\ldots,0\end{bmatrix} \in \mathbb{R}^{1\times 24}$$
+$$
+\mathbf{H}_\text{baro} = \begin{bmatrix}0,\ldots,0,\underbrace{1}_{\text{index 8}},0,\ldots,0\end{bmatrix} \in \mathbb{R}^{1\times 24}
+$$
 
 > **File**: [src/modules/ekf2/EKF/aid_sources/barometer/baro_height_control.cpp](../../../src/modules/ekf2/EKF/aid_sources/barometer/baro_height_control.cpp)
 
@@ -746,9 +778,13 @@ $$\mathbf{H}_\text{baro} = \begin{bmatrix}0,\ldots,0,\underbrace{1}_{\text{index
 
 Predicted measurement: $\hat{\mathbf{z}} = \mathbf{R}(\hat{\mathbf{q}})^\top\hat{\mathbf{m}}_I + \hat{\mathbf{m}}_B$ (field in body frame). The Jacobian couples three error-state groups:
 
-$$\mathbf{H}_\text{mag}\big|_{\delta\boldsymbol{\theta}} = [\mathbf{R}^\top\mathbf{m}_I]_\times \quad(3\times 3,\;\text{cols 0–2})$$
+$$
+\mathbf{H}_\text{mag}\big|_{\delta\boldsymbol{\theta}} = [\mathbf{R}^\top\mathbf{m}_I]_\times \quad(3\times 3,\;\text{cols 0–2})
+$$
 
-$$\mathbf{H}_\text{mag}\big|_{\delta\mathbf{m}_I} = \mathbf{R}^\top \quad(\text{cols 15–17})\,, \qquad \mathbf{H}_\text{mag}\big|_{\delta\mathbf{m}_B} = \mathbf{I} \quad(\text{cols 18–20})$$
+$$
+\mathbf{H}_\text{mag}\big|_{\delta\mathbf{m}_I} = \mathbf{R}^\top \quad(\text{cols 15–17})\,, \qquad \mathbf{H}_\text{mag}\big|_{\delta\mathbf{m}_B} = \mathbf{I} \quad(\text{cols 18–20})
+$$
 
 > **File**: [src/modules/ekf2/EKF/aid_sources/magnetometer/mag_control.cpp](../../../src/modules/ekf2/EKF/aid_sources/magnetometer/mag_control.cpp) — calls generated Jacobian:
 
@@ -766,21 +802,29 @@ When measurement $\mathbf{z}_k$ arrives:
 
 **Innovation:**
 
-$$\boxed{\boldsymbol{\nu}_k = \mathbf{z}_k - h(\mathbf{x}_\text{nom,k})}$$
+$$
+\boxed{\boldsymbol{\nu}_k = \mathbf{z}_k - h(\mathbf{x}_\text{nom,k})}
+$$
 
 **Innovation covariance** (Property 4 — joint Gaussian):
 
-$$\boxed{\mathbf{S}_k = \mathbf{H}_k\,\mathbf{P}_k\,\mathbf{H}_k^\top + \mathbf{R}}$$
+$$
+\boxed{\mathbf{S}_k = \mathbf{H}_k\,\mathbf{P}_k\,\mathbf{H}_k^\top + \mathbf{R}}
+$$
 
 $\mathbf{H}\mathbf{P}\mathbf{H}^\top$: state uncertainty projected to sensor space. $\mathbf{R}$: sensor noise. For scalar fusion, $S$ is a single float — no matrix inversion, just division.
 
 **Kalman Gain** (Property 5 — Woodbury identity):
 
-$$\boxed{\mathbf{K}_k = \mathbf{P}_k\,\mathbf{H}_k^\top\,S_k^{-1}} \quad (24\times 1\text{ for scalar fusion})$$
+$$
+\boxed{\mathbf{K}_k = \mathbf{P}_k\,\mathbf{H}_k^\top\,S_k^{-1}} \quad (24\times 1\text{ for scalar fusion})
+$$
 
 **Joseph-stabilized covariance update:**
 
-$$\boxed{\mathbf{P}_{k|k} = (\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)\,\mathbf{P}_{k|k-1}\,(\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)^\top + \mathbf{K}_k\,R\,\mathbf{K}_k^\top}$$
+$$
+\boxed{\mathbf{P}_{k|k} = (\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)\,\mathbf{P}_{k|k-1}\,(\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)^\top + \mathbf{K}_k\,R\,\mathbf{K}_k^\top}
+$$
 
 The simple form $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}$ is theoretically correct only when $\mathbf{K}$ is optimal. When some Kalman gains are zeroed (e.g., for unobservable states via `clearInhibitedStateKalmanGains`), the simple form can produce a non-symmetric or indefinite $\mathbf{P}$. The Joseph form guarantees positive semi-definiteness regardless.
 
@@ -833,9 +877,13 @@ bool Ekf::measurementUpdate(VectorState &K, const VectorState &H, const float R,
 
 After computing $\delta\hat{\mathbf{x}} = \mathbf{K}\cdot\boldsymbol{\nu}$, the correction is injected into the nominal state via $\mathbf{x}_\text{nom} \leftarrow \mathbf{x}_\text{nom} \boxplus \delta\hat{\mathbf{x}}$:
 
-$$\hat{\mathbf{q}}_{k|k} = \delta\mathbf{q}(\delta\hat{\boldsymbol{\theta}}) \otimes \hat{\mathbf{q}}_{k|k-1} \tag{multiplicative — stays on sphere}$$
+$$
+\hat{\mathbf{q}}_{k|k} = \delta\mathbf{q}(\delta\hat{\boldsymbol{\theta}}) \otimes \hat{\mathbf{q}}_{k|k-1} \tag{multiplicative}
+$$
 
-$$\hat{\mathbf{v}}_{k|k} = \hat{\mathbf{v}}_{k|k-1} - K_v \cdot \nu\,, \quad \hat{\mathbf{p}}_{k|k} = \hat{\mathbf{p}}_{k|k-1} - K_p \cdot \nu\,, \quad \ldots \tag{additive}$$
+$$
+\hat{\mathbf{v}}_{k|k} = \hat{\mathbf{v}}_{k|k-1} - K_v \cdot \nu\,, \quad \hat{\mathbf{p}}_{k|k} = \hat{\mathbf{p}}_{k|k-1} - K_p \cdot \nu\,, \quad \ldots \tag{additive}
+$$
 
 | Rule | Applied to | Reason |
 |---|---|---|
@@ -947,7 +995,7 @@ The developer TODO comment in `output_predictor.cpp:281` — *"there is no guara
 
 ## 2.10 Why Linearization Still Works
 
-**What the approximation discards**: The true covariance propagation is $\int \mathbf{f}(\mathbf{x})\mathbf{f}(\mathbf{x})^\top p(\mathbf{x})d\mathbf{x}$ — no closed form for nonlinear $\mathbf{f}$. The Taylor approximation gives $\mathbf{F}\mathbf{P}\mathbf{F}^\top$, discarding terms $O(\|\mathbf{P}\|^2)$.
+**What the approximation discards**: The true covariance propagation is $\int \mathbf{f}(\mathbf{x})\mathbf{f}(\mathbf{x})^\top p(\mathbf{x})d\mathbf{x}$ — no closed form for nonlinear $\mathbf{f}$. The Taylor approximation gives $\mathbf{F}\mathbf{P}\mathbf{F}^\top$, discarding terms $O(\lVert\mathbf{P}\rVert^2)$.
 
 **Three failure modes**: (1) Overconfidence — P underestimates true uncertainty. (2) Inconsistency — reported P < actual MSE. (3) Divergence — when P is large (poor initial conditions or large sudden maneuver).
 
@@ -955,7 +1003,7 @@ The developer TODO comment in `output_predictor.cpp:281` — *"there is no guara
 
 | Factor | Value | Effect |
 |---|---|---|
-| IMU rate | 200–1000 Hz | $\Delta t \leq 5$ ms → $\|\Delta\boldsymbol{\phi}\| \leq 0.05$ rad/step (mildly nonlinear) |
+| IMU rate | 200–1000 Hz | $\Delta t \leq 5$ ms → $\lVert\Delta\boldsymbol{\phi}\rVert \leq 0.05$ rad/step (mildly nonlinear) |
 | Post-convergence P | Small | Second-order terms are $O(\mathbf{P}^2) \ll O(\mathbf{P})$ |
 | ESKF design | $\delta\boldsymbol{\theta}$ always reset | Linearization around $\delta\mathbf{x}=0$ is always accurate, even at large nominal attitude |
 

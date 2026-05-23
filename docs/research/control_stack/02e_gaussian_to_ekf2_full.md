@@ -39,11 +39,15 @@ Carl Friedrich Gauss (1809) proposed:
 
 > The best estimate $\hat{\mu}$ is the one that minimizes the sum of squared errors.
 
-$$\hat{\mu} = \arg\min_{\mu} \sum_{i=1}^{n} (z_i - \mu)^2$$
+$$
+\hat{\mu} = \arg\min_{\mu} \sum_{i=1}^{n} (z_i - \mu)^2
+$$
 
 Taking the derivative and setting to zero:
 
-$$\frac{d}{d\mu} \sum_{i=1}^n (z_i - \mu)^2 = -2\sum_{i=1}^n (z_i - \mu) = 0 \quad\Rightarrow\quad \hat{\mu} = \bar{z}$$
+$$
+\frac{d}{d\mu} \sum_{i=1}^n (z_i - \mu)^2 = -2\sum_{i=1}^n (z_i - \mu) = 0 \quad\Rightarrow\quad \hat{\mu} = \bar{z}
+$$
 
 So **the mean minimizes least squares**. But Gauss then asked the deeper question:
 
@@ -61,11 +65,15 @@ Let each measurement be $z_i = \mu + e_i$, where $e_i$ has unknown pdf $p(e)$.
 
 The **likelihood** of observing the full data set $\{z_1, \ldots, z_n\}$:
 
-$$L(\mu) = \prod_{i=1}^n p(z_i - \mu)$$
+$$
+L(\mu) = \prod_{i=1}^n p(z_i - \mu)
+$$
 
 Maximize the log-likelihood:
 
-$$\frac{d}{d\mu}\sum_{i=1}^n \ln p(z_i - \mu) = 0 \quad\Rightarrow\quad \sum_{i=1}^n \frac{p'(z_i-\mu)}{p(z_i-\mu)} = 0 \tag{I}$$
+$$
+\frac{d}{d\mu}\sum_{i=1}^n \ln p(z_i - \mu) = 0 \quad\Rightarrow\quad \sum_{i=1}^n \frac{p'(z_i-\mu)}{p(z_i-\mu)} = 0 \tag{I}
+$$
 
 ---
 
@@ -75,13 +83,17 @@ We demand that the MLE gives $\hat{\mu} = \bar{z}$ for **any** data set.
 
 At $\mu = \bar{z}$, the residuals $e_i = z_i - \bar{z}$ always satisfy $\sum e_i = 0$. Equation (I) becomes:
 
-$$\sum_{i=1}^n \frac{p'(e_i)}{p(e_i)} = 0 \tag{II}$$
+$$
+\sum_{i=1}^n \frac{p'(e_i)}{p(e_i)} = 0 \tag{II}
+$$
 
 **What $p$ satisfies (II) for any residuals summing to zero?**
 
 If $\dfrac{p'(e)}{p(e)} = c \cdot e$ for some constant $c$, then:
 
-$$\sum_{i=1}^n c\,e_i = c\underbrace{\sum e_i}_{=\,0} = 0 \checkmark$$
+$$
+\sum_{i=1}^n c\,e_i = c\underbrace{\sum e_i}_{=\,0} = 0 \checkmark
+$$
 
 So the constraint reduces to the ODE: $\dfrac{p'(e)}{p(e)} = c\,e$, with $c < 0$ (so $p(e) \to 0$ as $|e|\to\infty$).
 
@@ -89,11 +101,15 @@ So the constraint reduces to the ODE: $\dfrac{p'(e)}{p(e)} = c\,e$, with $c < 0$
 
 ### 2.3 Solving the Differential Equation
 
-$$\frac{d}{de}\ln p(e) = c\,e \quad\Rightarrow\quad \ln p(e) = \frac{c}{2}e^2 + C_1 \quad\Rightarrow\quad p(e) = A\,e^{\,\frac{c}{2}e^2}$$
+$$
+\frac{d}{de}\ln p(e) = c\,e \quad\Rightarrow\quad \ln p(e) = \frac{c}{2}e^2 + C_1 \quad\Rightarrow\quad p(e) = A\,e^{\,\frac{c}{2}e^2}
+$$
 
 Substitute $c = -\frac{1}{\sigma^2}$ (giving $c$ a physical name):
 
-$$p(e) = A\cdot\exp\!\left(-\frac{e^2}{2\sigma^2}\right) \tag{III}$$
+$$
+p(e) = A\cdot\exp\!\left(-\frac{e^2}{2\sigma^2}\right) \tag{III}
+$$
 
 ---
 
@@ -103,15 +119,21 @@ Every pdf must integrate to 1. We need $\displaystyle\int_{-\infty}^{\infty} \ex
 
 **Poisson's trick:** Let $I = \int_{-\infty}^{\infty} e^{-t^2}dt$. Then:
 
-$$I^2 = \int\!\!\int e^{-(t^2+s^2)}dt\,ds \xrightarrow{\text{polar}} 2\pi\int_0^{\infty} r\,e^{-r^2}dr = \pi \quad\Rightarrow\quad I = \sqrt{\pi}$$
+$$
+I^2 = \int\!\!\int e^{-(t^2+s^2)}dt\,ds \xrightarrow{\text{polar}} 2\pi\int_0^{\infty} r\,e^{-r^2}dr = \pi \quad\Rightarrow\quad I = \sqrt{\pi}
+$$
 
 Substituting $u = e/(\sigma\sqrt{2})$:
 
-$$\int_{-\infty}^{\infty}\exp\!\left(-\frac{e^2}{2\sigma^2}\right)de = \sigma\sqrt{2\pi}$$
+$$
+\int_{-\infty}^{\infty}\exp\!\left(-\frac{e^2}{2\sigma^2}\right)de = \sigma\sqrt{2\pi}
+$$
 
 Therefore $A = \dfrac{1}{\sqrt{2\pi\sigma^2}}$, giving the **Gaussian distribution**:
 
-$$\boxed{p(e) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{e^2}{2\sigma^2}\right)}$$
+$$
+\boxed{p(e) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{e^2}{2\sigma^2}\right)}
+$$
 
 **Derived** — not assumed — from the requirement that the arithmetic mean is the MLE.
 
@@ -138,7 +160,9 @@ Before the properties, we need to be precise about what a **multivariate (vector
 
 The state of a drone in 2D (for example) is:
 
-$$\mathbf{x} = \begin{bmatrix}p_x \\ p_y \\ v_x \\ v_y\end{bmatrix} \in\mathbb{R}^{4\times 1}$$
+$$
+\mathbf{x} = \begin{bmatrix}p_x \\ p_y \\ v_x \\ v_y\end{bmatrix} \in\mathbb{R}^{4\times 1}
+$$
 
 (east position, north position, east velocity, north velocity — 4 numbers in a single column vector)
 
@@ -146,17 +170,17 @@ This vector is uncertain, so it follows a 4-dimensional Gaussian described by:
 
 **Mean vector** $\boldsymbol{\mu}$ — the best guess for each component:
 
-$$\boldsymbol{\mu} = \begin{bmatrix}\mu_{p_x} \\ \mu_{p_y} \\ \mu_{v_x} \\ \mu_{v_y}\end{bmatrix} = \begin{bmatrix}10.0\text{ m} \\ 5.0\text{ m} \\ 2.0\text{ m/s} \\ 0.5\text{ m/s}\end{bmatrix}$$
+$$
+\boldsymbol{\mu} = \begin{bmatrix}\mu_{p_x} \\ \mu_{p_y} \\ \mu_{v_x} \\ \mu_{v_y}\end{bmatrix} = \begin{bmatrix}10.0\text{ m} \\ 5.0\text{ m} \\ 2.0\text{ m/s} \\ 0.5\text{ m/s}\end{bmatrix}
+$$
 
 **Covariance matrix** $\mathbf{P}$ — the $n\times n$ matrix describing the uncertainty:
-
 $$\mathbf{P} = \begin{bmatrix}
 P_{11} & P_{12} & P_{13} & P_{14} \\
 P_{21} & P_{22} & P_{23} & P_{24} \\
 P_{31} & P_{32} & P_{33} & P_{34} \\
 P_{41} & P_{42} & P_{43} & P_{44}
 \end{bmatrix}$$
-
 where:
 - **Diagonal entries** $P_{ii}$ = variance of component $i$ = how uncertain we are about $x_i$ alone
   - $P_{11}$: variance of east position (e.g. $4\text{ m}^2$ → standard deviation 2 m)
@@ -170,7 +194,9 @@ where:
 
 **Concrete example** of what $\mathbf{P}$ looks like when uncertainties are independent (no correlation):
 
-$$\mathbf{P} = \begin{bmatrix}4 & 0 & 0 & 0 \\ 0 & 9 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 0.25\end{bmatrix}$$
+$$
+\mathbf{P} = \begin{bmatrix}4 & 0 & 0 & 0 \\ 0 & 9 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 0.25\end{bmatrix}
+$$
 
 This says: east position uncertain by $\sigma=2$ m, north by $\sigma=3$ m, east vel by $\sigma=1$ m/s, north vel by $\sigma=0.5$ m/s — and none of them are correlated.
 
@@ -209,19 +235,25 @@ This says: east position uncertain by $\sigma=2$ m, north by $\sigma=3$ m, east 
 
 **Setup.** You have one uncertain number $X$. You know it follows a Gaussian:
 
-$$X\sim\mathcal{N}(\mu,\,\sigma^2)$$
+$$
+X\sim\mathcal{N}(\mu,\,\sigma^2)
+$$
 
 meaning: the best guess for $X$ is $\mu$, and the spread is $\sigma^2$ (variance).
 
 You apply a linear function to $X$: multiply by $a$, then add $b$:
 
-$$Y = aX + b$$
+$$
+Y = aX + b
+$$
 
 where $a$ and $b$ are fixed known constants.
 
 **Claim:**
 
-$$Y \sim \mathcal{N}(a\mu + b,\;\; a^2\sigma^2)$$
+$$
+Y \sim \mathcal{N}(a\mu + b,\;\; a^2\sigma^2)
+$$
 
 The new mean is $a\mu + b$, the new variance is $a^2\sigma^2$.
 
@@ -229,7 +261,9 @@ The new mean is $a\mu + b$, the new variance is $a^2\sigma^2$.
 
 We need to find the pdf of $Y$. The key tool is the **change-of-variables formula**: if $Y = g(X)$ and $g$ is monotone, then:
 
-$$p_Y(y) = p_X\!\left(g^{-1}(y)\right)\cdot\left|\frac{d}{dy}g^{-1}(y)\right|$$
+$$
+p_Y(y) = p_X\!\left(g^{-1}(y)\right)\cdot\left|\frac{d}{dy}g^{-1}(y)\right|
+$$
 
 *Reading this formula:* to get the probability density of $Y$ at value $y$, we (1) map $y$ back to the corresponding $x = g^{-1}(y)$, (2) look up $p_X(x)$, and (3) multiply by the stretch factor $|dg^{-1}/dy|$ that accounts for how much the transformation stretches or compresses the axis.
 
@@ -237,29 +271,41 @@ Here $g(x) = ax + b$, so $g^{-1}(y) = \dfrac{y-b}{a}$ and $\dfrac{d}{dy}g^{-1}(y
 
 **Step 1** — Substitute $x = \dfrac{y-b}{a}$ into $p_X$:
 
-$$p_Y(y) = \underbrace{\frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{\left(\dfrac{y-b}{a}-\mu\right)^2}{2\sigma^2}\right)}_{p_X\!\left(\frac{y-b}{a}\right)}\cdot\frac{1}{|a|}$$
+$$
+p_Y(y) = \underbrace{\frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{\left(\dfrac{y-b}{a}-\mu\right)^2}{2\sigma^2}\right)}_{p_X\!\left(\frac{y-b}{a}\right)}\cdot\frac{1}{|a|}
+$$
 
 **Step 2** — Simplify what's inside the exponent. Compute $\dfrac{y-b}{a} - \mu$:
 
-$$\frac{y-b}{a} - \mu = \frac{y-b - a\mu}{a} = \frac{y-(a\mu+b)}{a}$$
+$$
+\frac{y-b}{a} - \mu = \frac{y-b - a\mu}{a} = \frac{y-(a\mu+b)}{a}
+$$
 
 Let $\mu_Y = a\mu + b$ (the new mean). Then:
 
-$$\left(\frac{y-b}{a} - \mu\right)^2 = \left(\frac{y-\mu_Y}{a}\right)^2 = \frac{(y-\mu_Y)^2}{a^2}$$
+$$
+\left(\frac{y-b}{a} - \mu\right)^2 = \left(\frac{y-\mu_Y}{a}\right)^2 = \frac{(y-\mu_Y)^2}{a^2}
+$$
 
 **Step 3** — Substitute back:
 
-$$p_Y(y) = \frac{1}{\sqrt{2\pi\sigma^2}}\cdot\frac{1}{|a|}\cdot\exp\!\left(-\frac{(y-\mu_Y)^2}{2a^2\sigma^2}\right)$$
+$$
+p_Y(y) = \frac{1}{\sqrt{2\pi\sigma^2}}\cdot\frac{1}{|a|}\cdot\exp\!\left(-\frac{(y-\mu_Y)^2}{2a^2\sigma^2}\right)
+$$
 
 **Step 4** — Tidy up the prefactor. Note $\dfrac{1}{\sqrt{2\pi\sigma^2}}\cdot\dfrac{1}{|a|} = \dfrac{1}{\sqrt{2\pi\,a^2\sigma^2}}$:
 
-$$\boxed{p_Y(y) = \frac{1}{\sqrt{2\pi\,(a^2\sigma^2)}}\exp\!\left(-\frac{(y-\mu_Y)^2}{2\,(a^2\sigma^2)}\right)} \quad\Rightarrow\quad Y\sim\mathcal{N}(a\mu+b,\;a^2\sigma^2)\quad\square$$
+$$
+\boxed{p_Y(y) = \frac{1}{\sqrt{2\pi\,(a^2\sigma^2)}}\exp\!\left(-\frac{(y-\mu_Y)^2}{2\,(a^2\sigma^2)}\right)} \quad\Rightarrow\quad Y\sim\mathcal{N}(a\mu+b,\;a^2\sigma^2)\quad\square
+$$
 
 **Concrete example:**
 
 Temperature sensor reads $X\sim\mathcal{N}(25°C,\; 4)$. You convert Celsius to Fahrenheit: $Y = 1.8X + 32$.
 
-$$Y\sim\mathcal{N}(1.8\cdot 25 + 32,\;\; 1.8^2\cdot 4) = \mathcal{N}(77°F,\;\; 12.96)$$
+$$
+Y\sim\mathcal{N}(1.8\cdot 25 + 32,\;\; 1.8^2\cdot 4) = \mathcal{N}(77°F,\;\; 12.96)
+$$
 
 Standard deviation in Celsius: $\sigma_X = 2°C$. In Fahrenheit: $\sigma_Y = 1.8\times 2 = 3.6°F = 1.8\cdot\sigma_X$. Makes sense — the scale stretches by a factor of 1.8.
 
@@ -269,38 +315,46 @@ Standard deviation in Celsius: $\sigma_X = 2°C$. In Fahrenheit: $\sigma_Y = 1.8
 
 **Setup.** Now you have $n$ uncertain numbers packed into a column vector:
 
-$$\mathbf{x} = \begin{bmatrix}x_1 \\ x_2 \\ \vdots \\ x_n\end{bmatrix} \quad (n\times 1 \text{ column vector})$$
+$$
+\mathbf{x} = \begin{bmatrix}x_1 \\ x_2 \\ \vdots \\ x_n\end{bmatrix} \quad (n\times 1 \text{ column vector})
+$$
 
 This vector follows an $n$-dimensional Gaussian:
 
-$$\mathbf{x}\sim\mathcal{N}(\boldsymbol{\mu},\,\mathbf{P})$$
+$$
+\mathbf{x}\sim\mathcal{N}(\boldsymbol{\mu},\,\mathbf{P})
+$$
 
 where:
 - Mean vector $\boldsymbol{\mu} = \begin{bmatrix}\mu_1\\\mu_2\\\vdots\\\mu_n\end{bmatrix}$ — the best guess for each component
 - Covariance matrix $\mathbf{P}$ — an $n\times n$ symmetric matrix:
-
 $$\mathbf{P} = \begin{bmatrix}
 P_{11} & P_{12} & \cdots & P_{1n} \\
 P_{21} & P_{22} & \cdots & P_{2n} \\
 \vdots & & \ddots & \vdots \\
 P_{n1} & P_{n2} & \cdots & P_{nn}
 \end{bmatrix}$$
-
 where $P_{ii} = \text{Var}[x_i]$ (variance of component $i$) and $P_{ij} = \text{Cov}[x_i, x_j]$ for $i\neq j$ (how much $x_i$ and $x_j$ tend to move together).
 
 You apply a **matrix linear transform** $\mathbf{A}$ (an $m\times n$ matrix of constants) to get an $m$-dimensional output:
 
-$$\mathbf{y} = \mathbf{A}\mathbf{x}$$
+$$
+\mathbf{y} = \mathbf{A}\mathbf{x}
+$$
 
 Written out, the matrix multiplication looks like:
 
-$$\begin{bmatrix}y_1\\y_2\\\vdots\\y_m\end{bmatrix} = \begin{bmatrix}A_{11}&A_{12}&\cdots&A_{1n}\\A_{21}&A_{22}&\cdots&A_{2n}\\\vdots&&\ddots&\vdots\\A_{m1}&A_{m2}&\cdots&A_{mn}\end{bmatrix}\begin{bmatrix}x_1\\x_2\\\vdots\\x_n\end{bmatrix}$$
+$$
+\begin{bmatrix}y_1\\y_2\\\vdots\\y_m\end{bmatrix} = \begin{bmatrix}A_{11}&A_{12}&\cdots&A_{1n}\\A_{21}&A_{22}&\cdots&A_{2n}\\\vdots&&\ddots&\vdots\\A_{m1}&A_{m2}&\cdots&A_{mn}\end{bmatrix}\begin{bmatrix}x_1\\x_2\\\vdots\\x_n\end{bmatrix}
+$$
 
 so $y_i = A_{i1}x_1 + A_{i2}x_2 + \cdots + A_{in}x_n$ — each output is a linear combination of the inputs.
 
 **Claim:**
 
-$$\mathbf{y}\sim\mathcal{N}(\mathbf{A}\boldsymbol{\mu},\;\mathbf{A}\mathbf{P}\mathbf{A}^\top)$$
+$$
+\mathbf{y}\sim\mathcal{N}(\mathbf{A}\boldsymbol{\mu},\;\mathbf{A}\mathbf{P}\mathbf{A}^\top)
+$$
 
 where $\mathbf{A}^\top$ is the $n\times m$ **transpose** of $\mathbf{A}$ (rows and columns swapped).
 
@@ -308,11 +362,15 @@ where $\mathbf{A}^\top$ is the $n\times m$ **transpose** of $\mathbf{A}$ (rows a
 
 **Step 1 — Find the mean of $\mathbf{y}$.**
 
-$$\mathbb{E}[\mathbf{y}] = \mathbb{E}[\mathbf{A}\mathbf{x}]$$
+$$
+\mathbb{E}[\mathbf{y}] = \mathbb{E}[\mathbf{A}\mathbf{x}]
+$$
 
 $\mathbf{A}$ is a constant matrix — it doesn't change. So:
 
-$$= \mathbf{A}\,\mathbb{E}[\mathbf{x}] = \mathbf{A}\boldsymbol{\mu}$$
+$$
+= \mathbf{A}\,\mathbb{E}[\mathbf{x}] = \mathbf{A}\boldsymbol{\mu}
+$$
 
 Written out entry by entry: $\mathbb{E}[y_i] = \sum_j A_{ij}\mathbb{E}[x_j] = \sum_j A_{ij}\mu_j$ — the $i$-th entry of $\mathbf{A}\boldsymbol{\mu}$. ✓
 
@@ -320,21 +378,29 @@ Written out entry by entry: $\mathbb{E}[y_i] = \sum_j A_{ij}\mathbb{E}[x_j] = \s
 
 The covariance matrix of $\mathbf{y}$ is defined as:
 
-$$\text{Cov}[\mathbf{y}] = \mathbb{E}\!\left[(\mathbf{y}-\mathbb{E}[\mathbf{y}])(\mathbf{y}-\mathbb{E}[\mathbf{y}])^\top\right]$$
+$$
+\text{Cov}[\mathbf{y}] = \mathbb{E}\!\left[(\mathbf{y}-\mathbb{E}[\mathbf{y}])(\mathbf{y}-\mathbb{E}[\mathbf{y}])^\top\right]
+$$
 
 *Reading this:* for each pair of output components $(y_i, y_j)$, compute the average of $(y_i - \mu_{y_i})(y_j - \mu_{y_j})$. This gives an $m\times m$ matrix.
 
 Now substitute $\mathbf{y} - \mathbb{E}[\mathbf{y}] = \mathbf{A}\mathbf{x} - \mathbf{A}\boldsymbol{\mu} = \mathbf{A}(\mathbf{x}-\boldsymbol{\mu})$:
 
-$$\text{Cov}[\mathbf{y}] = \mathbb{E}\!\left[\mathbf{A}(\mathbf{x}-\boldsymbol{\mu})\cdot\left(\mathbf{A}(\mathbf{x}-\boldsymbol{\mu})\right)^\top\right]$$
+$$
+\text{Cov}[\mathbf{y}] = \mathbb{E}\!\left[\mathbf{A}(\mathbf{x}-\boldsymbol{\mu})\cdot\left(\mathbf{A}(\mathbf{x}-\boldsymbol{\mu})\right)^\top\right]
+$$
 
 Using the transpose rule $(\mathbf{A}\mathbf{v})^\top = \mathbf{v}^\top\mathbf{A}^\top$:
 
-$$= \mathbb{E}\!\left[\mathbf{A}(\mathbf{x}-\boldsymbol{\mu})(\mathbf{x}-\boldsymbol{\mu})^\top\mathbf{A}^\top\right]$$
+$$
+= \mathbb{E}\!\left[\mathbf{A}(\mathbf{x}-\boldsymbol{\mu})(\mathbf{x}-\boldsymbol{\mu})^\top\mathbf{A}^\top\right]
+$$
 
 Since $\mathbf{A}$ and $\mathbf{A}^\top$ are constants (not random), pull them outside the expectation:
 
-$$= \mathbf{A}\underbrace{\mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu})(\mathbf{x}-\boldsymbol{\mu})^\top\right]}_{\text{definition of }\mathbf{P}}\mathbf{A}^\top = \mathbf{A}\mathbf{P}\mathbf{A}^\top$$
+$$
+= \mathbf{A}\underbrace{\mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu})(\mathbf{x}-\boldsymbol{\mu})^\top\right]}_{\text{definition of }\mathbf{P}}\mathbf{A}^\top = \mathbf{A}\mathbf{P}\mathbf{A}^\top
+$$
 
 **Step 3 — Verify the result is Gaussian.**
 
@@ -346,21 +412,29 @@ A multivariate Gaussian is uniquely determined by its mean vector and covariance
 
 Drone state $\mathbf{x} = \begin{bmatrix}p_x \\ p_y\end{bmatrix}$ (east and north position), with:
 
-$$\boldsymbol{\mu} = \begin{bmatrix}10\\ 5\end{bmatrix}\text{ m}, \qquad \mathbf{P} = \begin{bmatrix}4 & 1 \\ 1 & 9\end{bmatrix}\text{ m}^2$$
+$$
+\boldsymbol{\mu} = \begin{bmatrix}10\\ 5\end{bmatrix}\text{ m}, \qquad \mathbf{P} = \begin{bmatrix}4 & 1 \\ 1 & 9\end{bmatrix}\text{ m}^2
+$$
 
 ($P_{11}=4$: east uncertain by $\sigma=2$ m; $P_{22}=9$: north uncertain by $\sigma=3$ m; $P_{12}=1$: slight positive correlation — when drone is east of estimate, it's also slightly north.)
 
 GPS reports only east position: $\mathbf{A} = [1\quad 0]$ (a $1\times 2$ matrix, picks out $p_x$).
 
-$$\mathbf{y} = \mathbf{A}\mathbf{x} = [1\quad 0]\begin{bmatrix}p_x\\p_y\end{bmatrix} = p_x$$
+$$
+\mathbf{y} = \mathbf{A}\mathbf{x} = [1\quad 0]\begin{bmatrix}p_x\\p_y\end{bmatrix} = p_x
+$$
 
 **New mean:**
 
-$$\mathbf{A}\boldsymbol{\mu} = [1\quad 0]\begin{bmatrix}10\\5\end{bmatrix} = 10 \text{ m}$$
+$$
+\mathbf{A}\boldsymbol{\mu} = [1\quad 0]\begin{bmatrix}10\\5\end{bmatrix} = 10 \text{ m}
+$$
 
 **New covariance:**
 
-$$\mathbf{A}\mathbf{P}\mathbf{A}^\top = [1\quad 0]\begin{bmatrix}4&1\\1&9\end{bmatrix}\begin{bmatrix}1\\0\end{bmatrix}$$
+$$
+\mathbf{A}\mathbf{P}\mathbf{A}^\top = [1\quad 0]\begin{bmatrix}4&1\\1&9\end{bmatrix}\begin{bmatrix}1\\0\end{bmatrix}
+$$
 
 First compute $[1\quad 0]\begin{bmatrix}4&1\\1&9\end{bmatrix} = [4\quad 1]$. Then $[4\quad 1]\begin{bmatrix}1\\0\end{bmatrix} = 4$.
 
@@ -372,7 +446,9 @@ So $y = p_x\sim\mathcal{N}(10,\; 4)$. The GPS reading only carries the east vari
 
 In the PREDICT step, the state evolves as $\mathbf{x}_k = \mathbf{F}\mathbf{x}_{k-1}$ (no noise yet). Property 1 with $\mathbf{A}=\mathbf{F}$ gives:
 
-$$\mathbf{x}_k\sim\mathcal{N}\!\left(\mathbf{F}\hat{\mathbf{x}}_{k-1},\;\underbrace{\mathbf{F}\mathbf{P}_{k-1}\mathbf{F}^\top}_{\text{from Property 1}}\right)$$
+$$
+\mathbf{x}_k\sim\mathcal{N}\!\left(\mathbf{F}\hat{\mathbf{x}}_{k-1},\;\underbrace{\mathbf{F}\mathbf{P}_{k-1}\mathbf{F}^\top}_{\text{from Property 1}}\right)
+$$
 
 This is where the $\mathbf{F}\mathbf{P}\mathbf{F}^\top$ term in the KF predict step comes from.
 
@@ -382,7 +458,9 @@ This is where the $\mathbf{F}\mathbf{P}\mathbf{F}^\top$ term in the KF predict s
 
 **Statement:** If $X\sim\mathcal{N}(\mu_1,\sigma_1^2)$ and $Y\sim\mathcal{N}(\mu_2,\sigma_2^2)$ are **independent**, then:
 
-$$Z = X + Y \sim \mathcal{N}(\mu_1+\mu_2,\;\sigma_1^2+\sigma_2^2)$$
+$$
+Z = X + Y \sim \mathcal{N}(\mu_1+\mu_2,\;\sigma_1^2+\sigma_2^2)
+$$
 
 Means add. Variances add (not standard deviations — variances).
 
@@ -396,13 +474,17 @@ Before the proof, build intuition. If you measure altitude with error $e_1\sim\m
 
 Since $X$ and $Y$ are independent Gaussians, the vector $\begin{bmatrix}X\\Y\end{bmatrix}$ is a 2D Gaussian:
 
-$$\begin{bmatrix}X\\Y\end{bmatrix}\sim\mathcal{N}\!\left(\begin{bmatrix}\mu_1\\\mu_2\end{bmatrix},\;\begin{bmatrix}\sigma_1^2 & 0\\0&\sigma_2^2\end{bmatrix}\right)$$
+$$
+\begin{bmatrix}X\\Y\end{bmatrix}\sim\mathcal{N}\!\left(\begin{bmatrix}\mu_1\\\mu_2\end{bmatrix},\;\begin{bmatrix}\sigma_1^2 & 0\\0&\sigma_2^2\end{bmatrix}\right)
+$$
 
 *Why is the covariance matrix diagonal?* Off-diagonal entry $P_{12} = \text{Cov}(X,Y) = 0$ because $X$ and $Y$ are **independent** — knowing $X$ tells you nothing about $Y$. Independent variables always have zero covariance.
 
 **Step 2 — Express $Z = X + Y$ as a linear transform.**
 
-$$Z = X + Y = \underbrace{[1\quad 1]}_{\mathbf{A},\;1\times 2}\underbrace{\begin{bmatrix}X\\Y\end{bmatrix}}_{\mathbf{x},\;2\times 1}$$
+$$
+Z = X + Y = \underbrace{[1\quad 1]}_{\mathbf{A},\;1\times 2}\underbrace{\begin{bmatrix}X\\Y\end{bmatrix}}_{\mathbf{x},\;2\times 1}
+$$
 
 This is exactly the form $\mathbf{y} = \mathbf{A}\mathbf{x}$ from Property 1, with $m=1$, $n=2$, $\mathbf{A} = [1\quad 1]$.
 
@@ -410,11 +492,15 @@ This is exactly the form $\mathbf{y} = \mathbf{A}\mathbf{x}$ from Property 1, wi
 
 New mean (Property 1: $\mathbf{A}\boldsymbol{\mu}$):
 
-$$\mathbb{E}[Z] = [1\quad 1]\begin{bmatrix}\mu_1\\\mu_2\end{bmatrix} = \mu_1 + \mu_2$$
+$$
+\mathbb{E}[Z] = [1\quad 1]\begin{bmatrix}\mu_1\\\mu_2\end{bmatrix} = \mu_1 + \mu_2
+$$
 
 New variance (Property 1: $\mathbf{A}\mathbf{P}\mathbf{A}^\top$):
 
-$$\text{Var}[Z] = [1\quad 1]\begin{bmatrix}\sigma_1^2&0\\0&\sigma_2^2\end{bmatrix}\begin{bmatrix}1\\1\end{bmatrix}$$
+$$
+\text{Var}[Z] = [1\quad 1]\begin{bmatrix}\sigma_1^2&0\\0&\sigma_2^2\end{bmatrix}\begin{bmatrix}1\\1\end{bmatrix}
+$$
 
 First compute $[1\quad 1]\begin{bmatrix}\sigma_1^2&0\\0&\sigma_2^2\end{bmatrix} = [\sigma_1^2\quad\sigma_2^2]$.
 
@@ -424,11 +510,15 @@ Then $[\sigma_1^2\quad\sigma_2^2]\begin{bmatrix}1\\1\end{bmatrix} = \sigma_1^2 +
 
 Since $Z$ is a linear transform of a Gaussian vector, by Property 1, $Z$ is also Gaussian:
 
-$$Z\sim\mathcal{N}(\mu_1+\mu_2,\;\sigma_1^2+\sigma_2^2)\quad\square$$
+$$
+Z\sim\mathcal{N}(\mu_1+\mu_2,\;\sigma_1^2+\sigma_2^2)\quad\square
+$$
 
 **What if X and Y are correlated (not independent)?** Then $\text{Cov}(X,Y) = \rho\sigma_1\sigma_2\neq 0$ and $\mathbf{P} = \begin{bmatrix}\sigma_1^2&\rho\sigma_1\sigma_2\\\rho\sigma_1\sigma_2&\sigma_2^2\end{bmatrix}$. The matrix multiply gives:
 
-$$\text{Var}[Z] = \sigma_1^2 + 2\rho\sigma_1\sigma_2 + \sigma_2^2$$
+$$
+\text{Var}[Z] = \sigma_1^2 + 2\rho\sigma_1\sigma_2 + \sigma_2^2
+$$
 
 The extra term $2\rho\sigma_1\sigma_2$ is the covariance contribution. If $\rho>0$ (positively correlated), total variance is larger; if $\rho<0$ (negatively correlated), total variance is smaller. Independence ($\rho=0$) is the "no interaction" case.
 
@@ -436,7 +526,9 @@ The extra term $2\rho\sigma_1\sigma_2$ is the covariance contribution. If $\rho>
 
 The state model is $\mathbf{x}_k = \mathbf{F}\mathbf{x}_{k-1} + \mathbf{w}_k$ where $\mathbf{w}_k\sim\mathcal{N}(\mathbf{0},\mathbf{Q})$ is process noise, independent of $\mathbf{x}_{k-1}$. So the joint vector $\begin{bmatrix}\mathbf{F}\mathbf{x}_{k-1}\\\mathbf{w}_k\end{bmatrix}$ has block-diagonal covariance, and:
 
-$$\mathbf{x}_k = \underbrace{\mathbf{F}\mathbf{x}_{k-1}}_{\sim\mathcal{N}(\mathbf{F}\hat{\mathbf{x}},\,\mathbf{F}\mathbf{P}\mathbf{F}^\top)} + \underbrace{\mathbf{w}_k}_{\sim\mathcal{N}(\mathbf{0},\,\mathbf{Q})}$$
+$$
+\mathbf{x}_k = \underbrace{\mathbf{F}\mathbf{x}_{k-1}}_{\sim\mathcal{N}(\mathbf{F}\hat{\mathbf{x}},\,\mathbf{F}\mathbf{P}\mathbf{F}^\top)} + \underbrace{\mathbf{w}_k}_{\sim\mathcal{N}(\mathbf{0},\,\mathbf{Q})}
+$$
 
 By Property 2: $\mathbf{x}_k\sim\mathcal{N}(\mathbf{F}\hat{\mathbf{x}},\;\mathbf{F}\mathbf{P}\mathbf{F}^\top + \mathbf{Q})$.
 
@@ -450,67 +542,99 @@ This is the **most important property for the KF update step**. The Bayesian upd
 
 **Statement:** Given two Gaussian pdfs treated as functions of the same variable $x$:
 
-$$p_1(x) = \mathcal{N}(x;\,\mu_1,\sigma_1^2) \quad\text{and}\quad p_2(x) = \mathcal{N}(x;\,\mu_2,\sigma_2^2)$$
+$$
+p_1(x) = \mathcal{N}(x;\,\mu_1,\sigma_1^2) \quad\text{and}\quad p_2(x) = \mathcal{N}(x;\,\mu_2,\sigma_2^2)
+$$
 
 Their product is proportional to another Gaussian:
 
-$$p_1(x)\cdot p_2(x) \propto \mathcal{N}(x;\,\mu_\text{new},\,\sigma_\text{new}^2)$$
+$$
+p_1(x)\cdot p_2(x) \propto \mathcal{N}(x;\,\mu_\text{new},\,\sigma_\text{new}^2)
+$$
 
 where:
 
-$$\sigma_\text{new}^2 = \frac{\sigma_1^2\,\sigma_2^2}{\sigma_1^2+\sigma_2^2} \tag{P3-var}$$
+$$
+\sigma_\text{new}^2 = \frac{\sigma_1^2\,\sigma_2^2}{\sigma_1^2+\sigma_2^2} \tag{P3-var}
+$$
 
-$$\mu_\text{new} = \frac{\mu_1\,\sigma_2^2 + \mu_2\,\sigma_1^2}{\sigma_1^2+\sigma_2^2} \tag{P3-mean}$$
+$$
+\mu_\text{new} = \frac{\mu_1\,\sigma_2^2 + \mu_2\,\sigma_1^2}{\sigma_1^2+\sigma_2^2} \tag{P3-mean}
+$$
 
 **Step-by-step proof:**
 
 Write out the product explicitly, using $\mathcal{N}(x;\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$:
 
-$$p_1(x)\cdot p_2(x) = \frac{1}{\sqrt{2\pi\sigma_1^2}}\cdot\frac{1}{\sqrt{2\pi\sigma_2^2}}\cdot\exp\!\left(-\frac{(x-\mu_1)^2}{2\sigma_1^2} - \frac{(x-\mu_2)^2}{2\sigma_2^2}\right)$$
+$$
+p_1(x)\cdot p_2(x) = \frac{1}{\sqrt{2\pi\sigma_1^2}}\cdot\frac{1}{\sqrt{2\pi\sigma_2^2}}\cdot\exp\!\left(-\frac{(x-\mu_1)^2}{2\sigma_1^2} - \frac{(x-\mu_2)^2}{2\sigma_2^2}\right)
+$$
 
 The prefactor is a constant (doesn't depend on $x$). Focus entirely on the exponent, which determines the shape.
 
 **Step 1 — Combine the two fractions in the exponent** by finding a common denominator $2\sigma_1^2\sigma_2^2$:
 
-$$-\frac{(x-\mu_1)^2}{2\sigma_1^2} - \frac{(x-\mu_2)^2}{2\sigma_2^2} = -\frac{\sigma_2^2(x-\mu_1)^2 + \sigma_1^2(x-\mu_2)^2}{2\sigma_1^2\sigma_2^2}$$
+$$
+-\frac{(x-\mu_1)^2}{2\sigma_1^2} - \frac{(x-\mu_2)^2}{2\sigma_2^2} = -\frac{\sigma_2^2(x-\mu_1)^2 + \sigma_1^2(x-\mu_2)^2}{2\sigma_1^2\sigma_2^2}
+$$
 
 **Step 2 — Expand the numerator:**
 
-$$\sigma_2^2(x-\mu_1)^2 + \sigma_1^2(x-\mu_2)^2$$
+$$
+\sigma_2^2(x-\mu_1)^2 + \sigma_1^2(x-\mu_2)^2
+$$
 
-$$= \sigma_2^2(x^2 - 2\mu_1 x + \mu_1^2) + \sigma_1^2(x^2 - 2\mu_2 x + \mu_2^2)$$
+$$
+= \sigma_2^2(x^2 - 2\mu_1 x + \mu_1^2) + \sigma_1^2(x^2 - 2\mu_2 x + \mu_2^2)
+$$
 
-$$= (\sigma_1^2+\sigma_2^2)x^2 - 2(\mu_1\sigma_2^2+\mu_2\sigma_1^2)x + (\mu_1^2\sigma_2^2+\mu_2^2\sigma_1^2)$$
+$$
+= (\sigma_1^2+\sigma_2^2)x^2 - 2(\mu_1\sigma_2^2+\mu_2\sigma_1^2)x + (\mu_1^2\sigma_2^2+\mu_2^2\sigma_1^2)
+$$
 
 **Step 3 — Complete the square in $x$:**
 
 Factor out $(\sigma_1^2+\sigma_2^2)$ from the first two terms:
 
-$$= (\sigma_1^2+\sigma_2^2)\left[x^2 - 2\cdot\frac{\mu_1\sigma_2^2+\mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}\cdot x\right] + (\mu_1^2\sigma_2^2+\mu_2^2\sigma_1^2)$$
+$$
+= (\sigma_1^2+\sigma_2^2)\left[x^2 - 2\cdot\frac{\mu_1\sigma_2^2+\mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}\cdot x\right] + (\mu_1^2\sigma_2^2+\mu_2^2\sigma_1^2)
+$$
 
 The expression inside brackets has the form $x^2 - 2\mu_\text{new}x$. Complete the square:
 
-$$x^2 - 2\mu_\text{new}x = (x-\mu_\text{new})^2 - \mu_\text{new}^2$$
+$$
+x^2 - 2\mu_\text{new}x = (x-\mu_\text{new})^2 - \mu_\text{new}^2
+$$
 
 where $\mu_\text{new} = \dfrac{\mu_1\sigma_2^2+\mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}$.
 
 So the numerator becomes:
 
-$$(\sigma_1^2+\sigma_2^2)(x-\mu_\text{new})^2 + \underbrace{(\mu_1^2\sigma_2^2+\mu_2^2\sigma_1^2) - (\sigma_1^2+\sigma_2^2)\mu_\text{new}^2}_{\text{constant w.r.t. } x}$$
+$$
+(\sigma_1^2+\sigma_2^2)(x-\mu_\text{new})^2 + \underbrace{(\mu_1^2\sigma_2^2+\mu_2^2\sigma_1^2) - (\sigma_1^2+\sigma_2^2)\mu_\text{new}^2}_{\text{constant w.r.t. } x}
+$$
 
 **Step 4 — Substitute back into the exponent:**
 
-$$\text{exponent} = -\frac{(\sigma_1^2+\sigma_2^2)(x-\mu_\text{new})^2}{2\sigma_1^2\sigma_2^2} + \text{const}$$
+$$
+\text{exponent} = -\frac{(\sigma_1^2+\sigma_2^2)(x-\mu_\text{new})^2}{2\sigma_1^2\sigma_2^2} + \text{const}
+$$
 
-$$= -\frac{(x-\mu_\text{new})^2}{2\cdot\dfrac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2}} + \text{const}$$
+$$
+= -\frac{(x-\mu_\text{new})^2}{2\cdot\dfrac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2}} + \text{const}
+$$
 
-$$= -\frac{(x-\mu_\text{new})^2}{2\,\sigma_\text{new}^2} + \text{const}$$
+$$
+= -\frac{(x-\mu_\text{new})^2}{2\,\sigma_\text{new}^2} + \text{const}
+$$
 
 where $\sigma_\text{new}^2 = \dfrac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2}$.
 
 **Step 5 — Recognize the Gaussian form:**
 
-$$p_1(x)\cdot p_2(x) \propto \exp\!\left(-\frac{(x-\mu_\text{new})^2}{2\sigma_\text{new}^2}\right) \propto \mathcal{N}(x;\,\mu_\text{new},\,\sigma_\text{new}^2) \quad\square$$
+$$
+p_1(x)\cdot p_2(x) \propto \exp\!\left(-\frac{(x-\mu_\text{new})^2}{2\sigma_\text{new}^2}\right) \propto \mathcal{N}(x;\,\mu_\text{new},\,\sigma_\text{new}^2) \quad\square
+$$
 
 ---
 
@@ -518,35 +642,45 @@ $$p_1(x)\cdot p_2(x) \propto \exp\!\left(-\frac{(x-\mu_\text{new})^2}{2\sigma_\t
 
 The formula for $\mu_\text{new}$ can be refactored to expose the Kalman Gain:
 
-$$\mu_\text{new} = \frac{\mu_1\sigma_2^2 + \mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}$$
+$$
+\mu_\text{new} = \frac{\mu_1\sigma_2^2 + \mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}
+$$
 
 Factor out $\sigma_2^2$ from first term and $\sigma_1^2$ from second:
 
-$$= \mu_1\cdot\frac{\sigma_2^2}{\sigma_1^2+\sigma_2^2} + \mu_2\cdot\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}$$
+$$
+= \mu_1\cdot\frac{\sigma_2^2}{\sigma_1^2+\sigma_2^2} + \mu_2\cdot\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}
+$$
 
 Define:
 
-$$K \overset{\text{def}}{=} \frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}$$
+$$
+K \overset{\text{def}}{=} \frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}
+$$
 
 Then $\dfrac{\sigma_2^2}{\sigma_1^2+\sigma_2^2} = 1-K$, so:
 
-$$\mu_\text{new} = \mu_1(1-K) + \mu_2 K = \mu_1 + K(\mu_2 - \mu_1) \tag{KF mean update}$$
+$$
+\mu_\text{new} = \mu_1(1-K) + \mu_2 K = \mu_1 + K(\mu_2 - \mu_1) \tag{KF-mean}
+$$
 
 And:
 
-$$\sigma_\text{new}^2 = \frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2} = \sigma_1^2\cdot\frac{\sigma_2^2}{\sigma_1^2+\sigma_2^2} = \sigma_1^2(1-K) \tag{KF variance update}$$
+$$
+\sigma_\text{new}^2 = \frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2} = \sigma_1^2\cdot\frac{\sigma_2^2}{\sigma_1^2+\sigma_2^2} = \sigma_1^2(1-K) \tag{KF-var}
+$$
 
 **This is the entire Kalman Filter update in 1D.** Mapping to KF notation:
 
 | Algebra symbol | KF meaning | Physical interpretation |
 |---|---|---|
-| $\mu_1$ | $\hat{x}_{k\|k-1}$ | Best estimate before this measurement |
-| $\sigma_1^2$ | $P_{k\|k-1}$ | Uncertainty of the prediction |
+| $\mu_1$ | $\hat{x}_{k\mid k-1}$ | Best estimate before this measurement |
+| $\sigma_1^2$ | $P_{k\mid k-1}$ | Uncertainty of the prediction |
 | $\mu_2$ | $z_k$ | The measurement value |
 | $\sigma_2^2$ | $R$ | Measurement noise variance (how noisy is the sensor?) |
 | $K = \dfrac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}$ | $K_k$ | Kalman Gain: how much to trust this measurement |
-| $\mu_\text{new}$ | $\hat{x}_{k\|k}$ | Updated estimate after fusing measurement |
-| $\sigma_\text{new}^2$ | $P_{k\|k}$ | Reduced uncertainty after update |
+| $\mu_\text{new}$ | $\hat{x}_{k\mid k}$ | Updated estimate after fusing measurement |
+| $\sigma_\text{new}^2$ | $P_{k\mid k}$ | Reduced uncertainty after update |
 
 **Intuition — what does $K$ control?**
 
@@ -558,11 +692,17 @@ $$\sigma_\text{new}^2 = \frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2} = \si
 
 Altitude filter. IMU predicts 100 m with uncertainty $P = 4\text{ m}^2$. Barometer reads 103 m with noise $R = 1\text{ m}^2$.
 
-$$K = \frac{4}{4+1} = 0.8$$
+$$
+K = \frac{4}{4+1} = 0.8
+$$
 
-$$\hat{h} = 100 + 0.8\cdot(103 - 100) = 100 + 2.4 = 102.4\text{ m}$$
+$$
+\hat{h} = 100 + 0.8\cdot(103 - 100) = 100 + 2.4 = 102.4\text{ m}
+$$
 
-$$P_\text{new} = (1-0.8)\cdot 4 = 0.8\text{ m}^2$$
+$$
+P_\text{new} = (1-0.8)\cdot 4 = 0.8\text{ m}^2
+$$
 
 The filter strongly trusts the baro (K = 0.8), moves most of the way toward the baro reading, and the uncertainty drops from 4 to 0.8.
 
@@ -580,41 +720,55 @@ At each timestep, we have two things: the unknown state $\mathbf{x}$ (what we wa
 
 **The state** $\mathbf{x}$ is an $n$-dimensional column vector of hidden quantities (position, velocity, orientation, biases, …):
 
-$$\mathbf{x} = \begin{bmatrix}x_1\\x_2\\\vdots\\x_n\end{bmatrix} \;\in\mathbb{R}^n, \qquad \mathbf{x}\sim\mathcal{N}(\boldsymbol{\mu}_x,\,\mathbf{P}_{xx})$$
+$$
+\mathbf{x} = \begin{bmatrix}x_1\\x_2\\\vdots\\x_n\end{bmatrix} \;\in\mathbb{R}^n, \qquad \mathbf{x}\sim\mathcal{N}(\boldsymbol{\mu}_x,\,\mathbf{P}_{xx})
+$$
 
 - $\boldsymbol{\mu}_x$ ($n\times 1$): best guess for the state
 - $\mathbf{P}_{xx}$ ($n\times n$): covariance of the state uncertainty
 
 **The measurement** $\mathbf{y}$ is an $m$-dimensional column vector of sensor readings (GPS position, barometer altitude, magnetometer heading, …):
 
-$$\mathbf{y} = \mathbf{H}\mathbf{x} + \mathbf{v}$$
+$$
+\mathbf{y} = \mathbf{H}\mathbf{x} + \mathbf{v}
+$$
 
 where:
 - $\mathbf{H}$ ($m\times n$): the **observation matrix** — maps each state variable to what the sensors measure. For example, if $n=4$ (position $x,y$ + velocity $v_x,v_y$) and $m=2$ (GPS measures only position), then:
 
-$$\mathbf{H} = \begin{bmatrix}1&0&0&0\\0&1&0&0\end{bmatrix} \quad\Rightarrow\quad \mathbf{y} = \begin{bmatrix}1&0&0&0\\0&1&0&0\end{bmatrix}\begin{bmatrix}x\\y\\v_x\\v_y\end{bmatrix} = \begin{bmatrix}x\\y\end{bmatrix}$$
+$$
+\mathbf{H} = \begin{bmatrix}1&0&0&0\\0&1&0&0\end{bmatrix} \quad\Rightarrow\quad \mathbf{y} = \begin{bmatrix}1&0&0&0\\0&1&0&0\end{bmatrix}\begin{bmatrix}x\\y\\v_x\\v_y\end{bmatrix} = \begin{bmatrix}x\\y\end{bmatrix}
+$$
 
 GPS reads position, ignores velocity.
 
 - $\mathbf{v}$ ($m\times 1$): **measurement noise** — random errors of the sensor, independent of the state:
 
-$$\mathbf{v}\sim\mathcal{N}(\mathbf{0},\,\mathbf{R}), \qquad \mathbf{v}\perp\mathbf{x}$$
+$$
+\mathbf{v}\sim\mathcal{N}(\mathbf{0},\,\mathbf{R}), \qquad \mathbf{v}\perp\mathbf{x}
+$$
 
 - $\mathbf{R}$ ($m\times m$): covariance of sensor noise. If sensors are independent of each other, $\mathbf{R}$ is diagonal.
 
 **The joint vector** stacks state and measurement together into a single $(n+m)$-dimensional vector:
 
-$$\begin{bmatrix}\mathbf{x}\\\mathbf{y}\end{bmatrix} = \begin{bmatrix}x_1\\\vdots\\x_n\\y_1\\\vdots\\y_m\end{bmatrix} \;\in\mathbb{R}^{n+m}$$
+$$
+\begin{bmatrix}\mathbf{x}\\\mathbf{y}\end{bmatrix} = \begin{bmatrix}x_1\\\vdots\\x_n\\y_1\\\vdots\\y_m\end{bmatrix} \;\in\mathbb{R}^{n+m}
+$$
 
 ---
 
 **Claim:** This joint vector is Gaussian:
 
-$$\begin{bmatrix}\mathbf{x}\\\mathbf{y}\end{bmatrix}\sim\mathcal{N}\!\left(\begin{bmatrix}\boldsymbol{\mu}_x\\\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix},\;\underbrace{\begin{bmatrix}\mathbf{P}_{xx} & \mathbf{P}_{xx}\mathbf{H}^\top\\\mathbf{H}\mathbf{P}_{xx} & \mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}\end{bmatrix}}_{\boldsymbol{\Sigma}_\text{joint},\;(n+m)\times(n+m)}\right)$$
+$$
+\begin{bmatrix}\mathbf{x}\\\mathbf{y}\end{bmatrix}\sim\mathcal{N}\!\left(\begin{bmatrix}\boldsymbol{\mu}_x\\\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix},\;\underbrace{\begin{bmatrix}\mathbf{P}_{xx} & \mathbf{P}_{xx}\mathbf{H}^\top\\\mathbf{H}\mathbf{P}_{xx} & \mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}\end{bmatrix}}_{\boldsymbol{\Sigma}_\text{joint},\;(n+m)\times(n+m)}\right)
+$$
 
 The joint covariance is a $(n+m)\times(n+m)$ block matrix with four blocks:
 
-$$\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}\underbrace{\mathbf{P}_{xx}}_{n\times n} & \underbrace{\mathbf{P}_{xx}\mathbf{H}^\top}_{n\times m}\\\underbrace{\mathbf{H}\mathbf{P}_{xx}}_{m\times n} & \underbrace{\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}}_{m\times m}\end{bmatrix}$$
+$$
+\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}\underbrace{\mathbf{P}_{xx}}_{n\times n} & \underbrace{\mathbf{P}_{xx}\mathbf{H}^\top}_{n\times m}\\\underbrace{\mathbf{H}\mathbf{P}_{xx}}_{m\times n} & \underbrace{\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}}_{m\times m}\end{bmatrix}
+$$
 
 ---
 
@@ -622,7 +776,9 @@ $$\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}\underbrace{\mathbf{P}_{xx}}
 
 **Step 1 — Find the mean of $\mathbf{y}$.**
 
-$$\mathbb{E}[\mathbf{y}] = \mathbb{E}[\mathbf{H}\mathbf{x}+\mathbf{v}] = \mathbf{H}\underbrace{\mathbb{E}[\mathbf{x}]}_{\boldsymbol{\mu}_x} + \underbrace{\mathbb{E}[\mathbf{v}]}_{\mathbf{0}} = \mathbf{H}\boldsymbol{\mu}_x$$
+$$
+\mathbb{E}[\mathbf{y}] = \mathbb{E}[\mathbf{H}\mathbf{x}+\mathbf{v}] = \mathbf{H}\underbrace{\mathbb{E}[\mathbf{x}]}_{\boldsymbol{\mu}_x} + \underbrace{\mathbb{E}[\mathbf{v}]}_{\mathbf{0}} = \mathbf{H}\boldsymbol{\mu}_x
+$$
 
 So the joint mean vector is $\begin{bmatrix}\boldsymbol{\mu}_x\\\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix}$.
 
@@ -634,23 +790,33 @@ By definition, this is just $\mathbf{P}_{xx}$. Nothing to compute.
 
 First find the deviation of $\mathbf{y}$ from its mean:
 
-$$\mathbf{y} - \mathbb{E}[\mathbf{y}] = \mathbf{H}\mathbf{x} + \mathbf{v} - \mathbf{H}\boldsymbol{\mu}_x = \underbrace{\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)}_{\text{state uncertainty projected to sensor}} + \underbrace{\mathbf{v}}_{\text{sensor noise}}$$
+$$
+\mathbf{y} - \mathbb{E}[\mathbf{y}] = \mathbf{H}\mathbf{x} + \mathbf{v} - \mathbf{H}\boldsymbol{\mu}_x = \underbrace{\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)}_{\text{state uncertainty projected to sensor}} + \underbrace{\mathbf{v}}_{\text{sensor noise}}
+$$
 
 Now compute:
 
-$$\text{Cov}(\mathbf{y},\mathbf{y}) = \mathbb{E}\!\left[\left(\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)+\mathbf{v}\right)\left(\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)+\mathbf{v}\right)^\top\right]$$
+$$
+\text{Cov}(\mathbf{y},\mathbf{y}) = \mathbb{E}\!\left[\left(\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)+\mathbf{v}\right)\left(\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)+\mathbf{v}\right)^\top\right]
+$$
 
 Expand ($(a+b)(a+b)^\top = aa^\top + ab^\top + ba^\top + bb^\top$):
 
-$$= \mathbb{E}\!\left[\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)(\mathbf{x}-\boldsymbol{\mu}_x)^\top\mathbf{H}^\top\right] + \mathbb{E}\!\left[\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)\mathbf{v}^\top\right] + \mathbb{E}\!\left[\mathbf{v}(\mathbf{x}-\boldsymbol{\mu}_x)^\top\mathbf{H}^\top\right] + \mathbb{E}\!\left[\mathbf{v}\mathbf{v}^\top\right]$$
+$$
+= \mathbb{E}\!\left[\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)(\mathbf{x}-\boldsymbol{\mu}_x)^\top\mathbf{H}^\top\right] + \mathbb{E}\!\left[\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)\mathbf{v}^\top\right] + \mathbb{E}\!\left[\mathbf{v}(\mathbf{x}-\boldsymbol{\mu}_x)^\top\mathbf{H}^\top\right] + \mathbb{E}\!\left[\mathbf{v}\mathbf{v}^\top\right]
+$$
 
 Since $\mathbf{x}\perp\mathbf{v}$ (state and sensor noise are independent):
 
-$$\mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu}_x)\mathbf{v}^\top\right] = \mathbb{E}[\mathbf{x}-\boldsymbol{\mu}_x]\cdot\mathbb{E}[\mathbf{v}^\top] = \mathbf{0}\cdot\mathbf{0}^\top = \mathbf{0}$$
+$$
+\mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu}_x)\mathbf{v}^\top\right] = \mathbb{E}[\mathbf{x}-\boldsymbol{\mu}_x]\cdot\mathbb{E}[\mathbf{v}^\top] = \mathbf{0}\cdot\mathbf{0}^\top = \mathbf{0}
+$$
 
 So the cross terms vanish, leaving:
 
-$$\text{Cov}(\mathbf{y},\mathbf{y}) = \mathbf{H}\underbrace{\mathbb{E}[(\mathbf{x}-\boldsymbol{\mu}_x)(\mathbf{x}-\boldsymbol{\mu}_x)^\top]}_{\mathbf{P}_{xx}}\mathbf{H}^\top + \underbrace{\mathbb{E}[\mathbf{v}\mathbf{v}^\top]}_{\mathbf{R}} = \boxed{\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top + \mathbf{R}}$$
+$$
+\text{Cov}(\mathbf{y},\mathbf{y}) = \mathbf{H}\underbrace{\mathbb{E}[(\mathbf{x}-\boldsymbol{\mu}_x)(\mathbf{x}-\boldsymbol{\mu}_x)^\top]}_{\mathbf{P}_{xx}}\mathbf{H}^\top + \underbrace{\mathbb{E}[\mathbf{v}\mathbf{v}^\top]}_{\mathbf{R}} = \boxed{\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top + \mathbf{R}}
+$$
 
 This block has a name: $\mathbf{S} = \mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top + \mathbf{R}$, called the **innovation covariance**.
 
@@ -660,11 +826,17 @@ This block has a name: $\mathbf{S} = \mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top + 
 
 This $n\times m$ block measures how much the state uncertainty and the measurement uncertainty are correlated — if $\mathbf{x}$ is above its mean, does $\mathbf{y}$ tend to be above its mean too?
 
-$$\text{Cov}(\mathbf{x},\mathbf{y}) = \mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu}_x)\left(\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)+\mathbf{v}\right)^\top\right]$$
+$$
+\text{Cov}(\mathbf{x},\mathbf{y}) = \mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu}_x)\left(\mathbf{H}(\mathbf{x}-\boldsymbol{\mu}_x)+\mathbf{v}\right)^\top\right]
+$$
 
-$$= \mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu}_x)(\mathbf{x}-\boldsymbol{\mu}_x)^\top\right]\mathbf{H}^\top + \underbrace{\mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu}_x)\mathbf{v}^\top\right]}_{=\,\mathbf{0},\;\mathbf{x}\perp\mathbf{v}}$$
+$$
+= \mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu}_x)(\mathbf{x}-\boldsymbol{\mu}_x)^\top\right]\mathbf{H}^\top + \underbrace{\mathbb{E}\!\left[(\mathbf{x}-\boldsymbol{\mu}_x)\mathbf{v}^\top\right]}_{=\,\mathbf{0},\;\mathbf{x}\perp\mathbf{v}}
+$$
 
-$$= \mathbf{P}_{xx}\mathbf{H}^\top \quad =: \quad \mathbf{P}_{xy}$$
+$$
+= \mathbf{P}_{xx}\mathbf{H}^\top \quad =: \quad \mathbf{P}_{xy}
+$$
 
 **Step 5 — Block (2,1) follows by symmetry.**
 
@@ -672,7 +844,9 @@ $\text{Cov}(\mathbf{y},\mathbf{x}) = \mathbf{P}_{xy}^\top = \mathbf{H}\mathbf{P}
 
 **Step 6 — Assemble the result:**
 
-$$\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}\mathbf{P}_{xx} & \mathbf{P}_{xx}\mathbf{H}^\top\\\mathbf{H}\mathbf{P}_{xx} & \mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}\end{bmatrix} \quad\square$$
+$$
+\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}\mathbf{P}_{xx} & \mathbf{P}_{xx}\mathbf{H}^\top\\\mathbf{H}\mathbf{P}_{xx} & \mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}\end{bmatrix} \quad\square
+$$
 
 ---
 
@@ -691,9 +865,13 @@ $$\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}\mathbf{P}_{xx} & \mathbf{P}
 
 Altitude filter: $n=2$ (state = altitude $h$ and vertical speed $\dot{h}$), $m=1$ (barometer reads altitude only).
 
-$$\mathbf{x}=\begin{bmatrix}h\\\dot{h}\end{bmatrix}, \quad \boldsymbol{\mu}_x=\begin{bmatrix}100\\2\end{bmatrix}\text{ m, m/s}, \quad \mathbf{P}_{xx}=\begin{bmatrix}4&0\\0&1\end{bmatrix}$$
+$$
+\mathbf{x}=\begin{bmatrix}h\\\dot{h}\end{bmatrix}, \quad \boldsymbol{\mu}_x=\begin{bmatrix}100\\2\end{bmatrix}\text{ m, m/s}, \quad \mathbf{P}_{xx}=\begin{bmatrix}4&0\\0&1\end{bmatrix}
+$$
 
-$$\mathbf{H}=[1\quad 0], \quad R=9 \text{ m}^2 \text{ (baro noise)}$$
+$$
+\mathbf{H}=[1\quad 0], \quad R=9 \text{ m}^2 \text{ (baro noise)}
+$$
 
 Compute each block:
 
@@ -703,7 +881,9 @@ Compute each block:
 
 Full joint covariance ($3\times 3$):
 
-$$\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}4&0&4\\0&1&0\\4&0&13\end{bmatrix}$$
+$$
+\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}4&0&4\\0&1&0\\4&0&13\end{bmatrix}
+$$
 
 *Reading:* The (3,3) entry (13) is the total uncertainty in the predicted baro reading: 4 comes from altitude uncertainty already in the state, 9 is pure sensor noise.
 
@@ -711,7 +891,9 @@ $$\boldsymbol{\Sigma}_\text{joint} = \begin{bmatrix}4&0&4\\0&1&0\\4&0&13\end{bma
 
 The Kalman Gain is:
 
-$$\mathbf{K} = \underbrace{\mathbf{P}_{xx}\mathbf{H}^\top}_{\text{cross-cov}}\cdot\underbrace{\left(\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}\right)^{-1}}_{\mathbf{S}^{-1},\;\text{innov cov}^{-1}}$$
+$$
+\mathbf{K} = \underbrace{\mathbf{P}_{xx}\mathbf{H}^\top}_{\text{cross-cov}}\cdot\underbrace{\left(\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}\right)^{-1}}_{\mathbf{S}^{-1},\;\text{innov cov}^{-1}}
+$$
 
 In words: the gain is "how much of the state uncertainty reaches the sensor" divided by "total sensor uncertainty". In the example: $\mathbf{K} = \begin{bmatrix}4\\0\end{bmatrix}\cdot\frac{1}{13} = \begin{bmatrix}0.308\\0\end{bmatrix}$.
 
@@ -723,7 +905,9 @@ This says: when the baro reading deviates from prediction, update the altitude e
 
 **This is the most important property.** It directly produces all three KF update equations:
 
-$$\mathbf{K}_k = \mathbf{P}\mathbf{H}^\top(\mathbf{H}\mathbf{P}\mathbf{H}^\top+\mathbf{R})^{-1}, \qquad \hat{\mathbf{x}}\mathrel{+}=\mathbf{K}(\mathbf{z}-\mathbf{H}\hat{\mathbf{x}}), \qquad \mathbf{P}\leftarrow(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}$$
+$$
+\mathbf{K}_k = \mathbf{P}\mathbf{H}^\top(\mathbf{H}\mathbf{P}\mathbf{H}^\top+\mathbf{R})^{-1}, \qquad \hat{\mathbf{x}}\mathrel{+}=\mathbf{K}(\mathbf{z}-\mathbf{H}\hat{\mathbf{x}}), \qquad \mathbf{P}\leftarrow(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}
+$$
 
 These equations are not heuristics. They are the exact Bayesian posterior of a Gaussian prior given a Gaussian measurement — derived purely from probability.
 
@@ -733,7 +917,9 @@ These equations are not heuristics. They are the exact Bayesian posterior of a G
 
 We have (from Property 4) the joint Gaussian:
 
-$$\begin{bmatrix}\mathbf{x}\\\mathbf{y}\end{bmatrix}\sim\mathcal{N}\!\left(\begin{bmatrix}\boldsymbol{\mu}_x\\\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix},\;\boldsymbol{\Sigma}\right), \qquad \boldsymbol{\Sigma} = \begin{bmatrix}\mathbf{P}_{xx} & \mathbf{P}_{xx}\mathbf{H}^\top\\\mathbf{H}\mathbf{P}_{xx} & \mathbf{S}\end{bmatrix}$$
+$$
+\begin{bmatrix}\mathbf{x}\\\mathbf{y}\end{bmatrix}\sim\mathcal{N}\!\left(\begin{bmatrix}\boldsymbol{\mu}_x\\\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix},\;\boldsymbol{\Sigma}\right), \qquad \boldsymbol{\Sigma} = \begin{bmatrix}\mathbf{P}_{xx} & \mathbf{P}_{xx}\mathbf{H}^\top\\\mathbf{H}\mathbf{P}_{xx} & \mathbf{S}\end{bmatrix}
+$$
 
 where $\mathbf{S} = \mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R}$ is the innovation covariance.
 
@@ -745,15 +931,23 @@ This is the **conditional distribution** $p(\mathbf{x}\mid\mathbf{y}=\mathbf{z})
 
 **Claim:**
 
-$$\mathbf{x}\mid\mathbf{y}=\mathbf{z}\;\sim\;\mathcal{N}(\boldsymbol{\mu}_{x|y},\;\mathbf{P}_{x|y})$$
+$$
+\mathbf{x}\mid\mathbf{y}=\mathbf{z}\;\sim\;\mathcal{N}(\boldsymbol{\mu}_{x|y},\;\mathbf{P}_{x|y})
+$$
 
 with:
 
-$$\boldsymbol{\mu}_{x|y} = \boldsymbol{\mu}_x + \underbrace{\mathbf{K}}_{\text{Kalman Gain}}(\underbrace{\mathbf{z}-\mathbf{H}\boldsymbol{\mu}_x}_{\text{innovation}}) \tag{P5-mean}$$
+$$
+\boldsymbol{\mu}_{x|y} = \boldsymbol{\mu}_x + \underbrace{\mathbf{K}}_{\text{Kalman Gain}}(\underbrace{\mathbf{z}-\mathbf{H}\boldsymbol{\mu}_x}_{\text{innovation}}) \tag{P5-mean}
+$$
 
-$$\mathbf{P}_{x|y} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}_{xx} \tag{P5-cov}$$
+$$
+\mathbf{P}_{x|y} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}_{xx} \tag{P5-cov}
+$$
 
-$$\mathbf{K} = \mathbf{P}_{xx}\mathbf{H}^\top(\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R})^{-1} = \mathbf{P}_{xx}\mathbf{H}^\top\mathbf{S}^{-1} \tag{P5-gain}$$
+$$
+\mathbf{K} = \mathbf{P}_{xx}\mathbf{H}^\top(\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R})^{-1} = \mathbf{P}_{xx}\mathbf{H}^\top\mathbf{S}^{-1} \tag{P5-gain}
+$$
 
 ---
 
@@ -763,13 +957,17 @@ $$\mathbf{K} = \mathbf{P}_{xx}\mathbf{H}^\top(\mathbf{H}\mathbf{P}_{xx}\mathbf{H
 
 A multivariate Gaussian with mean $\boldsymbol{\mu}$ and covariance $\boldsymbol{\Sigma}$ has pdf:
 
-$$p(\mathbf{u}) \propto \exp\!\left(-\frac{1}{2}(\mathbf{u}-\boldsymbol{\mu})^\top\boldsymbol{\Sigma}^{-1}(\mathbf{u}-\boldsymbol{\mu})\right)$$
+$$
+p(\mathbf{u}) \propto \exp\!\left(-\frac{1}{2}(\mathbf{u}-\boldsymbol{\mu})^\top\boldsymbol{\Sigma}^{-1}(\mathbf{u}-\boldsymbol{\mu})\right)
+$$
 
 The symbol $\propto$ means we drop constants that don't depend on $\mathbf{u}$. The shape is entirely determined by the exponent.
 
 With $\mathbf{u} = \begin{bmatrix}\mathbf{x}\\\mathbf{y}\end{bmatrix}$ and $\boldsymbol{\mu} = \begin{bmatrix}\boldsymbol{\mu}_x\\\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix}$:
 
-$$p(\mathbf{x},\mathbf{y}) \propto \exp\!\left(-\frac{1}{2}\underbrace{\begin{bmatrix}\mathbf{x}-\boldsymbol{\mu}_x\\\mathbf{y}-\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix}^\top}_{\tilde{\mathbf{u}}^\top}\boldsymbol{\Sigma}^{-1}\underbrace{\begin{bmatrix}\mathbf{x}-\boldsymbol{\mu}_x\\\mathbf{y}-\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix}}_{\tilde{\mathbf{u}}}\right)$$
+$$
+p(\mathbf{x},\mathbf{y}) \propto \exp\!\left(-\frac{1}{2}\underbrace{\begin{bmatrix}\mathbf{x}-\boldsymbol{\mu}_x\\\mathbf{y}-\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix}^\top}_{\tilde{\mathbf{u}}^\top}\boldsymbol{\Sigma}^{-1}\underbrace{\begin{bmatrix}\mathbf{x}-\boldsymbol{\mu}_x\\\mathbf{y}-\mathbf{H}\boldsymbol{\mu}_x\end{bmatrix}}_{\tilde{\mathbf{u}}}\right)
+$$
 
 Let $\tilde{\mathbf{x}} = \mathbf{x}-\boldsymbol{\mu}_x$ and $\tilde{\mathbf{z}} = \mathbf{z}-\mathbf{H}\boldsymbol{\mu}_x$ (the **innovation** — how far the measurement is from what we predicted).
 
@@ -781,7 +979,9 @@ Inverting a block matrix is harder than inverting a scalar — you can't just "f
 
 For a $2\times 2$ block matrix $\begin{bmatrix}\mathbf{A}&\mathbf{B}\\\mathbf{C}&\mathbf{D}\end{bmatrix}$ where $\mathbf{A}$ and $\mathbf{D}$ are invertible, the inverse is:
 
-$$\begin{bmatrix}\mathbf{A}&\mathbf{B}\\\mathbf{C}&\mathbf{D}\end{bmatrix}^{-1} = \begin{bmatrix}\mathbf{A}^{-1}+\mathbf{A}^{-1}\mathbf{B}\mathbf{M}^{-1}\mathbf{C}\mathbf{A}^{-1} & -\mathbf{A}^{-1}\mathbf{B}\mathbf{M}^{-1}\\-\mathbf{M}^{-1}\mathbf{C}\mathbf{A}^{-1} & \mathbf{M}^{-1}\end{bmatrix}$$
+$$
+\begin{bmatrix}\mathbf{A}&\mathbf{B}\\\mathbf{C}&\mathbf{D}\end{bmatrix}^{-1} = \begin{bmatrix}\mathbf{A}^{-1}+\mathbf{A}^{-1}\mathbf{B}\mathbf{M}^{-1}\mathbf{C}\mathbf{A}^{-1} & -\mathbf{A}^{-1}\mathbf{B}\mathbf{M}^{-1}\\-\mathbf{M}^{-1}\mathbf{C}\mathbf{A}^{-1} & \mathbf{M}^{-1}\end{bmatrix}
+$$
 
 where $\mathbf{M} = \mathbf{D} - \mathbf{C}\mathbf{A}^{-1}\mathbf{B}$ is called the **Schur complement** of $\mathbf{A}$.
 
@@ -793,7 +993,9 @@ The Schur complement $\mathbf{M} = \mathbf{S} - \mathbf{H}\mathbf{P}_{xx}\mathbf
 
 This gives:
 
-$$\boldsymbol{\Sigma}^{-1} = \begin{bmatrix}\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H} & -\mathbf{H}^\top\mathbf{R}^{-1}\\-\mathbf{R}^{-1}\mathbf{H} & \mathbf{R}^{-1}\end{bmatrix}$$
+$$
+\boldsymbol{\Sigma}^{-1} = \begin{bmatrix}\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H} & -\mathbf{H}^\top\mathbf{R}^{-1}\\-\mathbf{R}^{-1}\mathbf{H} & \mathbf{R}^{-1}\end{bmatrix}
+$$
 
 *(You can verify: multiply $\boldsymbol{\Sigma}\cdot\boldsymbol{\Sigma}^{-1}$ and check it gives the identity matrix.)*
 
@@ -801,11 +1003,15 @@ $$\boldsymbol{\Sigma}^{-1} = \begin{bmatrix}\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top
 
 Plug $\boldsymbol{\Sigma}^{-1}$ into the exponent and expand the block matrix multiplication:
 
-$$\tilde{\mathbf{u}}^\top\boldsymbol{\Sigma}^{-1}\tilde{\mathbf{u}} = \begin{bmatrix}\tilde{\mathbf{x}}^\top & \tilde{\mathbf{y}}^\top\end{bmatrix}\begin{bmatrix}\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H} & -\mathbf{H}^\top\mathbf{R}^{-1}\\-\mathbf{R}^{-1}\mathbf{H} & \mathbf{R}^{-1}\end{bmatrix}\begin{bmatrix}\tilde{\mathbf{x}}\\\tilde{\mathbf{y}}\end{bmatrix}$$
+$$
+\tilde{\mathbf{u}}^\top\boldsymbol{\Sigma}^{-1}\tilde{\mathbf{u}} = \begin{bmatrix}\tilde{\mathbf{x}}^\top & \tilde{\mathbf{y}}^\top\end{bmatrix}\begin{bmatrix}\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H} & -\mathbf{H}^\top\mathbf{R}^{-1}\\-\mathbf{R}^{-1}\mathbf{H} & \mathbf{R}^{-1}\end{bmatrix}\begin{bmatrix}\tilde{\mathbf{x}}\\\tilde{\mathbf{y}}\end{bmatrix}
+$$
 
 Expanding row-by-row (denoting $\tilde{\mathbf{y}} = \mathbf{y} - \mathbf{H}\boldsymbol{\mu}_x$):
 
-$$= \tilde{\mathbf{x}}^\top(\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})\tilde{\mathbf{x}} - 2\tilde{\mathbf{y}}^\top\mathbf{R}^{-1}\mathbf{H}\tilde{\mathbf{x}} + \tilde{\mathbf{y}}^\top\mathbf{R}^{-1}\tilde{\mathbf{y}}$$
+$$
+= \tilde{\mathbf{x}}^\top(\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})\tilde{\mathbf{x}} - 2\tilde{\mathbf{y}}^\top\mathbf{R}^{-1}\mathbf{H}\tilde{\mathbf{x}} + \tilde{\mathbf{y}}^\top\mathbf{R}^{-1}\tilde{\mathbf{y}}
+$$
 
 **Step 4 — Condition on $\mathbf{y} = \mathbf{z}$ (fix $\tilde{\mathbf{y}} = \tilde{\mathbf{z}}$ as a constant).**
 
@@ -813,7 +1019,9 @@ When computing $p(\mathbf{x}\mid\mathbf{y}=\mathbf{z})$, we treat $\mathbf{z}$ a
 
 The last term $\tilde{\mathbf{z}}^\top\mathbf{R}^{-1}\tilde{\mathbf{z}}$ does not involve $\mathbf{x}$ — it's a pure constant that folds into the normalization. Drop it (absorbed into $\propto$):
 
-$$p(\mathbf{x}\mid\mathbf{z})\propto\exp\!\left(-\frac{1}{2}\left[\tilde{\mathbf{x}}^\top\underbrace{(\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})}_{\text{call this }\boldsymbol{\Lambda}}\tilde{\mathbf{x}} - 2\underbrace{\tilde{\mathbf{z}}^\top\mathbf{R}^{-1}\mathbf{H}}_{\mathbf{b}^\top}\tilde{\mathbf{x}}\right]\right)$$
+$$
+p(\mathbf{x}\mid\mathbf{z})\propto\exp\!\left(-\frac{1}{2}\left[\tilde{\mathbf{x}}^\top\underbrace{(\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})}_{\text{call this }\boldsymbol{\Lambda}}\tilde{\mathbf{x}} - 2\underbrace{\tilde{\mathbf{z}}^\top\mathbf{R}^{-1}\mathbf{H}}_{\mathbf{b}^\top}\tilde{\mathbf{x}}\right]\right)
+$$
 
 We have: $-\frac{1}{2}[\tilde{\mathbf{x}}^\top\boldsymbol{\Lambda}\tilde{\mathbf{x}} - 2\mathbf{b}^\top\tilde{\mathbf{x}}]$.
 
@@ -825,7 +1033,9 @@ For vectors: $\tilde{\mathbf{x}}^\top\boldsymbol{\Lambda}\tilde{\mathbf{x}} - 2\
 
 The last term doesn't involve $\mathbf{x}$, so:
 
-$$p(\mathbf{x}\mid\mathbf{z})\propto\exp\!\left(-\frac{1}{2}(\tilde{\mathbf{x}}-\boldsymbol{\Lambda}^{-1}\mathbf{b})^\top\boldsymbol{\Lambda}(\tilde{\mathbf{x}}-\boldsymbol{\Lambda}^{-1}\mathbf{b})\right)$$
+$$
+p(\mathbf{x}\mid\mathbf{z})\propto\exp\!\left(-\frac{1}{2}(\tilde{\mathbf{x}}-\boldsymbol{\Lambda}^{-1}\mathbf{b})^\top\boldsymbol{\Lambda}(\tilde{\mathbf{x}}-\boldsymbol{\Lambda}^{-1}\mathbf{b})\right)
+$$
 
 This is a Gaussian in $\tilde{\mathbf{x}} = \mathbf{x}-\boldsymbol{\mu}_x$ centered at $\boldsymbol{\Lambda}^{-1}\mathbf{b}$, with precision matrix $\boldsymbol{\Lambda}$.
 
@@ -842,27 +1052,37 @@ Inverting this directly would require computing $\mathbf{P}_{xx}^{-1}$ (invertin
 
 The **Woodbury identity** (matrix inversion lemma) provides a shortcut. The general form is:
 
-$$(\mathbf{A}+\mathbf{U}\mathbf{C}\mathbf{V})^{-1} = \mathbf{A}^{-1} - \mathbf{A}^{-1}\mathbf{U}(\mathbf{C}^{-1}+\mathbf{V}\mathbf{A}^{-1}\mathbf{U})^{-1}\mathbf{V}\mathbf{A}^{-1}$$
+$$
+(\mathbf{A}+\mathbf{U}\mathbf{C}\mathbf{V})^{-1} = \mathbf{A}^{-1} - \mathbf{A}^{-1}\mathbf{U}(\mathbf{C}^{-1}+\mathbf{V}\mathbf{A}^{-1}\mathbf{U})^{-1}\mathbf{V}\mathbf{A}^{-1}
+$$
 
 *What this formula does:* Instead of inverting the large $n\times n$ matrix $(\mathbf{A}+\mathbf{U}\mathbf{C}\mathbf{V})$, you only need to invert the smaller $m\times m$ matrix $(\mathbf{C}^{-1}+\mathbf{V}\mathbf{A}^{-1}\mathbf{U})$. This is the "push the inversion down to smaller dimension" trick.
 
 *Scalar verification (sanity check):* With $A=p^{-1}$, $U=h$, $C=r^{-1}$, $V=h$ (all scalars), the formula gives:
 
-$$(p^{-1}+h\cdot r^{-1}\cdot h)^{-1} = p - p\cdot h\cdot (r+h\cdot p\cdot h)^{-1}\cdot h\cdot p = p - \frac{ph^2p}{r+h^2p}$$
+$$
+(p^{-1}+h\cdot r^{-1}\cdot h)^{-1} = p - p\cdot h\cdot (r+h\cdot p\cdot h)^{-1}\cdot h\cdot p = p - \frac{ph^2p}{r+h^2p}
+$$
 
 The result: $p_\text{new} = p - ph^2 p/(r+h^2 p) = pr/(r+h^2 p) = \frac{pr}{r+h^2 p}$. This matches the scalar KF: $P_\text{new} = (1-KH)P$ where $K = PH/(HPH+R)$. ✓
 
 Apply Woodbury to our case with $\mathbf{A}^{-1}\to\mathbf{P}_{xx}$, $\mathbf{U}\to\mathbf{H}^\top$, $\mathbf{C}^{-1}\to\mathbf{R}$, $\mathbf{V}\to\mathbf{H}$:
 
-$$\mathbf{P}_{x|y} = (\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})^{-1} = \mathbf{P}_{xx} - \mathbf{P}_{xx}\mathbf{H}^\top\underbrace{(\mathbf{R}+\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top)^{-1}}_{\mathbf{S}^{-1}}\mathbf{H}\mathbf{P}_{xx}$$
+$$
+\mathbf{P}_{x|y} = (\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})^{-1} = \mathbf{P}_{xx} - \mathbf{P}_{xx}\mathbf{H}^\top\underbrace{(\mathbf{R}+\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top)^{-1}}_{\mathbf{S}^{-1}}\mathbf{H}\mathbf{P}_{xx}
+$$
 
 Define the **Kalman Gain**:
 
-$$\boxed{\mathbf{K} = \mathbf{P}_{xx}\mathbf{H}^\top\mathbf{S}^{-1} = \mathbf{P}_{xx}\mathbf{H}^\top(\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R})^{-1}}$$
+$$
+\boxed{\mathbf{K} = \mathbf{P}_{xx}\mathbf{H}^\top\mathbf{S}^{-1} = \mathbf{P}_{xx}\mathbf{H}^\top(\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top+\mathbf{R})^{-1}}
+$$
 
 Then: $\mathbf{P}_{x|y} = \mathbf{P}_{xx} - \mathbf{K}\mathbf{H}\mathbf{P}_{xx}$, which factors as:
 
-$$\boxed{\mathbf{P}_{x|y} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}_{xx}}$$
+$$
+\boxed{\mathbf{P}_{x|y} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}_{xx}}
+$$
 
 **Step 7 — Simplify the posterior mean.**
 
@@ -870,23 +1090,33 @@ From Step 5: $\boldsymbol{\mu}_{x|y} = \boldsymbol{\mu}_x + \mathbf{P}_{x|y}\mat
 
 We need $\mathbf{P}_{x|y}\mathbf{H}^\top\mathbf{R}^{-1}$. Substitute $\mathbf{P}_{x|y} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}_{xx}$:
 
-$$\mathbf{P}_{x|y}\mathbf{H}^\top\mathbf{R}^{-1} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}_{xx}\mathbf{H}^\top\mathbf{R}^{-1} = \mathbf{P}_{xx}\mathbf{H}^\top\mathbf{R}^{-1} - \mathbf{K}\underbrace{\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top\mathbf{R}^{-1}}_{\mathbf{S}\mathbf{R}^{-1}-\mathbf{I}\text{ (from }\mathbf{S}=\mathbf{H}\mathbf{P}\mathbf{H}^\top+\mathbf{R}\text{)}}$$
+$$
+\mathbf{P}_{x|y}\mathbf{H}^\top\mathbf{R}^{-1} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}_{xx}\mathbf{H}^\top\mathbf{R}^{-1} = \mathbf{P}_{xx}\mathbf{H}^\top\mathbf{R}^{-1} - \mathbf{K}\underbrace{\mathbf{H}\mathbf{P}_{xx}\mathbf{H}^\top\mathbf{R}^{-1}}_{\mathbf{S}\mathbf{R}^{-1}-\mathbf{I}\text{ (from }\mathbf{S}=\mathbf{H}\mathbf{P}\mathbf{H}^\top+\mathbf{R}\text{)}}
+$$
 
 A cleaner route: use the **push-through identity** $\mathbf{P}_{xx}\mathbf{H}^\top\mathbf{S}^{-1} = (\mathbf{P}_{xx}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})^{-1}\mathbf{H}^\top\mathbf{R}^{-1}$ (both sides equal $\mathbf{K}$). So directly:
 
-$$\mathbf{P}_{x|y}\mathbf{H}^\top\mathbf{R}^{-1} = \mathbf{K}\mathbf{S}\mathbf{R}^{-1}\cdot\text{(terms)} = \mathbf{K}$$
+$$
+\mathbf{P}_{x|y}\mathbf{H}^\top\mathbf{R}^{-1} = \mathbf{K}\mathbf{S}\mathbf{R}^{-1}\cdot\text{(terms)} = \mathbf{K}
+$$
 
 Therefore:
 
-$$\boldsymbol{\mu}_{x|y} = \boldsymbol{\mu}_x + \mathbf{K}\tilde{\mathbf{z}} = \boldsymbol{\mu}_x + \mathbf{K}(\mathbf{z}-\mathbf{H}\boldsymbol{\mu}_x)$$
+$$
+\boldsymbol{\mu}_{x|y} = \boldsymbol{\mu}_x + \mathbf{K}\tilde{\mathbf{z}} = \boldsymbol{\mu}_x + \mathbf{K}(\mathbf{z}-\mathbf{H}\boldsymbol{\mu}_x)
+$$
 
-$$\boxed{\boldsymbol{\mu}_{x|y} = \boldsymbol{\mu}_x + \mathbf{K}(\mathbf{z}-\mathbf{H}\boldsymbol{\mu}_x)} \quad\square$$
+$$
+\boxed{\boldsymbol{\mu}_{x|y} = \boldsymbol{\mu}_x + \mathbf{K}(\mathbf{z}-\mathbf{H}\boldsymbol{\mu}_x)} \quad\square
+$$
 
 ---
 
 **Reading each term of the final equations:**
 
-$$\underbrace{\boldsymbol{\mu}_{x|y}}_{\text{updated estimate}} = \underbrace{\boldsymbol{\mu}_x}_{\text{predicted estimate}} + \underbrace{\mathbf{K}}_{\text{Kalman Gain}} \cdot \underbrace{(\mathbf{z} - \mathbf{H}\boldsymbol{\mu}_x)}_{\text{innovation}}$$
+$$
+\underbrace{\boldsymbol{\mu}_{x|y}}_{\text{updated estimate}} = \underbrace{\boldsymbol{\mu}_x}_{\text{predicted estimate}} + \underbrace{\mathbf{K}}_{\text{Kalman Gain}} \cdot \underbrace{(\mathbf{z} - \mathbf{H}\boldsymbol{\mu}_x)}_{\text{innovation}}
+$$
 
 | Term | Name | Meaning |
 |---|---|---|
@@ -901,7 +1131,9 @@ $$\underbrace{\boldsymbol{\mu}_{x|y}}_{\text{updated estimate}} = \underbrace{\b
 
 In 1D: $K = P/(P+R)$, so $1-K = R/(P+R)$, and:
 
-$$P_\text{new} = (1-K)P = \frac{R}{P+R}\cdot P = \frac{PR}{P+R}$$
+$$
+P_\text{new} = (1-K)P = \frac{R}{P+R}\cdot P = \frac{PR}{P+R}
+$$
 
 This is the harmonic-mean-like combination of $P$ and $R$. It is always $\leq\min(P,R)$ — the updated uncertainty is **always smaller than both the prior and the sensor noise**. Every measurement, no matter how noisy, reduces uncertainty.
 
@@ -919,11 +1151,15 @@ Innovation: $z - \mathbf{H}\boldsymbol{\mu}_x = 103 - 100 = 3$ m.
 
 Updated mean:
 
-$$\boldsymbol{\mu}_{x|y} = \begin{bmatrix}100\\2\end{bmatrix} + \begin{bmatrix}0.308\\0\end{bmatrix}\cdot 3 = \begin{bmatrix}100 + 0.923\\2 + 0\end{bmatrix} = \begin{bmatrix}100.92\text{ m}\\2\text{ m/s}\end{bmatrix}$$
+$$
+\boldsymbol{\mu}_{x|y} = \begin{bmatrix}100\\2\end{bmatrix} + \begin{bmatrix}0.308\\0\end{bmatrix}\cdot 3 = \begin{bmatrix}100 + 0.923\\2 + 0\end{bmatrix} = \begin{bmatrix}100.92\text{ m}\\2\text{ m/s}\end{bmatrix}
+$$
 
 Updated covariance:
 
-$$\mathbf{P}_{x|y} = \left(\mathbf{I} - \begin{bmatrix}0.308\\0\end{bmatrix}[1\quad 0]\right)\begin{bmatrix}4&0\\0&1\end{bmatrix} = \begin{bmatrix}1-0.308&0\\0&1\end{bmatrix}\begin{bmatrix}4&0\\0&1\end{bmatrix} = \begin{bmatrix}2.77&0\\0&1\end{bmatrix}$$
+$$
+\mathbf{P}_{x|y} = \left(\mathbf{I} - \begin{bmatrix}0.308\\0\end{bmatrix}[1\quad 0]\right)\begin{bmatrix}4&0\\0&1\end{bmatrix} = \begin{bmatrix}1-0.308&0\\0&1\end{bmatrix}\begin{bmatrix}4&0\\0&1\end{bmatrix} = \begin{bmatrix}2.77&0\\0&1\end{bmatrix}
+$$
 
 Altitude uncertainty dropped from $\sqrt{4}=2$ m to $\sqrt{2.77}=1.66$ m. Velocity unchanged (baro doesn't measure velocity, so $K_2=0$ — the velocity row of $\mathbf{K}$ is zero).
 
@@ -944,10 +1180,10 @@ Before the algorithm — every symbol defined precisely:
 | Symbol | Dimensions | Meaning |
 |---|---|---|
 | $\mathbf{x}_k$ | $n\times 1$ | True (unknown) state at time step $k$ |
-| $\hat{\mathbf{x}}_{k\|k-1}$ | $n\times 1$ | **Predicted** state at time $k$, given all observations up to $k-1$ |
-| $\hat{\mathbf{x}}_{k\|k}$ | $n\times 1$ | **Updated** state at time $k$, given all observations up to and including $k$ |
-| $\mathbf{P}_{k\|k-1}$ | $n\times n$ | **Predicted** error covariance — uncertainty of the prediction |
-| $\mathbf{P}_{k\|k}$ | $n\times n$ | **Updated** error covariance — uncertainty after fusing measurement $k$ |
+| $\hat{\mathbf{x}}_{k\mid k-1}$ | $n\times 1$ | **Predicted** state at time $k$, given all observations up to $k-1$ |
+| $\hat{\mathbf{x}}_{k\mid k}$ | $n\times 1$ | **Updated** state at time $k$, given all observations up to and including $k$ |
+| $\mathbf{P}_{k\mid k-1}$ | $n\times n$ | **Predicted** error covariance — uncertainty of the prediction |
+| $\mathbf{P}_{k\mid k}$ | $n\times n$ | **Updated** error covariance — uncertainty after fusing measurement $k$ |
 
 **Model matrices:**
 
@@ -963,13 +1199,13 @@ Before the algorithm — every symbol defined precisely:
 | Symbol | Dimensions | Meaning |
 |---|---|---|
 | $\mathbf{z}_k$ | $m\times 1$ | Measurement (sensor reading) at time $k$ |
-| $\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_{k\|k-1}$ | $m\times 1$ | **Innovation** — observed minus predicted measurement |
-| $\mathbf{S}_k = \mathbf{H}\mathbf{P}_{k\|k-1}\mathbf{H}^\top+\mathbf{R}$ | $m\times m$ | **Innovation covariance** — how uncertain is the predicted measurement? |
+| $\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_{k\mid k-1}$ | $m\times 1$ | **Innovation** — observed minus predicted measurement |
+| $\mathbf{S}_k = \mathbf{H}\mathbf{P}_{k\mid k-1}\mathbf{H}^\top+\mathbf{R}$ | $m\times m$ | **Innovation covariance** — how uncertain is the predicted measurement? |
 | $\mathbf{K}_k$ | $n\times m$ | **Kalman Gain** — how much to correct the state for a unit innovation |
 
-**The subscript notation $a\|b$:** "quantity at time $a$, given information up to time $b$."
-- $k\|k-1$ = predicted (before current measurement)
-- $k\|k$ = updated (after fusing current measurement)
+**The subscript notation $a\mid b$:** "quantity at time $a$, given information up to time $b$."
+- $k\mid k-1$ = predicted (before current measurement)
+- $k\mid k$ = updated (after fusing current measurement)
 
 ---
 
@@ -977,14 +1213,18 @@ Before the algorithm — every symbol defined precisely:
 
 **State evolution model:**
 
-$$\mathbf{x}_k = \mathbf{F}\mathbf{x}_{k-1} + \mathbf{w}_k, \qquad \mathbf{w}_k\sim\mathcal{N}(\mathbf{0},\mathbf{Q})$$
+$$
+\mathbf{x}_k = \mathbf{F}\mathbf{x}_{k-1} + \mathbf{w}_k, \qquad \mathbf{w}_k\sim\mathcal{N}(\mathbf{0},\mathbf{Q})
+$$
 
 - $\mathbf{F}$ models physics: constant velocity means $\mathbf{F}$ propagates position as $p \leftarrow p + v\Delta t$
 - $\mathbf{w}_k$ is the **process noise**: unmodeled forces, integration errors, wind gusts
 
 **Observation model:**
 
-$$\mathbf{z}_k = \mathbf{H}\mathbf{x}_k + \mathbf{v}_k, \qquad \mathbf{v}_k\sim\mathcal{N}(\mathbf{0},\mathbf{R})$$
+$$
+\mathbf{z}_k = \mathbf{H}\mathbf{x}_k + \mathbf{v}_k, \qquad \mathbf{v}_k\sim\mathcal{N}(\mathbf{0},\mathbf{R})
+$$
 
 - $\mathbf{H}$ selects which state components the sensor measures (e.g., GPS only sees position, not velocity)
 - $\mathbf{v}_k$ is the **measurement noise**: thermal noise, quantization, atmospheric effects
@@ -993,7 +1233,9 @@ $$\mathbf{z}_k = \mathbf{H}\mathbf{x}_k + \mathbf{v}_k, \qquad \mathbf{v}_k\sim\
 
 State $\mathbf{x}_k = \begin{bmatrix}h_k \\ \dot{h}_k\end{bmatrix}$ (altitude and vertical velocity). Barometer measures altitude directly.
 
-$$\mathbf{F} = \begin{bmatrix}1 & \Delta t\\0 & 1\end{bmatrix}, \quad \mathbf{Q} = \begin{bmatrix}\sigma_h^2 & 0\\0 & \sigma_{\dot{h}}^2\end{bmatrix}, \quad \mathbf{H} = \begin{bmatrix}1 & 0\end{bmatrix}, \quad R = \sigma_\text{baro}^2$$
+$$
+\mathbf{F} = \begin{bmatrix}1 & \Delta t\\0 & 1\end{bmatrix}, \quad \mathbf{Q} = \begin{bmatrix}\sigma_h^2 & 0\\0 & \sigma_{\dot{h}}^2\end{bmatrix}, \quad \mathbf{H} = \begin{bmatrix}1 & 0\end{bmatrix}, \quad R = \sigma_\text{baro}^2
+$$
 
 $\mathbf{F}$: "altitude at next step = current altitude + velocity × Δt; velocity unchanged." $\mathbf{H}$: "sensor reads the first state component (altitude) only."
 
@@ -1013,9 +1255,13 @@ The state at time $k$ is $\mathbf{x}_k = \mathbf{F}\mathbf{x}_{k-1} + \mathbf{w}
 
 Therefore:
 
-$$\boxed{\hat{\mathbf{x}}_{k|k-1} = \mathbf{F}\hat{\mathbf{x}}_{k-1|k-1}}$$
+$$
+\boxed{\hat{\mathbf{x}}_{k|k-1} = \mathbf{F}\hat{\mathbf{x}}_{k-1|k-1}}
+$$
 
-$$\boxed{\mathbf{P}_{k|k-1} = \mathbf{F}\mathbf{P}_{k-1|k-1}\mathbf{F}^\top + \mathbf{Q}}$$
+$$
+\boxed{\mathbf{P}_{k|k-1} = \mathbf{F}\mathbf{P}_{k-1|k-1}\mathbf{F}^\top + \mathbf{Q}}
+$$
 
 **Why does $\mathbf{P}$ grow in the predict step?** Adding process noise $\mathbf{Q}$ always increases uncertainty. The longer we run without a measurement, the more uncertain we become.
 
@@ -1029,7 +1275,9 @@ We now have:
 
 **By Property 4**: the joint $\begin{bmatrix}\mathbf{x}_k\\\mathbf{z}_k\end{bmatrix}$ is Gaussian with:
 
-$$\text{Cov}(\mathbf{x}_k,\mathbf{z}_k) = \mathbf{P}_{k|k-1}\mathbf{H}^\top, \quad \text{Cov}(\mathbf{z}_k,\mathbf{z}_k) = \mathbf{S}_k = \mathbf{H}\mathbf{P}_{k|k-1}\mathbf{H}^\top + \mathbf{R}$$
+$$
+\text{Cov}(\mathbf{x}_k,\mathbf{z}_k) = \mathbf{P}_{k|k-1}\mathbf{H}^\top, \quad \text{Cov}(\mathbf{z}_k,\mathbf{z}_k) = \mathbf{S}_k = \mathbf{H}\mathbf{P}_{k|k-1}\mathbf{H}^\top + \mathbf{R}
+$$
 
 **By Property 5**: the conditional $\mathbf{x}_k\mid\mathbf{z}_k$ is Gaussian. Using the formulas from Property 5 with:
 - $\boldsymbol{\mu}_x \leftarrow \hat{\mathbf{x}}_{k|k-1}$
@@ -1038,15 +1286,21 @@ $$\text{Cov}(\mathbf{x}_k,\mathbf{z}_k) = \mathbf{P}_{k|k-1}\mathbf{H}^\top, \qu
 
 The Kalman Gain:
 
-$$\boxed{\mathbf{K}_k = \mathbf{P}_{k|k-1}\mathbf{H}^\top(\mathbf{H}\mathbf{P}_{k|k-1}\mathbf{H}^\top + \mathbf{R})^{-1} = \mathbf{P}_{k|k-1}\mathbf{H}^\top\mathbf{S}_k^{-1}}$$
+$$
+\boxed{\mathbf{K}_k = \mathbf{P}_{k|k-1}\mathbf{H}^\top(\mathbf{H}\mathbf{P}_{k|k-1}\mathbf{H}^\top + \mathbf{R})^{-1} = \mathbf{P}_{k|k-1}\mathbf{H}^\top\mathbf{S}_k^{-1}}
+$$
 
 Updated mean:
 
-$$\boxed{\hat{\mathbf{x}}_{k|k} = \hat{\mathbf{x}}_{k|k-1} + \mathbf{K}_k(\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_{k|k-1})}$$
+$$
+\boxed{\hat{\mathbf{x}}_{k|k} = \hat{\mathbf{x}}_{k|k-1} + \mathbf{K}_k(\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_{k|k-1})}
+$$
 
 Updated covariance:
 
-$$\boxed{\mathbf{P}_{k|k} = (\mathbf{I}-\mathbf{K}_k\mathbf{H})\mathbf{P}_{k|k-1}}$$
+$$
+\boxed{\mathbf{P}_{k|k} = (\mathbf{I}-\mathbf{K}_k\mathbf{H})\mathbf{P}_{k|k-1}}
+$$
 
 ---
 
@@ -1054,17 +1308,25 @@ $$\boxed{\mathbf{P}_{k|k} = (\mathbf{I}-\mathbf{K}_k\mathbf{H})\mathbf{P}_{k|k-1
 
 Setup: $n=2$, $m=1$, $\Delta t = 0.1$ s.
 
-$$\mathbf{F} = \begin{bmatrix}1&0.1\\0&1\end{bmatrix}, \quad \mathbf{Q} = \begin{bmatrix}0.01&0\\0&0.1\end{bmatrix}, \quad \mathbf{H} = [1\;0], \quad R = 4$$
+$$
+\mathbf{F} = \begin{bmatrix}1&0.1\\0&1\end{bmatrix}, \quad \mathbf{Q} = \begin{bmatrix}0.01&0\\0&0.1\end{bmatrix}, \quad \mathbf{H} = [1\;0], \quad R = 4
+$$
 
 **Initial state:** $\hat{\mathbf{x}}_0 = \begin{bmatrix}100\\1\end{bmatrix}$ (100 m altitude, 1 m/s climb), $\mathbf{P}_0 = \begin{bmatrix}1&0\\0&0.1\end{bmatrix}$.
 
 **PREDICT (step $k=1$):**
 
-$$\hat{\mathbf{x}}_{1|0} = \begin{bmatrix}1&0.1\\0&1\end{bmatrix}\begin{bmatrix}100\\1\end{bmatrix} = \begin{bmatrix}100.1\\1\end{bmatrix}$$
+$$
+\hat{\mathbf{x}}_{1|0} = \begin{bmatrix}1&0.1\\0&1\end{bmatrix}\begin{bmatrix}100\\1\end{bmatrix} = \begin{bmatrix}100.1\\1\end{bmatrix}
+$$
 
-$$\mathbf{P}_{1|0} = \begin{bmatrix}1&0.1\\0&1\end{bmatrix}\begin{bmatrix}1&0\\0&0.1\end{bmatrix}\begin{bmatrix}1&0\\0.1&1\end{bmatrix} + \begin{bmatrix}0.01&0\\0&0.1\end{bmatrix}$$
+$$
+\mathbf{P}_{1|0} = \begin{bmatrix}1&0.1\\0&1\end{bmatrix}\begin{bmatrix}1&0\\0&0.1\end{bmatrix}\begin{bmatrix}1&0\\0.1&1\end{bmatrix} + \begin{bmatrix}0.01&0\\0&0.1\end{bmatrix}
+$$
 
-$$= \begin{bmatrix}1.01 & 0.1\\0.1 & 0.2\end{bmatrix}$$
+$$
+= \begin{bmatrix}1.01 & 0.1\\0.1 & 0.2\end{bmatrix}
+$$
 
 **Measurement arrives:** $z_1 = 102$ m (baro reads 102 m).
 
@@ -1078,11 +1340,15 @@ Innovation: $z_1 - \mathbf{H}\hat{\mathbf{x}}_{1|0} = 102 - 100.1 = 1.9$ m
 
 Updated state:
 
-$$\hat{\mathbf{x}}_{1|1} = \begin{bmatrix}100.1\\1\end{bmatrix} + \begin{bmatrix}0.201\\0.020\end{bmatrix}\cdot 1.9 = \begin{bmatrix}100.48\\1.038\end{bmatrix}$$
+$$
+\hat{\mathbf{x}}_{1|1} = \begin{bmatrix}100.1\\1\end{bmatrix} + \begin{bmatrix}0.201\\0.020\end{bmatrix}\cdot 1.9 = \begin{bmatrix}100.48\\1.038\end{bmatrix}
+$$
 
 Updated covariance:
 
-$$\mathbf{P}_{1|1} = \left(\mathbf{I} - \begin{bmatrix}0.201\\0.020\end{bmatrix}[1\;0]\right)\begin{bmatrix}1.01&0.1\\0.1&0.2\end{bmatrix} = \begin{bmatrix}0.799&0.0798\\0.080&0.198\end{bmatrix}$$
+$$
+\mathbf{P}_{1|1} = \left(\mathbf{I} - \begin{bmatrix}0.201\\0.020\end{bmatrix}[1\;0]\right)\begin{bmatrix}1.01&0.1\\0.1&0.2\end{bmatrix} = \begin{bmatrix}0.799&0.0798\\0.080&0.198\end{bmatrix}
+$$
 
 **Reading the result:** The altitude estimate moved from 100.1 m toward 102 m (the measurement), landing at 100.48 m. The altitude uncertainty dropped from $P_{11}=1.01$ to $P_{11}=0.799$ — we're now more confident because we fused a sensor reading.
 
@@ -1093,7 +1359,7 @@ $$\mathbf{P}_{1|1} = \left(\mathbf{I} - \begin{bmatrix}0.201\\0.020\end{bmatrix}
 The KF is **exact Bayesian inference** under the model assumptions. This means:
 
 1. **It computes the true posterior** $p(\mathbf{x}_k\mid\mathbf{z}_{1:k})$ — not an approximation.
-2. **It is the BLUE** (Best Linear Unbiased Estimator) — among all linear estimators, the KF minimizes the expected squared error $\mathbb{E}[\|\mathbf{x}_k-\hat{\mathbf{x}}_{k|k}\|^2]$.
+2. **It is the BLUE** (Best Linear Unbiased Estimator) — among all linear estimators, the KF minimizes the expected squared error $\mathbb{E}[\lVert\mathbf{x}_k-\hat{\mathbf{x}}_{k|k}\rVert^2]$.
 3. **Optimality is strict**: if the noise is truly Gaussian and the model is truly linear, no estimator can do better.
 
 The key condition: **Gaussian closure**. Because all 5 properties hold, every distribution that passes through the filter remains Gaussian. The filter never needs to represent a non-Gaussian shape — the mean vector and covariance matrix are always sufficient to describe everything.
@@ -1116,7 +1382,7 @@ t=k:   x_k ~ Gaussian      <- always exact, forever
 
 | Step | Gaussian property used | Formula it produces | Physical meaning |
 |---|---|---|---|
-| PREDICT — mean | Prop 1: $\mathbb{E}[\mathbf{F}\mathbf{x}] = \mathbf{F}\mathbb{E}[\mathbf{x}]$ | $\hat{\mathbf{x}}_{k\|k-1} = \mathbf{F}\hat{\mathbf{x}}_{k-1\|k-1}$ | State evolves by physics |
+| PREDICT — mean | Prop 1: $\mathbb{E}[\mathbf{F}\mathbf{x}] = \mathbf{F}\mathbb{E}[\mathbf{x}]$ | $\hat{\mathbf{x}}_{k\mid k-1} = \mathbf{F}\hat{\mathbf{x}}_{k-1\mid k-1}$ | State evolves by physics |
 | PREDICT — covariance | Prop 1: $\text{Cov}[\mathbf{F}\mathbf{x}]=\mathbf{F}\mathbf{P}\mathbf{F}^\top$ | $\mathbf{F}\mathbf{P}\mathbf{F}^\top$ term | Uncertainty evolves with state |
 | PREDICT — noise | Prop 2: Sum of Gaussians | $+\mathbf{Q}$ term | Model uncertainty grows $\mathbf{P}$ |
 | UPDATE — cross-cov | Prop 4: $\text{Cov}(\mathbf{x},\mathbf{y})=\mathbf{P}\mathbf{H}^\top$ | Numerator of $\mathbf{K}$ | How much state leaks into measurement |
@@ -1135,7 +1401,9 @@ The KF's closure relies entirely on **Property 1**: a linear transform of a Gaus
 
 Real drone dynamics are nonlinear. The state transition function $\mathbf{f}(\mathbf{x})$ contains:
 
-$$\mathbf{q}_{k+1} = \mathbf{q}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega})\,, \quad \mathbf{v}_{k+1} = \mathbf{v}_k + \mathbf{R}(\mathbf{q}_k)\,\mathbf{a}_\text{body}\,\Delta t + \mathbf{g}\,\Delta t$$
+$$
+\mathbf{q}_{k+1} = \mathbf{q}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega})\,, \quad \mathbf{v}_{k+1} = \mathbf{v}_k + \mathbf{R}(\mathbf{q}_k)\,\mathbf{a}_\text{body}\,\Delta t + \mathbf{g}\,\Delta t
+$$
 
 The rotation matrix $\mathbf{R}(\mathbf{q})$ is a **nonlinear** function of $\mathbf{q}$ (it involves products of quaternion components). Quaternion multiplication $\otimes$ is also nonlinear. So if $\mathbf{x}\sim\mathcal{N}(\boldsymbol{\mu},\mathbf{P})$, then $\mathbf{f}(\mathbf{x})$ is **not Gaussian** in general:
 
@@ -1152,14 +1420,16 @@ The EKF solution: approximate $\mathbf{f}$ as linear at each step using a **firs
 
 The standard EKF operates in a flat Euclidean state space $\mathbb{R}^n$. Attitude — the orientation of a rigid body — does not live in $\mathbb{R}^n$. It lives on the **Special Orthogonal group** SO(3), a 3-dimensional curved manifold.
 
-PX4 represents attitude as a unit quaternion $\mathbf{q} = (q_w, q_x, q_y, q_z)$ with $\|\mathbf{q}\|=1$. This has:
+PX4 represents attitude as a unit quaternion $\mathbf{q} = (q_w, q_x, q_y, q_z)$ with $\lVert\mathbf{q}\rVert=1$. This has:
 - **4 numbers** to store
 - **3 degrees of freedom** (the unit-norm constraint removes one)
 - **Non-Euclidean composition**: rotations compose by multiplication $\mathbf{q}_1\otimes\mathbf{q}_2$, not by addition
 
 **The fundamental breakdown:** if you naively add a Gaussian perturbation to $\mathbf{q}$:
 
-$$\mathbf{q} + \delta\mathbf{q} \quad\Rightarrow\quad \|\mathbf{q}+\delta\mathbf{q}\| \neq 1 \quad\text{(no longer a valid quaternion)}$$
+$$
+\mathbf{q} + \delta\mathbf{q} \quad\Rightarrow\quad \lVert\mathbf{q}+\delta\mathbf{q}\rVert \neq 1 \quad\text{(no longer a valid quaternion)}
+$$
 
 The covariance matrix $\mathbf{P}$ operates in $\mathbb{R}^n$ (flat space). Adding $\mathbf{P}$-weighted Gaussian noise to $\mathbf{q}$ takes you off the unit sphere — the result is not a rotation. This means:
 
@@ -1175,7 +1445,9 @@ The covariance matrix $\mathbf{P}$ operates in $\mathbb{R}^n$ (flat space). Addi
 
 The Error-State EKF (ESKF) solves both the nonlinearity and the manifold problems simultaneously by splitting the state into two parts:
 
-$$\mathbf{x}_\text{true} = \mathbf{x}_\text{nom} \boxplus \delta\mathbf{x}$$
+$$
+\mathbf{x}_\text{true} = \mathbf{x}_\text{nom} \boxplus \delta\mathbf{x}
+$$
 
 | Component | Lives in | Updated how | Role |
 |---|---|---|---|
@@ -1186,7 +1458,9 @@ For attitude specifically:
 - **Nominal:** quaternion $\mathbf{q}_\text{nom}$ — always on the unit sphere, propagated via $\mathbf{q}\otimes\Delta\mathbf{q}$
 - **Error:** rotation vector $\delta\boldsymbol{\theta}\in\mathbb{R}^3$ — the small rotation that takes $\mathbf{q}_\text{nom}$ to $\mathbf{q}_\text{true}$:
 
-$$\mathbf{q}_\text{true} = \mathbf{q}_\text{nom}\otimes\delta\mathbf{q}(\delta\boldsymbol{\theta})\,, \qquad \delta\mathbf{q}(\delta\boldsymbol{\theta})\approx\begin{bmatrix}1\\\delta\boldsymbol{\theta}/2\end{bmatrix} \quad\text{(valid quaternion, on sphere)}$$
+$$
+\mathbf{q}_\text{true} = \mathbf{q}_\text{nom}\otimes\delta\mathbf{q}(\delta\boldsymbol{\theta})\,, \qquad \delta\mathbf{q}(\delta\boldsymbol{\theta})\approx\begin{bmatrix}1\\\delta\boldsymbol{\theta}/2\end{bmatrix} \quad\text{(valid quaternion, on sphere)}
+$$
 
 The key insight: $\delta\boldsymbol{\theta}$ is **always small** (it is zeroed at every update), so the linearization of the error dynamics around $\delta\boldsymbol{\theta}=\mathbf{0}$ is always accurate — regardless of how large the nominal attitude is.
 
@@ -1216,7 +1490,9 @@ The 24-dimensional error state is not arbitrary — it is the result of a delibe
 
 These are the minimum states for dead reckoning. Without them, you cannot integrate IMU data into a position estimate at all.
 
-$$\underbrace{\delta\boldsymbol{\theta}}_{3} + \underbrace{\delta\mathbf{v}}_{3} + \underbrace{\delta\mathbf{p}}_{3} = 9 \text{ states}$$
+$$
+\underbrace{\delta\boldsymbol{\theta}}_{3} + \underbrace{\delta\mathbf{v}}_{3} + \underbrace{\delta\mathbf{p}}_{3} = 9 \text{ states}
+$$
 
 **Group 2 — IMU biases (6 states: gyro bias + accel bias):**
 
@@ -1224,7 +1500,9 @@ IMU biases are the primary source of INS drift. Without estimating them online, 
 
 *Observable via:* GPS position fix allows the filter to back-compute what IMU bias must have caused the accumulated error. The bias states converge when GPS is available and remain estimated during GPS outages.
 
-$$\underbrace{\delta\mathbf{b}_g}_{3} + \underbrace{\delta\mathbf{b}_a}_{3} = 6 \text{ states}$$
+$$
+\underbrace{\delta\mathbf{b}_g}_{3} + \underbrace{\delta\mathbf{b}_a}_{3} = 6 \text{ states}
+$$
 
 **Group 3 — Magnetic field model (6 states: inertial + body frame):**
 
@@ -1232,7 +1510,9 @@ Magnetic field $\mathbf{m}_I\in\mathbb{R}^3$ varies by geographic location (unkn
 
 *Observable via:* magnetometer readings fused over time as attitude changes, allowing separation of $\mathbf{m}_I$ and $\mathbf{m}_B$.
 
-$$\underbrace{\delta\mathbf{m}_I}_{3} + \underbrace{\delta\mathbf{m}_B}_{3} = 6 \text{ states}$$
+$$
+\underbrace{\delta\mathbf{m}_I}_{3} + \underbrace{\delta\mathbf{m}_B}_{3} = 6 \text{ states}
+$$
 
 **Group 4 — Wind velocity (2 states: NE components):**
 
@@ -1240,7 +1520,9 @@ Wind affects airspeed-based navigation (fixed-wing). Without wind estimation, ai
 
 *Observable via:* airspeed sensor + GPS ground speed — their difference reveals wind.
 
-$$\underbrace{\delta\mathbf{w}}_{\text{NE}} = 2 \text{ states}$$
+$$
+\underbrace{\delta\mathbf{w}}_{\text{NE}} = 2 \text{ states}
+$$
 
 **Group 5 — Terrain height (1 state):**
 
@@ -1248,7 +1530,9 @@ The absolute terrain height above the home point, used for rangefinder-based alt
 
 *Observable via:* downward-facing rangefinder (measures distance to terrain directly).
 
-$$\underbrace{\delta h}_{1} = 1 \text{ state}$$
+$$
+\underbrace{\delta h}_{1} = 1 \text{ state}
+$$
 
 **Total:** $9 + 6 + 6 + 2 + 1 = 24$
 
@@ -1270,10 +1554,21 @@ $$\underbrace{\delta h}_{1} = 1 \text{ state}$$
 
 **The continuous-time error-state model does exist.** Differentiating the error kinematics gives:
 
-$$\dot{\delta\boldsymbol{\theta}} = -[\boldsymbol{\omega}_c]_\times\,\delta\boldsymbol{\theta} - \delta\mathbf{b}_g + \mathbf{n}_g$$
-$$\dot{\delta\mathbf{v}} = -\mathbf{R}_\text{nom}[\mathbf{a}_b]_\times\,\delta\boldsymbol{\theta} - \mathbf{R}_\text{nom}\,\delta\mathbf{b}_a + \mathbf{n}_a$$
-$$\dot{\delta\mathbf{p}} = \delta\mathbf{v}$$
-$$\dot{\delta\mathbf{b}}_g = \mathbf{w}_{bg}\,, \quad \dot{\delta\mathbf{b}}_a = \mathbf{w}_{ba}\,, \;\ldots$$
+$$
+\dot{\delta\boldsymbol{\theta}} = -[\boldsymbol{\omega}_c]_\times\,\delta\boldsymbol{\theta} - \delta\mathbf{b}_g + \mathbf{n}_g
+$$
+
+$$
+\dot{\delta\mathbf{v}} = -\mathbf{R}_\text{nom}[\mathbf{a}_b]_\times\,\delta\boldsymbol{\theta} - \mathbf{R}_\text{nom}\,\delta\mathbf{b}_a + \mathbf{n}_a
+$$
+
+$$
+\dot{\delta\mathbf{p}} = \delta\mathbf{v}
+$$
+
+$$
+\dot{\delta\mathbf{b}}_g = \mathbf{w}_{bg}\,, \quad \dot{\delta\mathbf{b}}_a = \mathbf{w}_{ba}\,, \;\ldots
+$$
 
 Stacked: $\dot{\delta\mathbf{x}} = \mathbf{F}_c\,\delta\mathbf{x} + \mathbf{G}_c\,\mathbf{w}$
 
@@ -1285,15 +1580,19 @@ where $\mathbf{F}_c\in\mathbb{R}^{24\times 24}$ is the **continuous-time state m
 
 **Reason 2 — Exact discretization is too expensive.** The exact discrete-time equivalent of $\dot{\mathbf{x}} = \mathbf{F}_c\mathbf{x}$ is:
 
-$$\mathbf{x}_{k+1} = \underbrace{e^{\mathbf{F}_c\Delta t}}_{\mathbf{F}_d}\mathbf{x}_k$$
+$$
+\mathbf{x}_{k+1} = \underbrace{e^{\mathbf{F}_c\Delta t}}_{\mathbf{F}_d}\mathbf{x}_k
+$$
 
 Computing the **matrix exponential** $e^{\mathbf{F}_c\Delta t}$ (a $24\times 24$ matrix) at every IMU sample (250–1000 Hz) is impractical on embedded hardware. It requires either Padé approximation or eigendecomposition — both $O(n^3)$ per step.
 
 **Reason 3 — First-order approximation is accurate enough.** For small $\Delta t$:
 
-$$e^{\mathbf{F}_c\Delta t} = \mathbf{I} + \mathbf{F}_c\Delta t + \frac{(\mathbf{F}_c\Delta t)^2}{2!} + \ldots \approx \mathbf{I} + \mathbf{F}_c\Delta t$$
+$$
+e^{\mathbf{F}_c\Delta t} = \mathbf{I} + \mathbf{F}_c\Delta t + \frac{(\mathbf{F}_c\Delta t)^2}{2!} + \ldots \approx \mathbf{I} + \mathbf{F}_c\Delta t
+$$
 
-The truncation error is $O(\|\mathbf{F}_c\|^2\Delta t^2)$. At 1 kHz with typical drone dynamics ($\|\mathbf{F}_c\|\lesssim 10$ rad/s), $\|\mathbf{F}_c\|^2\Delta t^2 \approx 10^{-4}$ — less than 0.01% per step.
+The truncation error is $O(\lVert\mathbf{F}_c\rVert^2\Delta t^2)$. At 1 kHz with typical drone dynamics ($\lVert\mathbf{F}_c\rVert\lesssim 10$ rad/s), $\lVert\mathbf{F}_c\rVert^2\Delta t^2 \approx 10^{-4}$ — less than 0.01% per step.
 
 **The connection between continuous $\mathbf{F}_c$ and discrete $\mathbf{F}_k$:**
 
@@ -1314,12 +1613,10 @@ The truncation error is $O(\|\mathbf{F}_c\|^2\Delta t^2)$. At 1 kHz with typical
 The ESKF tracks an **error state** $\delta\mathbf{x}\in\mathbb{R}^{24}$ — the perturbation of the true state around the nominal trajectory. This is the vector whose covariance $\mathbf{P}$ (24×24) the filter maintains.
 
 **The 24-dimensional error state vector:**
-
 $$\delta\mathbf{x} = \begin{bmatrix}
 \delta\boldsymbol{\theta} \\ \delta\mathbf{v} \\ \delta\mathbf{p} \\ \delta\mathbf{b}_g \\ \delta\mathbf{b}_a \\ \delta\mathbf{m}_I \\ \delta\mathbf{m}_B \\ \delta\mathbf{w} \\ \delta h
 \end{bmatrix}
 \in\mathbb{R}^{24}$$
-
 | Component | Indices | Size | Physical meaning | Code field |
 |---|---|---|---|---|
 | $\delta\boldsymbol{\theta}$ | 0–2 | 3 | Attitude error (rotation vector, body frame) | `State::quat_nominal` (3 DoF in error state) |
@@ -1360,25 +1657,33 @@ Each IMU sample brings: $\tilde{\boldsymbol{\omega}}$ (gyro measurement) and $\t
 
 The **true IMU measurements** include bias and noise:
 
-$$\tilde{\boldsymbol{\omega}} = \boldsymbol{\omega}_\text{true} + \mathbf{b}_g + \mathbf{n}_g\,, \qquad \tilde{\mathbf{a}} = \mathbf{a}_\text{true} + \mathbf{b}_a + \mathbf{n}_a$$
+$$
+\tilde{\boldsymbol{\omega}} = \boldsymbol{\omega}_\text{true} + \mathbf{b}_g + \mathbf{n}_g\,, \qquad \tilde{\mathbf{a}} = \mathbf{a}_\text{true} + \mathbf{b}_a + \mathbf{n}_a
+$$
 
 where $\mathbf{n}_g\sim\mathcal{N}(\mathbf{0},\sigma_g^2\mathbf{I})$ and $\mathbf{n}_a\sim\mathcal{N}(\mathbf{0},\sigma_a^2\mathbf{I})$ are white noise processes.
 
 The **corrected IMU** (bias-subtracted) measurements:
 
-$$\boldsymbol{\omega}_c = \tilde{\boldsymbol{\omega}} - \mathbf{b}_g \approx \boldsymbol{\omega}_\text{true} + \mathbf{n}_g\,, \qquad \mathbf{a}_c = \tilde{\mathbf{a}} - \mathbf{b}_a \approx \mathbf{a}_\text{true} + \mathbf{n}_a$$
+$$
+\boldsymbol{\omega}_c = \tilde{\boldsymbol{\omega}} - \mathbf{b}_g \approx \boldsymbol{\omega}_\text{true} + \mathbf{n}_g\,, \qquad \mathbf{a}_c = \tilde{\mathbf{a}} - \mathbf{b}_a \approx \mathbf{a}_\text{true} + \mathbf{n}_a
+$$
 
 The **nonlinear nominal state propagation** (no noise — this is the deterministic part):
 
 **Equation F1 — Attitude kinematics (quaternion):**
 
-$$\mathbf{q}_{k+1} = \mathbf{q}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega}_c \,\Delta t)$$
+$$
+\mathbf{q}_{k+1} = \mathbf{q}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega}_c \,\Delta t)
+$$
 
 where $\Delta\mathbf{q}(\boldsymbol{\phi})$ is the unit quaternion for rotation vector $\boldsymbol{\phi}$:
 
-$$\Delta\mathbf{q}(\boldsymbol{\phi}) = \begin{bmatrix}\cos\!\left(\|\boldsymbol{\phi}\|/2\right) \\ \sin\!\left(\|\boldsymbol{\phi}\|/2\right)\cdot\hat{\boldsymbol{\phi}}\end{bmatrix}\,, \qquad \hat{\boldsymbol{\phi}} = \boldsymbol{\phi}/\|\boldsymbol{\phi}\|$$
+$$
+\Delta\mathbf{q}(\boldsymbol{\phi}) = \begin{bmatrix}\cos\!\left(\lVert\boldsymbol{\phi}\rVert/2\right) \\ \sin\!\left(\lVert\boldsymbol{\phi}\rVert/2\right)\cdot\hat{\boldsymbol{\phi}}\end{bmatrix}\,, \qquad \hat{\boldsymbol{\phi}} = \boldsymbol{\phi}/\lVert\boldsymbol{\phi}\rVert
+$$
 
-For small $\|\boldsymbol{\phi}\| = \|\boldsymbol{\omega}_c\|\Delta t \ll 1$: $\Delta\mathbf{q} \approx \begin{bmatrix}1 \\ \boldsymbol{\phi}/2\end{bmatrix}$ (first-order).
+For small $\lVert\boldsymbol{\phi}\rVert = \lVert\boldsymbol{\omega}_c\rVert\Delta t \ll 1$: $\Delta\mathbf{q} \approx \begin{bmatrix}1 \\ \boldsymbol{\phi}/2\end{bmatrix}$ (first-order).
 
 **In PX4 code** (`ekf.cpp: predictState()`):
 ```cpp
@@ -1390,7 +1695,9 @@ _state.quat_nominal = (_state.quat_nominal * dq).normalized();
 
 **Equation F2 — Velocity kinematics (NED frame):**
 
-$$\mathbf{v}_{k+1} = \mathbf{v}_k + \mathbf{R}(\mathbf{q}_k)\,\mathbf{a}_c\,\Delta t + \mathbf{g}\,\Delta t$$
+$$
+\mathbf{v}_{k+1} = \mathbf{v}_k + \mathbf{R}(\mathbf{q}_k)\,\mathbf{a}_c\,\Delta t + \mathbf{g}\,\Delta t
+$$
 
 where:
 - $\mathbf{R}(\mathbf{q}_k)\in\mathbb{R}^{3\times 3}$ is the rotation matrix from body to NED frame (DCM), constructed from the current quaternion
@@ -1398,13 +1705,11 @@ where:
 - $\mathbf{g} = [0,\, 0,\, +g]^\top$ in NED convention ($+Z$ pointing down, $g \approx 9.81$ m/s²)
 
 The rotation matrix $\mathbf{R}(\mathbf{q})$ in terms of quaternion components $[q_w, q_x, q_y, q_z]$:
-
 $$\mathbf{R}(\mathbf{q}) = \begin{bmatrix}
 1 - 2(q_y^2+q_z^2) & 2(q_xq_y - q_wq_z) & 2(q_xq_z + q_wq_y) \\
 2(q_xq_y + q_wq_z) & 1 - 2(q_x^2+q_z^2) & 2(q_yq_z - q_wq_x) \\
 2(q_xq_z - q_wq_y) & 2(q_yq_z + q_wq_x) & 1 - 2(q_x^2+q_y^2)
 \end{bmatrix}$$
-
 This is the source of nonlinearity — $\mathbf{R}$ is a quadratic function of the quaternion components.
 
 **In PX4 code:**
@@ -1418,7 +1723,9 @@ _state.vel += gravity_acceleration * dt;            // + g·Δt
 
 **Equation F3 — Position kinematics:**
 
-$$\mathbf{p}_{k+1} = \mathbf{p}_k + \tfrac{1}{2}(\mathbf{v}_k + \mathbf{v}_{k+1})\,\Delta t$$
+$$
+\mathbf{p}_{k+1} = \mathbf{p}_k + \tfrac{1}{2}(\mathbf{v}_k + \mathbf{v}_{k+1})\,\Delta t
+$$
 
 (Trapezoidal integration — more accurate than Euler for velocity.)
 
@@ -1433,7 +1740,9 @@ _gpos += (vel_last + _state.vel) * imu_delayed.delta_vel_dt * 0.5f;
 
 All biases and auxiliary states are modeled as **random walks** (no deterministic drift):
 
-$$\mathbf{b}_{g,k+1} = \mathbf{b}_{g,k}\,, \quad \mathbf{b}_{a,k+1} = \mathbf{b}_{a,k}\,, \quad \mathbf{m}_{I,k+1} = \mathbf{m}_{I,k}\,, \quad \mathbf{m}_{B,k+1} = \mathbf{m}_{B,k}\,, \quad \mathbf{w}_{k+1} = \mathbf{w}_k\,, \quad h_{k+1} = h_k$$
+$$
+\mathbf{b}_{g,k+1} = \mathbf{b}_{g,k}\,, \quad \mathbf{b}_{a,k+1} = \mathbf{b}_{a,k}\,, \quad \mathbf{m}_{I,k+1} = \mathbf{m}_{I,k}\,, \quad \mathbf{m}_{B,k+1} = \mathbf{m}_{B,k}\,, \quad \mathbf{w}_{k+1} = \mathbf{w}_k\,, \quad h_{k+1} = h_k
+$$
 
 The randomness (how biases drift) is captured in the process noise $\mathbf{Q}$, not in the mean evolution.
 
@@ -1451,11 +1760,15 @@ The randomness (how biases drift) is captured in the process noise $\mathbf{Q}$,
 
 For small $\delta\mathbf{x}_k$, Taylor-expand $\mathbf{f}(\mathbf{x}_\text{nom} \boxplus \delta\mathbf{x})$ around $\delta\mathbf{x} = \mathbf{0}$:
 
-$$\mathbf{f}(\mathbf{x}_\text{nom} \boxplus \delta\mathbf{x}) \approx \mathbf{f}(\mathbf{x}_\text{nom}) + \underbrace{\left.\frac{\partial\,[\mathbf{f}(\mathbf{x}_\text{nom}\boxplus\delta\mathbf{x})\ominus\mathbf{f}(\mathbf{x}_\text{nom})]}{\partial\,\delta\mathbf{x}}\right|_{\delta\mathbf{x}=\mathbf{0}}}_{\mathbf{F}_k,\;24\times 24}\delta\mathbf{x}_k$$
+$$
+\mathbf{f}(\mathbf{x}_\text{nom} \boxplus \delta\mathbf{x}) \approx \mathbf{f}(\mathbf{x}_\text{nom}) + \underbrace{\left.\frac{\partial\,[\mathbf{f}(\mathbf{x}_\text{nom}\boxplus\delta\mathbf{x})\ominus\mathbf{f}(\mathbf{x}_\text{nom})]}{\partial\,\delta\mathbf{x}}\right|_{\delta\mathbf{x}=\mathbf{0}}}_{\mathbf{F}_k,\;24\times 24}\delta\mathbf{x}_k
+$$
 
 This gives the **linearized error dynamics**:
 
-$$\boxed{\delta\mathbf{x}_{k+1} \approx \mathbf{F}_k\,\delta\mathbf{x}_k + \mathbf{G}_k\,\mathbf{n}_k}$$
+$$
+\boxed{\delta\mathbf{x}_{k+1} \approx \mathbf{F}_k\,\delta\mathbf{x}_k + \mathbf{G}_k\,\mathbf{n}_k}
+$$
 
 where:
 - $\mathbf{F}_k$ is the **state transition Jacobian** (24×24) — how error propagates
@@ -1464,11 +1777,15 @@ where:
 
 By Property 1 (linear transform of Gaussian) and Property 2 (sum of Gaussians), the error covariance propagates as:
 
-$$\boxed{\mathbf{P}_{k+1} = \mathbf{F}_k\,\mathbf{P}_k\,\mathbf{F}_k^\top + \mathbf{G}_k\,\mathbf{Q}_c\,\mathbf{G}_k^\top}$$
+$$
+\boxed{\mathbf{P}_{k+1} = \mathbf{F}_k\,\mathbf{P}_k\,\mathbf{F}_k^\top + \mathbf{G}_k\,\mathbf{Q}_c\,\mathbf{G}_k^\top}
+$$
 
 The term $\mathbf{G}_k\,\mathbf{Q}_c\,\mathbf{G}_k^\top$ is typically absorbed into a single discrete process noise matrix $\mathbf{Q}$:
 
-$$\mathbf{P}_{k+1} = \mathbf{F}_k\,\mathbf{P}_k\,\mathbf{F}_k^\top + \mathbf{Q}$$
+$$
+\mathbf{P}_{k+1} = \mathbf{F}_k\,\mathbf{P}_k\,\mathbf{F}_k^\top + \mathbf{Q}
+$$
 
 **In PX4 code**, `predictCovariance()` in `covariance.cpp` computes this using auto-generated SymPy expressions (the explicit $\mathbf{F}$ and $\mathbf{Q}$ derivations below are exactly what that script produces).
 
@@ -1490,7 +1807,9 @@ $\mathbf{F}_k$ is a $24\times 24$ matrix. Most off-diagonal blocks are zero; onl
 
 **Setup:** The true quaternion is $\mathbf{q}_\text{true} = \mathbf{q}_\text{nom}\otimes\delta\mathbf{q}$, where for small $\delta\boldsymbol{\theta}$:
 
-$$\delta\mathbf{q} \approx \begin{bmatrix}1\\\delta\boldsymbol{\theta}/2\end{bmatrix}$$
+$$
+\delta\mathbf{q} \approx \begin{bmatrix}1\\\delta\boldsymbol{\theta}/2\end{bmatrix}
+$$
 
 After one IMU step with corrected angular rate $\boldsymbol{\omega}_c - \delta\mathbf{b}_g$:
 
@@ -1499,25 +1818,37 @@ After one IMU step with corrected angular rate $\boldsymbol{\omega}_c - \delta\m
 
 The **error quaternion at step $k+1$**:
 
-$$\delta\mathbf{q}_{k+1} = \mathbf{q}_\text{nom,k+1}^{-1}\otimes\mathbf{q}_\text{true,k+1}$$
+$$
+\delta\mathbf{q}_{k+1} = \mathbf{q}_\text{nom,k+1}^{-1}\otimes\mathbf{q}_\text{true,k+1}
+$$
 
 Substituting both:
 
-$$\delta\mathbf{q}_{k+1} = \underbrace{\Delta\mathbf{q}(\Delta\boldsymbol{\phi})^{-1}}_{\Delta\mathbf{q}(-\Delta\boldsymbol{\phi})}\otimes\underbrace{\mathbf{q}_\text{nom,k}^{-1}\otimes\mathbf{q}_\text{nom,k}}_{=\mathbf{1}}\otimes\delta\mathbf{q}_k\otimes\Delta\mathbf{q}(\Delta\boldsymbol{\phi} - \delta\mathbf{b}_g\Delta t)$$
+$$
+\delta\mathbf{q}_{k+1} = \underbrace{\Delta\mathbf{q}(\Delta\boldsymbol{\phi})^{-1}}_{\Delta\mathbf{q}(-\Delta\boldsymbol{\phi})}\otimes\underbrace{\mathbf{q}_\text{nom,k}^{-1}\otimes\mathbf{q}_\text{nom,k}}_{=\mathbf{1}}\otimes\delta\mathbf{q}_k\otimes\Delta\mathbf{q}(\Delta\boldsymbol{\phi} - \delta\mathbf{b}_g\Delta t)
+$$
 
-$$= \Delta\mathbf{q}(-\Delta\boldsymbol{\phi})\otimes\delta\mathbf{q}_k\otimes\Delta\mathbf{q}(\Delta\boldsymbol{\phi})\otimes\underbrace{\Delta\mathbf{q}(-\delta\mathbf{b}_g\Delta t)}_{\approx\,[1,\,-\delta\mathbf{b}_g\Delta t/2]^\top}$$
+$$
+= \Delta\mathbf{q}(-\Delta\boldsymbol{\phi})\otimes\delta\mathbf{q}_k\otimes\Delta\mathbf{q}(\Delta\boldsymbol{\phi})\otimes\underbrace{\Delta\mathbf{q}(-\delta\mathbf{b}_g\Delta t)}_{\approx\,[1,\,-\delta\mathbf{b}_g\Delta t/2]^\top}
+$$
 
 The product $\Delta\mathbf{q}(-\Delta\boldsymbol{\phi})\otimes\delta\mathbf{q}_k\otimes\Delta\mathbf{q}(\Delta\boldsymbol{\phi})$ is a **conjugation** of $\delta\mathbf{q}$ by $\Delta\mathbf{q}$. In rotation-vector terms, this rotates the error vector by the nominal rotation $\Delta\boldsymbol{\phi}$:
 
-$$\delta\boldsymbol{\theta}\;\xrightarrow{\text{conjugation by }\Delta\mathbf{q}}\;\mathbf{R}(\Delta\mathbf{q}(-\Delta\boldsymbol{\phi}))\cdot\delta\boldsymbol{\theta} = \mathbf{R}(\Delta\boldsymbol{\phi})^\top\cdot\delta\boldsymbol{\theta}$$
+$$
+\delta\boldsymbol{\theta}\;\xrightarrow{\text{conjugation by }\Delta\mathbf{q}}\;\mathbf{R}(\Delta\mathbf{q}(-\Delta\boldsymbol{\phi}))\cdot\delta\boldsymbol{\theta} = \mathbf{R}(\Delta\boldsymbol{\phi})^\top\cdot\delta\boldsymbol{\theta}
+$$
 
 For small $\Delta\boldsymbol{\phi}$, $\mathbf{R}(\Delta\boldsymbol{\phi})^\top \approx \mathbf{I} - [\Delta\boldsymbol{\phi}]_\times$. So:
 
-$$\delta\boldsymbol{\theta}_{k+1} \approx (\mathbf{I} - [\Delta\boldsymbol{\phi}]_\times)\,\delta\boldsymbol{\theta}_k - \Delta t\,\delta\mathbf{b}_g$$
+$$
+\delta\boldsymbol{\theta}_{k+1} \approx (\mathbf{I} - [\Delta\boldsymbol{\phi}]_\times)\,\delta\boldsymbol{\theta}_k - \Delta t\,\delta\mathbf{b}_g
+$$
 
-$$\boxed{\mathbf{F}_{\theta\theta} = \mathbf{I} - [\Delta\boldsymbol{\phi}]_\times\,, \qquad \Delta\boldsymbol{\phi} = \boldsymbol{\omega}_c\,\Delta t}$$
+$$
+\boxed{\mathbf{F}_{\theta\theta} = \mathbf{I} - [\Delta\boldsymbol{\phi}]_\times\,, \qquad \Delta\boldsymbol{\phi} = \boldsymbol{\omega}_c\,\Delta t}
+$$
 
-For IMU rate $\geq 250$ Hz, $\Delta t \leq 4$ ms, and typical drone rates $\|\boldsymbol{\omega}\|\leq 10$ rad/s, so $\|\Delta\boldsymbol{\phi}\| \leq 0.04$ rad — $[\Delta\boldsymbol{\phi}]_\times$ is at most a 4% correction to the identity. At low rates (e.g., 100 Hz), this term matters.
+For IMU rate $\geq 250$ Hz, $\Delta t \leq 4$ ms, and typical drone rates $\lVert\boldsymbol{\omega}\rVert\leq 10$ rad/s, so $\lVert\Delta\boldsymbol{\phi}\rVert \leq 0.04$ rad — $[\Delta\boldsymbol{\phi}]_\times$ is at most a 4% correction to the identity. At low rates (e.g., 100 Hz), this term matters.
 
 ---
 
@@ -1525,9 +1856,13 @@ For IMU rate $\geq 250$ Hz, $\Delta t \leq 4$ ms, and typical drone rates $\|\bo
 
 From the same derivation above, the gyro bias error contribution to the attitude error is:
 
-$$\delta\boldsymbol{\theta}_{k+1} \supset -\Delta t\,\delta\mathbf{b}_g$$
+$$
+\delta\boldsymbol{\theta}_{k+1} \supset -\Delta t\,\delta\mathbf{b}_g
+$$
 
-$$\boxed{\mathbf{F}_{\theta b_g} = -\Delta t\,\mathbf{I}_{3\times 3}}$$
+$$
+\boxed{\mathbf{F}_{\theta b_g} = -\Delta t\,\mathbf{I}_{3\times 3}}
+$$
 
 **Physical meaning:** A gyro bias error of 1 rad/s causes attitude to drift at 1 rad/s — it directly drives the attitude error. After $\Delta t$ seconds, the accumulated error is $\Delta t\,\delta\mathbf{b}_g$.
 
@@ -1539,29 +1874,43 @@ $$\boxed{\mathbf{F}_{\theta b_g} = -\Delta t\,\mathbf{I}_{3\times 3}}$$
 
 True and nominal:
 
-$$\delta\mathbf{v}_{k+1} = \delta\mathbf{v}_k + [\mathbf{R}(\mathbf{q}_\text{true,k}) - \mathbf{R}(\mathbf{q}_\text{nom,k})]\,\mathbf{a}_b\,\Delta t - \mathbf{R}_\text{nom}\,\delta\mathbf{b}_a\,\Delta t$$
+$$
+\delta\mathbf{v}_{k+1} = \delta\mathbf{v}_k + [\mathbf{R}(\mathbf{q}_\text{true,k}) - \mathbf{R}(\mathbf{q}_\text{nom,k})]\,\mathbf{a}_b\,\Delta t - \mathbf{R}_\text{nom}\,\delta\mathbf{b}_a\,\Delta t
+$$
 
 For the attitude perturbation (right perturbation, $\delta\boldsymbol{\theta}$ in body frame):
 
-$$\mathbf{R}(\mathbf{q}_\text{true}) = \mathbf{R}(\mathbf{q}_\text{nom}\otimes\delta\mathbf{q}) \approx \mathbf{R}_\text{nom}\cdot(\mathbf{I} + [\delta\boldsymbol{\theta}]_\times)$$
+$$
+\mathbf{R}(\mathbf{q}_\text{true}) = \mathbf{R}(\mathbf{q}_\text{nom}\otimes\delta\mathbf{q}) \approx \mathbf{R}_\text{nom}\cdot(\mathbf{I} + [\delta\boldsymbol{\theta}]_\times)
+$$
 
 Therefore:
 
-$$\mathbf{R}(\mathbf{q}_\text{true})\,\mathbf{a}_b - \mathbf{R}_\text{nom}\,\mathbf{a}_b \approx \mathbf{R}_\text{nom}\,[\delta\boldsymbol{\theta}]_\times\,\mathbf{a}_b$$
+$$
+\mathbf{R}(\mathbf{q}_\text{true})\,\mathbf{a}_b - \mathbf{R}_\text{nom}\,\mathbf{a}_b \approx \mathbf{R}_\text{nom}\,[\delta\boldsymbol{\theta}]_\times\,\mathbf{a}_b
+$$
 
 Using the vector identity $[\mathbf{u}]_\times\,\mathbf{v} = \mathbf{u}\times\mathbf{v} = -\mathbf{v}\times\mathbf{u} = -[\mathbf{v}]_\times\,\mathbf{u}$:
 
-$$\mathbf{R}_\text{nom}\,[\delta\boldsymbol{\theta}]_\times\,\mathbf{a}_b = -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\delta\boldsymbol{\theta}$$
+$$
+\mathbf{R}_\text{nom}\,[\delta\boldsymbol{\theta}]_\times\,\mathbf{a}_b = -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\delta\boldsymbol{\theta}
+$$
 
 So the velocity error contribution from attitude error:
 
-$$\delta\mathbf{v}_{k+1} \supset -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\delta\boldsymbol{\theta}\,\Delta t$$
+$$
+\delta\mathbf{v}_{k+1} \supset -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\delta\boldsymbol{\theta}\,\Delta t
+$$
 
-$$\boxed{\mathbf{F}_{v\theta} = -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\Delta t\,, \qquad \mathbf{a}_b = \tilde{\mathbf{a}} - \mathbf{b}_{a,\text{nom}}}$$
+$$
+\boxed{\mathbf{F}_{v\theta} = -\mathbf{R}_\text{nom}\,[\mathbf{a}_b]_\times\,\Delta t\,, \qquad \mathbf{a}_b = \tilde{\mathbf{a}} - \mathbf{b}_{a,\text{nom}}}
+$$
 
 The $3\times 3$ matrix $[\mathbf{a}_b]_\times$ (skew-symmetric):
 
-$$[\mathbf{a}_b]_\times = \begin{bmatrix}0 & -a_{b,z} & a_{b,y} \\ a_{b,z} & 0 & -a_{b,x} \\ -a_{b,y} & a_{b,x} & 0\end{bmatrix}$$
+$$
+[\mathbf{a}_b]_\times = \begin{bmatrix}0 & -a_{b,z} & a_{b,y} \\ a_{b,z} & 0 & -a_{b,x} \\ -a_{b,y} & a_{b,x} & 0\end{bmatrix}
+$$
 
 **Physical meaning:** An attitude error $\delta\boldsymbol{\theta}$ causes the accelerometer to be mis-projected into the NED frame, creating a spurious velocity change. The stronger the specific force $\mathbf{a}_b$ (e.g., during aggressive maneuvers), the larger this coupling.
 
@@ -1577,9 +1926,13 @@ $$[\mathbf{a}_b]_\times = \begin{bmatrix}0 & -a_{b,z} & a_{b,y} \\ a_{b,z} & 0 &
 
 Velocity update depends on previous velocity additively:
 
-$$\delta\mathbf{v}_{k+1} \supset \delta\mathbf{v}_k$$
+$$
+\delta\mathbf{v}_{k+1} \supset \delta\mathbf{v}_k
+$$
 
-$$\boxed{\mathbf{F}_{vv} = \mathbf{I}_{3\times 3}}$$
+$$
+\boxed{\mathbf{F}_{vv} = \mathbf{I}_{3\times 3}}
+$$
 
 ---
 
@@ -1587,9 +1940,13 @@ $$\boxed{\mathbf{F}_{vv} = \mathbf{I}_{3\times 3}}$$
 
 The accelerometer bias error enters velocity through the rotation:
 
-$$\delta\mathbf{v}_{k+1} \supset -\mathbf{R}_\text{nom}\,\delta\mathbf{b}_a\,\Delta t$$
+$$
+\delta\mathbf{v}_{k+1} \supset -\mathbf{R}_\text{nom}\,\delta\mathbf{b}_a\,\Delta t
+$$
 
-$$\boxed{\mathbf{F}_{vb_a} = -\mathbf{R}_\text{nom}\,\Delta t}$$
+$$
+\boxed{\mathbf{F}_{vb_a} = -\mathbf{R}_\text{nom}\,\Delta t}
+$$
 
 **Physical meaning:** An accelerometer bias error of $\delta b_a$ m/s² causes velocity to drift at $R_\text{nom}\,\delta b_a$ m/s (after rotating to NED frame). This is the most important bias coupling for position accuracy.
 
@@ -1601,11 +1958,15 @@ Position update: $\mathbf{p}_{k+1} = \mathbf{p}_k + \frac{1}{2}(\mathbf{v}_k + \
 
 The velocity error $\delta\mathbf{v}_k$ contributes to position error:
 
-$$\delta\mathbf{p}_{k+1} \supset \delta\mathbf{v}_k\,\Delta t$$
+$$
+\delta\mathbf{p}_{k+1} \supset \delta\mathbf{v}_k\,\Delta t
+$$
 
 (The factor $\frac{1}{2}$ from trapezoidal integration applies to both $\delta\mathbf{v}_k$ and $\delta\mathbf{v}_{k+1}$, but to first order in $\Delta t$:)
 
-$$\boxed{\mathbf{F}_{pv} = \Delta t\,\mathbf{I}_{3\times 3}}$$
+$$
+\boxed{\mathbf{F}_{pv} = \Delta t\,\mathbf{I}_{3\times 3}}
+$$
 
 ---
 
@@ -1619,7 +1980,9 @@ Position error carries forward unchanged.
 
 Position update depends on $\mathbf{v}_{k+1}$ which depends on $\delta\boldsymbol{\theta}_k$ through $\mathbf{F}_{v\theta}$. The second-order contribution $\frac{1}{2}\mathbf{F}_{v\theta}\Delta t^2$ is negligible at high IMU rates and is typically set to zero in the discrete model.
 
-$$\mathbf{F}_{p\theta} \approx \mathbf{0} \quad\text{(second order in }\Delta t\text{)}$$
+$$
+\mathbf{F}_{p\theta} \approx \mathbf{0} \quad\text{(second order in }\Delta t\text{)}
+$$
 
 ---
 
@@ -1627,9 +1990,13 @@ $$\mathbf{F}_{p\theta} \approx \mathbf{0} \quad\text{(second order in }\Delta t\
 
 Biases are random walks — they evolve only through process noise, not through deterministic dynamics:
 
-$$\delta\mathbf{b}_{g,k+1} = \delta\mathbf{b}_{g,k}\,, \quad \delta\mathbf{b}_{a,k+1} = \delta\mathbf{b}_{a,k}$$
+$$
+\delta\mathbf{b}_{g,k+1} = \delta\mathbf{b}_{g,k}\,, \quad \delta\mathbf{b}_{a,k+1} = \delta\mathbf{b}_{a,k}
+$$
 
-$$\boxed{\mathbf{F}_{b_g b_g} = \mathbf{F}_{b_a b_a} = \mathbf{I}_{3\times 3}}$$
+$$
+\boxed{\mathbf{F}_{b_g b_g} = \mathbf{F}_{b_a b_a} = \mathbf{I}_{3\times 3}}
+$$
 
 Similarly for $\mathbf{m}_I$, $\mathbf{m}_B$, $\mathbf{w}$, $h$: all diagonal blocks are $\mathbf{I}$, all off-diagonal blocks are $\mathbf{0}$.
 
@@ -1638,7 +2005,6 @@ Similarly for $\mathbf{m}_I$, $\mathbf{m}_B$, $\mathbf{w}$, $h$: all diagonal bl
 ### 5.10 The Full F Matrix (24×24) — Complete Structure
 
 Below is the full $24\times 24$ Jacobian. Only non-zero off-diagonal blocks are shown; diagonal blocks are $\mathbf{I}$ (identity of appropriate size); all other blocks are $\mathbf{0}$:
-
 $$\mathbf{F}_k = \begin{bmatrix}
 \underbrace{\mathbf{I}-[\Delta\boldsymbol{\phi}]_\times}_{\mathbf{F}_{\theta\theta}} & \mathbf{0} & \mathbf{0} & \underbrace{-\Delta t\,\mathbf{I}}_{\mathbf{F}_{\theta b_g}} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} \\
 \underbrace{-\mathbf{R}[\mathbf{a}_b]_\times\Delta t}_{\mathbf{F}_{v\theta}} & \mathbf{I} & \mathbf{0} & \mathbf{0} & \underbrace{-\mathbf{R}\Delta t}_{\mathbf{F}_{vb_a}} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} \\
@@ -1650,7 +2016,6 @@ $$\mathbf{F}_k = \begin{bmatrix}
 \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{I} & \mathbf{0} \\
 \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & 1
 \end{bmatrix}$$
-
 where row/column blocks correspond to $[\delta\boldsymbol{\theta}|\,\delta\mathbf{v}|\,\delta\mathbf{p}|\,\delta\mathbf{b}_g|\,\delta\mathbf{b}_a|\,\delta\mathbf{m}_I|\,\delta\mathbf{m}_B|\,\delta\mathbf{w}|\,\delta h]$ and $\mathbf{R} \equiv \mathbf{R}_\text{nom}$.
 
 **Summary of non-zero off-diagonal blocks:**
@@ -1679,11 +2044,15 @@ The IMU noise $[\mathbf{n}_g,\,\mathbf{n}_a]$ enters the state as:
 
 The contribution to $\mathbf{Q}$:
 
-$$\mathbf{Q}_\text{IMU} = \mathbf{G}\begin{bmatrix}\sigma_g^2\mathbf{I}&\mathbf{0}\\\mathbf{0}&\sigma_a^2\mathbf{I}\end{bmatrix}\mathbf{G}^\top = \begin{bmatrix}\sigma_g^2\Delta t^2\,\mathbf{I} & \mathbf{0} \\ \mathbf{0} & \sigma_a^2\Delta t^2\,\mathbf{I} \\ \vdots & \vdots\end{bmatrix}$$
+$$
+\mathbf{Q}_\text{IMU} = \mathbf{G}\begin{bmatrix}\sigma_g^2\mathbf{I}&\mathbf{0}\\\mathbf{0}&\sigma_a^2\mathbf{I}\end{bmatrix}\mathbf{G}^\top = \begin{bmatrix}\sigma_g^2\Delta t^2\,\mathbf{I} & \mathbf{0} \\ \mathbf{0} & \sigma_a^2\Delta t^2\,\mathbf{I} \\ \vdots & \vdots\end{bmatrix}
+$$
 
 **2. Random-walk noise** (bias stability, magnetic variation):
 
-$$\mathbf{Q}_\text{RW} = \begin{bmatrix}\ddots & & & & \\ & \sigma_{bg}^2\mathbf{I} & & & \\ & & \sigma_{ba}^2\mathbf{I} & & \\ & & & \sigma_{m}^2\mathbf{I} & \\ & & & & \ddots \end{bmatrix}$$
+$$
+\mathbf{Q}_\text{RW} = \begin{bmatrix}\ddots & & & & \\ & \sigma_{bg}^2\mathbf{I} & & & \\ & & \sigma_{ba}^2\mathbf{I} & & \\ & & & \sigma_{m}^2\mathbf{I} & \\ & & & & \ddots \end{bmatrix}
+$$
 
 **In PX4 parameters** (set via QGroundControl or parameter files):
 
@@ -1705,19 +2074,29 @@ Combining all of the above, the predict step is:
 
 **Step 1 — Propagate nominal state** (nonlinear, exact, zero noise):
 
-$$\hat{\mathbf{q}}_{k+1} = \hat{\mathbf{q}}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega}_c\,\Delta t) \tag{Eq. F1}$$
+$$
+\hat{\mathbf{q}}_{k+1} = \hat{\mathbf{q}}_k \otimes \Delta\mathbf{q}(\boldsymbol{\omega}_c\,\Delta t) \tag{F1}
+$$
 
-$$\hat{\mathbf{v}}_{k+1} = \hat{\mathbf{v}}_k + \mathbf{R}(\hat{\mathbf{q}}_k)\,\mathbf{a}_c\,\Delta t + \mathbf{g}\,\Delta t \tag{Eq. F2}$$
+$$
+\hat{\mathbf{v}}_{k+1} = \hat{\mathbf{v}}_k + \mathbf{R}(\hat{\mathbf{q}}_k)\,\mathbf{a}_c\,\Delta t + \mathbf{g}\,\Delta t \tag{F2}
+$$
 
-$$\hat{\mathbf{p}}_{k+1} = \hat{\mathbf{p}}_k + \tfrac{1}{2}(\hat{\mathbf{v}}_k + \hat{\mathbf{v}}_{k+1})\,\Delta t \tag{Eq. F3}$$
+$$
+\hat{\mathbf{p}}_{k+1} = \hat{\mathbf{p}}_k + \tfrac{1}{2}(\hat{\mathbf{v}}_k + \hat{\mathbf{v}}_{k+1})\,\Delta t \tag{F3}
+$$
 
-$$\hat{\mathbf{b}}_{g,k+1} = \hat{\mathbf{b}}_{g,k}\,, \quad \hat{\mathbf{b}}_{a,k+1} = \hat{\mathbf{b}}_{a,k}\,, \;\ldots \tag{Eqs. F4–F8}$$
+$$
+\hat{\mathbf{b}}_{g,k+1} = \hat{\mathbf{b}}_{g,k}\,, \quad \hat{\mathbf{b}}_{a,k+1} = \hat{\mathbf{b}}_{a,k}\,, \;\ldots \tag{F4-F8}
+$$
 
 → Code: `Ekf::predictState()` in `ekf.cpp`
 
 **Step 2 — Propagate error covariance** (linearized, using Jacobian $\mathbf{F}_k$):
 
-$$\mathbf{P}_{k+1} = \mathbf{F}_k\,\mathbf{P}_k\,\mathbf{F}_k^\top + \mathbf{Q} \tag{Eq. PREDICT-P}$$
+$$
+\mathbf{P}_{k+1} = \mathbf{F}_k\,\mathbf{P}_k\,\mathbf{F}_k^\top + \mathbf{Q} \tag{PREDICT-P}
+$$
 
 where $\mathbf{F}_k$ has the block structure from §5.6.
 
@@ -1741,7 +2120,9 @@ Predicted measurement: $\hat{\mathbf{z}} = \hat{\mathbf{p}}_\text{nom}$ (positio
 
 Jacobian (since $h = \mathbf{p}$ and $\delta\mathbf{p}$ is at indices 6–8):
 
-$$\mathbf{H}_\text{GPS} = \frac{\partial\,\delta\mathbf{p}}{\partial\,\delta\mathbf{x}} = \begin{bmatrix}\mathbf{0}_{3\times 6} & \mathbf{I}_3 & \mathbf{0}_{3\times 15}\end{bmatrix} \quad (3\times 24)$$
+$$
+\mathbf{H}_\text{GPS} = \frac{\partial\,\delta\mathbf{p}}{\partial\,\delta\mathbf{x}} = \begin{bmatrix}\mathbf{0}_{3\times 6} & \mathbf{I}_3 & \mathbf{0}_{3\times 15}\end{bmatrix} \quad (3\times 24)
+$$
 
 The row block $[\mathbf{0}|\mathbf{I}|\mathbf{0}]$ picks out the position error rows (indices 6–8) and ignores all other error states.
 
@@ -1753,7 +2134,9 @@ The baro reports altitude $z_\text{baro} = h$ (scalar). Predicted: $\hat{z} = \h
 
 Jacobian (scalar measurement, $p_D$ at index 8):
 
-$$\mathbf{H}_\text{baro} = \begin{bmatrix}0,\ldots,0,\underbrace{1}_{\text{index 8}},0,\ldots,0\end{bmatrix} \quad (1\times 24)$$
+$$
+\mathbf{H}_\text{baro} = \begin{bmatrix}0,\ldots,0,\underbrace{1}_{\text{index 8}},0,\ldots,0\end{bmatrix} \quad (1\times 24)
+$$
 
 ---
 
@@ -1765,7 +2148,9 @@ Predicted measurement: $\hat{\mathbf{z}} = \mathbf{R}(\hat{\mathbf{q}})^\top\,\h
 
 The Jacobian is more complex — it involves the derivative of $\mathbf{R}(\hat{\mathbf{q}})^\top\,\mathbf{m}_I$ with respect to $\delta\boldsymbol{\theta}$:
 
-$$\frac{\partial}{\partial\,\delta\boldsymbol{\theta}}\left[\mathbf{R}(\mathbf{q}\otimes\delta\mathbf{q})^\top\,\mathbf{m}_I\right]_{\delta\boldsymbol{\theta}=0} = \left[\mathbf{R}^\top\,\mathbf{m}_I\right]_\times \quad (3\times 3)$$
+$$
+\frac{\partial}{\partial\,\delta\boldsymbol{\theta}}\left[\mathbf{R}(\mathbf{q}\otimes\delta\mathbf{q})^\top\,\mathbf{m}_I\right]_{\delta\boldsymbol{\theta}=0} = \left[\mathbf{R}^\top\,\mathbf{m}_I\right]_\times \quad (3\times 3)
+$$
 
 So: $\mathbf{H}_\text{mag}\big|_{\delta\boldsymbol{\theta}} = [\mathbf{R}^\top\mathbf{m}_I]_\times$ (indices 0–2)
 
@@ -1779,35 +2164,49 @@ When a measurement $\mathbf{z}_k$ arrives:
 
 **Step 1 — Compute innovation:**
 
-$$\boldsymbol{\nu}_k = \mathbf{z}_k - h(\mathbf{x}_\text{nom,k}) \tag{innovation}$$
+$$
+\boldsymbol{\nu}_k = \mathbf{z}_k - h(\mathbf{x}_\text{nom,k}) \tag{innovation}
+$$
 
 *Innovation = actual sensor reading minus what the nominal state predicted.*
 
 **Step 2 — Innovation covariance** $\mathbf{S}_k$ ($m\times m$, derived from Property 4):
 
-$$\mathbf{S}_k = \mathbf{H}_k\,\mathbf{P}_k\,\mathbf{H}_k^\top + \mathbf{R} \tag{innovation cov}$$
+$$
+\mathbf{S}_k = \mathbf{H}_k\,\mathbf{P}_k\,\mathbf{H}_k^\top + \mathbf{R} \tag{innov-cov}
+$$
 
 The two terms: $\mathbf{H}_k\mathbf{P}_k\mathbf{H}_k^\top$ = state uncertainty projected to sensor space; $\mathbf{R}$ = sensor noise.
 
 **Step 3 — Kalman Gain** $\mathbf{K}_k$ ($24\times m$, derived from Property 5):
 
-$$\mathbf{K}_k = \mathbf{P}_k\,\mathbf{H}_k^\top\,\mathbf{S}_k^{-1} \tag{Kalman Gain}$$
+$$
+\mathbf{K}_k = \mathbf{P}_k\,\mathbf{H}_k^\top\,\mathbf{S}_k^{-1} \tag{K}
+$$
 
 **Step 4 — Error state correction:**
 
-$$\delta\hat{\mathbf{x}}_k = \mathbf{K}_k\,\boldsymbol{\nu}_k \tag{correction vector, 24×1}$$
+$$
+\delta\hat{\mathbf{x}}_k = \mathbf{K}_k\,\boldsymbol{\nu}_k \tag{dx}
+$$
 
 **Step 5 — Inject correction into nominal state:**
 
-$$\hat{\mathbf{q}}_{k|k} = \hat{\mathbf{q}}_{k|k-1}\otimes\Delta\mathbf{q}(\delta\hat{\boldsymbol{\theta}}) \tag{multiplicative — stays on sphere}$$
+$$
+\hat{\mathbf{q}}_{k|k} = \hat{\mathbf{q}}_{k|k-1}\otimes\Delta\mathbf{q}(\delta\hat{\boldsymbol{\theta}}) \tag{multiplicative}
+$$
 
-$$\hat{\mathbf{v}}_{k|k} = \hat{\mathbf{v}}_{k|k-1} + \delta\hat{\mathbf{v}}\,, \quad \hat{\mathbf{p}}_{k|k} = \hat{\mathbf{p}}_{k|k-1} + \delta\hat{\mathbf{p}}\,, \quad \ldots \tag{additive}$$
+$$
+\hat{\mathbf{v}}_{k|k} = \hat{\mathbf{v}}_{k|k-1} + \delta\hat{\mathbf{v}}\,, \quad \hat{\mathbf{p}}_{k|k} = \hat{\mathbf{p}}_{k|k-1} + \delta\hat{\mathbf{p}}\,, \quad \ldots \tag{additive}
+$$
 
 → Code: `Ekf::fuse()` in `ekf_helper.cpp`
 
 **Step 6 — Update covariance** (Joseph form for numerical stability):
 
-$$\mathbf{P}_{k|k} = (\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)\,\mathbf{P}_{k|k-1}\,(\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)^\top + \mathbf{K}_k\,\mathbf{R}\,\mathbf{K}_k^\top \tag{Joseph form}$$
+$$
+\mathbf{P}_{k|k} = (\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)\,\mathbf{P}_{k|k-1}\,(\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)^\top + \mathbf{K}_k\,\mathbf{R}\,\mathbf{K}_k^\top \tag{Joseph}
+$$
 
 *Simple form:* $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}$ — correct when $\mathbf{K}$ is optimal, but can lose symmetry numerically.
 
@@ -1823,7 +2222,7 @@ $$\mathbf{P}_{k|k} = (\mathbf{I}-\mathbf{K}_k\mathbf{H}_k)\,\mathbf{P}_{k|k-1}\,
 
 **What the approximation discards:**
 
-The true covariance propagation is $\text{Cov}[\mathbf{f}(\mathbf{x})] = \int \mathbf{f}(\mathbf{x})(\mathbf{f}(\mathbf{x}))^\top p(\mathbf{x})\,d\mathbf{x}$, which has no closed form for nonlinear $\mathbf{f}$. The Taylor approximation gives $\mathbf{F}\mathbf{P}\mathbf{F}^\top$ — which captures only the first-order behavior. The discarded second-order terms scale as $O(\|\mathbf{P}\|^2)$.
+The true covariance propagation is $\text{Cov}[\mathbf{f}(\mathbf{x})] = \int \mathbf{f}(\mathbf{x})(\mathbf{f}(\mathbf{x}))^\top p(\mathbf{x})\,d\mathbf{x}$, which has no closed form for nonlinear $\mathbf{f}$. The Taylor approximation gives $\mathbf{F}\mathbf{P}\mathbf{F}^\top$ — which captures only the first-order behavior. The discarded second-order terms scale as $O(\lVert\mathbf{P}\rVert^2)$.
 
 **Three failure modes:**
 
@@ -1833,7 +2232,7 @@ The true covariance propagation is $\text{Cov}[\mathbf{f}(\mathbf{x})] = \int \m
 
 **Why it works well for PX4 EKF2:**
 
-- IMU rate is 200–1000 Hz → $\Delta t \leq 5$ ms → $\|\Delta\boldsymbol{\phi}\| \leq 0.05$ rad per step (mildly nonlinear)
+- IMU rate is 200–1000 Hz → $\Delta t \leq 5$ ms → $\lVert\Delta\boldsymbol{\phi}\rVert \leq 0.05$ rad per step (mildly nonlinear)
 - After initial convergence, $\mathbf{P}$ remains small → second-order terms are $O(\mathbf{P}^2) \ll O(\mathbf{P})$
 - The ESKF further helps: $\delta\boldsymbol{\theta}$ is always a small perturbation around the nominal → the linearization of the error dynamics is accurate even when the nominal trajectory has large attitude angles
 

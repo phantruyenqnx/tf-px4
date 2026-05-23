@@ -69,6 +69,7 @@ Functions to read:
 ### Step 1 — Parameter conversion to ideal form
 
 The `K*` parameter allows expressing the controller in *parallel* form (`P + I/s + sD`) ↔ *ideal* form (`K(1+1/sTi+sTd)`):
+
 $$
 K_p^\omega = \boldsymbol{K}\odot\boldsymbol{p},\quad K_i^\omega=\boldsymbol{K}\odot\boldsymbol{i},\quad K_d^\omega=\boldsymbol{K}\odot\boldsymbol{d}
 $$
@@ -101,6 +102,7 @@ _rate_control.setFeedForwardGain(
 $$
 \boldsymbol{e}_\omega = \boldsymbol{\omega}_{sp}-\boldsymbol{\omega}
 $$
+
 $$
 \boxed{\ \boldsymbol{\tau} = \boldsymbol{K}_p^\omega\odot\boldsymbol{e}_\omega + \boldsymbol{I}_\omega - \boldsymbol{K}_d^\omega\odot\dot{\boldsymbol{\omega}} + \boldsymbol{K}_{ff}^\omega\odot\boldsymbol{\omega}_{sp}\ }
 $$
@@ -172,6 +174,7 @@ Each mechanism is broken down below:
 #### (a) Saturation feedback from Allocator
 
 If the allocator has saturated the motors in the positive direction:
+
 $$
 e_{\omega,i}\leftarrow\min(e_{\omega,i},0),\quad\text{or }e_{\omega,i}\leftarrow\max(e_{\omega,i},0)\text{ for negative direction}
 $$
@@ -245,6 +248,7 @@ if (PX4_ISFINITE(rate_i)) {
 ```
 
 ### Step 4 — Yaw torque LPF
+
 $$
 \tau_z\leftarrow \mathrm{LPF}_{f_c=\text{MC\_YAW\_TQ\_CUTOFF}}(\tau_z)
 $$
@@ -267,6 +271,7 @@ torque_setpoint(2) = _output_lpf_yaw.update(torque_setpoint(2), dt);
 ### Step 5 — Battery scaling (optional)
 
 When `MC_BAT_SCALE_EN=1`:
+
 $$
 s_{bat}=\frac{V_{nom}}{V_{batt}},\quad
 \boldsymbol{\tau}\leftarrow\mathrm{clip}(s_{bat}\boldsymbol{\tau},-1,1),\ \boldsymbol{T}\leftarrow\mathrm{clip}(s_{bat}\boldsymbol{T},-1,1)
@@ -330,9 +335,11 @@ if (_vehicle_control_mode.flag_control_manual_enabled && !_vehicle_control_mode.
 	}
 }
 ```
+
 $$
 x_{shape}=\mathrm{superexpo}(x,e_{exp},s_{sup})=(1-e_{exp})x+e_{exp}x^3,\ \text{then}\ \frac{1-s_{sup}}{1-s_{sup}|x|}
 $$
+
 $$
 \boldsymbol{\omega}_{sp} = \mathrm{shape}(\text{stick})\odot \boldsymbol{\omega}_{max}^{acro}
 $$
