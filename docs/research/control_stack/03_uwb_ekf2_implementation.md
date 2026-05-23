@@ -11,6 +11,7 @@
 ## Table of Contents
 
 - [0. Pre-flight: What Already Exists](#0-pre-flight-what-already-exists)
+- [0.5 Phase 0 — DWM3000 UART Driver](#05-phase-0--dwm3000-uart-driver)
 - [1. Phase 1 — uORB Topics](#1-phase-1--uorb-topics)
 - [2. Phase 2 — Sample Struct + Ring Buffer](#2-phase-2--sample-struct--ring-buffer)
 - [3. Phase 3 — Parameters](#3-phase-3--parameters)
@@ -74,6 +75,210 @@ PX4 convention is to publish one `estimator_aid_source1d` per anchor per update.
 **Critical:** UWB has a nonlinear measurement model (`‖p - a‖`), so H is NOT a standard basis
 vector. We **cannot** use `fuseDirectStateMeasurement()` (which hardcodes `H(state_index) = 1`).
 We must call `measurementUpdate(K, H, R, innov)` with an explicitly computed H.
+
+---
+
+## 0.5 Phase 0 — DWM3000 UART Driver
+
+The EKF2 changes below only define how EKF consumes UWB range samples. With a self-developed
+DWM3000 tag connected to Pixhawk over UART, there is one missing layer before Phase 1:
+
+```
+DWM3000 tag firmware
+    → UART frame on Pixhawk TELEM/GPS/UART port
+    → PX4 driver parses frame
+    → publish one uORB range sample per anchor
+    → EKF2 subscribes and feeds setUwbData()
+```
+
+### 0.5.1 What current source already has
+
+PX4 already contains `src/drivers/uwb/uwb_sr150/`, but that driver is specific to the NXP
+SR150/MK UWB Shield frame format:
+
+- `uwb_sr150.cpp` opens a serial port, configures termios, reads a fixed `distance_msg_t`,
+  and publishes `sensor_uwb`.
+- `uwb_sr150.h` defines only one `UWB_range_meas_t measurements` inside each `distance_msg_t`.
+- `msg/SensorUwb.msg` carries `mac_dest`, `status`, `nlos`, and `distance`, but no
+  `timestamp_sample`, no variance, and no `anchor_id`.
+
+So for DWM3000 + 4 anchors, do **not** try to feed EKF directly from the existing SR150 parser.
+Use it as a PX4 driver style reference, then add a DWM3000-specific serial driver that publishes
+the EKF-oriented topic from Phase 1.
+
+### 0.5.2 Recommended driver location
+
+Create a new driver next to the existing UWB driver:
+
+```
+src/drivers/uwb/dwm3000_uart/
+    CMakeLists.txt
+    Kconfig
+    module.yaml
+    dwm3000_uart.cpp
+    dwm3000_uart.hpp
+```
+
+Then register it:
+
+```cmake
+# src/drivers/uwb/CMakeLists.txt
+add_subdirectory(uwb_sr150)
+add_subdirectory(dwm3000_uart)
+```
+
+```kconfig
+# src/drivers/uwb/Kconfig
+menuconfig COMMON_UWB
+    bool "common UWB Drivers"
+    default n
+    select DRIVERS_UWB_UWB_SR150
+    select DRIVERS_UWB_DWM3000_UART
+```
+
+and in `src/drivers/uwb/dwm3000_uart/Kconfig`:
+
+```kconfig
+menuconfig DRIVERS_UWB_DWM3000_UART
+    bool "dwm3000_uart"
+    default n
+    ---help---
+        Enable support for a DWM3000 UART tag publishing ranges to anchors.
+```
+
+### 0.5.3 Driver skeleton follows PX4 serial driver patterns
+
+Use the same base pattern as `TFMINI` and `uwb_sr150`:
+
+- inherit `ModuleBase`, `ModuleParams`, `px4::ScheduledWorkItem`;
+- schedule on `px4::serial_port_to_wq(port)`;
+- open with `::open(_port, O_RDWR | O_NOCTTY | O_NONBLOCK)`;
+- configure 8N1 termios (`CLOCAL | CREAD`, `CS8`, no parity, one stop bit, no flow control);
+- read all available bytes each cycle;
+- keep parser state across cycles because UART frames can be split;
+- publish **up to 4 uORB messages per ranging round**, one per anchor.
+
+The publication should target the new Phase 1 topic:
+
+```cpp
+#include <uORB/Publication.hpp>
+#include <uORB/topics/sensor_uwb_range.h>
+
+uORB::Publication<sensor_uwb_range_s> _sensor_uwb_range_pub{ORB_ID(sensor_uwb_range)};
+```
+
+For each valid anchor in a decoded DWM3000 frame:
+
+```cpp
+sensor_uwb_range_s msg{};
+msg.timestamp = hrt_absolute_time();          // publish/receive time
+msg.timestamp_sample = sample_time_us;        // measurement time, see 0.5.5
+msg.anchor_id = anchor_id;                    // 0..3 after MAC/address mapping
+msg.range = range_mm * 0.001f;
+msg.range_variance = range_variance_m2;       // 0 if unknown; EKF uses EKF2_UWB_NOISE^2
+msg.nlos_flag = nlos_flag;
+msg.quality = quality;                        // 0..100, or 0 if unknown
+_sensor_uwb_range_pub.publish(msg);
+```
+
+Do not publish the four distances as one custom array if EKF2 expects `sensor_uwb_range`.
+The ring buffer and sequential fusion in later phases are simpler and more PX4-like when each
+anchor range is one sample.
+
+### 0.5.4 UART frame contract between tag firmware and PX4
+
+The exact binary protocol is yours, but it should include enough metadata for EKF:
+
+```cpp
+struct Dwm3000Range {
+    uint16_t anchor_mac;      // or compact anchor slot id
+    uint32_t range_mm;
+    uint16_t variance_mm2;    // optional; 0 means unknown
+    uint8_t  nlos;            // 0 LOS, 1 possible NLOS, 2 confirmed NLOS
+    uint8_t  quality;         // 0..100
+} __attribute__((packed));
+
+struct Dwm3000Frame {
+    uint16_t magic;           // e.g. 0xD300
+    uint8_t  version;
+    uint8_t  n_ranges;        // normally 4, allow fewer if an anchor is missing
+    uint32_t seq;
+    uint64_t measurement_time_us; // preferred if tag is time-synced to PX4
+    Dwm3000Range ranges[4];
+    uint16_t crc16;
+} __attribute__((packed));
+```
+
+Minimum validation before publishing:
+
+- frame header/version/length/CRC valid;
+- `n_ranges <= 4`;
+- anchor MAC maps to a known `anchor_id`;
+- range finite and inside expected operating limits, for example `0.1 m .. 200 m`;
+- duplicate anchors in one frame are either rejected or last-sample-wins;
+- stale sequence numbers are dropped.
+
+Anchor mapping can be done in the driver (`anchor_mac → anchor_id`) or in the tag firmware
+(send `anchor_id` directly). If the DWM3000 firmware sends MACs, add driver params such as
+`UWB_A0_MAC ... UWB_A3_MAC`, or keep a small static mapping while prototyping.
+
+### 0.5.5 Timestamp rule
+
+For EKF, `timestamp_sample` is more important than `timestamp`.
+
+Best case:
+
+```
+measurement_time_us = PX4-synchronized hardware measurement time
+timestamp_sample    = measurement_time_us
+timestamp           = hrt_absolute_time() when PX4 publishes
+```
+
+If the DWM3000 tag is not time-synced to PX4, set:
+
+```cpp
+const hrt_abstime now = hrt_absolute_time();
+msg.timestamp = now;
+msg.timestamp_sample = now - estimated_uart_and_processing_latency_us;
+```
+
+Then put the remaining systematic delay into `EKF2_UWB_DELAY`. Avoid setting
+`timestamp_sample` to zero or to a tag-local clock that PX4 cannot compare with `hrt_absolute_time()`.
+
+### 0.5.6 `module.yaml` serial port integration
+
+Mirror the existing `uwb_sr150/module.yaml` so the driver can be assigned to a Pixhawk UART
+through a parameter:
+
+```yaml
+module_name: DWM3000 UART UWB range driver
+serial_config:
+  - command: dwm3000_uart start -d ${SERIAL_DEV} -b p:${BAUD_PARAM}
+    port_config_param:
+      name: DWM3000_CFG
+      group: UWB
+```
+
+The start command should also accept manual use:
+
+```sh
+dwm3000_uart start -d /dev/ttyS2 -b 115200
+dwm3000_uart status
+dwm3000_uart stop
+```
+
+### 0.5.7 Alternative: bridge from existing `sensor_uwb`
+
+If you want the smallest short-term change, adapt the existing `uwb_sr150` style and publish
+`sensor_uwb` first, then add a small bridge module:
+
+```
+sensor_uwb → map mac_dest to anchor_id → fill timestamp_sample/range_variance → sensor_uwb_range
+```
+
+This is useful for quick logging, but the cleaner implementation is for the DWM3000 driver to
+publish `sensor_uwb_range` directly. That keeps EKF2 independent of a vendor-specific raw UWB
+message format.
 
 ---
 
@@ -773,6 +978,47 @@ No structural changes needed if `uwb_range_fusion.cpp` is inside the `ecl_EKF` l
 target (handled by the EKF/CMakeLists.txt above).
 
 If you add a new msg file, also register it in `msg/CMakeLists.txt`.
+
+### 9.4 DWM3000 UART driver build hooks
+
+The EKF build hooks above do not build the UART reader. For the driver from Phase 0, add:
+
+```cmake
+# src/drivers/uwb/CMakeLists.txt
+add_subdirectory(dwm3000_uart)
+```
+
+```cmake
+# src/drivers/uwb/dwm3000_uart/CMakeLists.txt
+px4_add_module(
+    MODULE drivers__dwm3000_uart
+    MAIN dwm3000_uart
+    SRCS
+        dwm3000_uart.cpp
+        dwm3000_uart.hpp
+    MODULE_CONFIG
+        module.yaml
+    DEPENDS
+        px4_work_queue
+)
+```
+
+Also add `src/drivers/uwb/dwm3000_uart/Kconfig` and include/select it from
+`src/drivers/uwb/Kconfig`, following the existing `uwb_sr150` layout. On board configs,
+enable both:
+
+```text
+CONFIG_DRIVERS_UWB_DWM3000_UART=y
+CONFIG_EKF2_UWB=y
+```
+
+Runtime data flow to verify:
+
+```sh
+dwm3000_uart start -d /dev/ttyS2 -b 115200
+listener sensor_uwb_range
+ekf2 status
+```
 
 ---
 
