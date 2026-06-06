@@ -15,6 +15,7 @@ Each file below explains **one layer** of the PX4 multicopter control stack: for
 | 5 | Rate Control | `05_rate_control.md` |
 | 6 | Control Allocation | `06_control_allocation.md` |
 | 7 | Hover Thrust Estimator | `07_hover_thrust_estimator.md` |
+| 8 | GNSS/GPS in EKF2 — sim to real hardware | `08_gnss_gps_sim_to_hardware.md` |
 
 Notation conventions are kept consistent with `../quadcopter_control_math.md` (§0).
 
