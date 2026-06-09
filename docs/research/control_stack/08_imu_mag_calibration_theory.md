@@ -161,6 +161,12 @@ exact and the user instructions unambiguous (level, on each side, nose up, nose
 down, upside down). At each face one axis reads $\pm g$ and the others ~0. Many
 samples per face are averaged to beat down noise.
 
+![PX4 accelerometer 6-position calibration in QGroundControl](images/accel_positions.png)
+
+*The six required orientations of the accelerometer calibration (PX4/QGroundControl
+"Sensors Setup"). Each face holds one body axis along gravity so it reads $\pm g$;
+the vehicle is held still while samples are averaged. Source: [PX4 User Guide — Accelerometer](https://docs.px4.io/main/en/config/accelerometer.html).*
+
 **Bias** comes from the two *opposite* faces of each axis. If axis $i$ reads
 $a^{+}_i$ pointing up and $a^{-}_i$ pointing down, the bias is the midpoint —
 gravity cancels by symmetry:
@@ -204,7 +210,7 @@ terms are discarded. The runtime correction is therefore an *element-wise* scale
 not a matrix product:
 
 $$
-\boldsymbol{a}_{\text{corr}} = \boldsymbol{R}_{BS}\,\big(\operatorname{diag}(\boldsymbol{s}_a)\odot(\boldsymbol{a}_m - \boldsymbol{b}_a - \boldsymbol{b}_{\text{th}})\big)
+\boldsymbol{a}_{\text{corr}} = \boldsymbol{R}_{BS}\,\big(\mathrm{diag}(\boldsymbol{s}_a)\odot(\boldsymbol{a}_m - \boldsymbol{b}_a - \boldsymbol{b}_{\text{th}})\big)
 $$
 
 The rationale: MEMS accelerometer cross-axis errors are small, the residual is
@@ -221,6 +227,14 @@ tracked by EKF2 in flight.
 The magnetometer is the most involved because its environment, not just the chip,
 distorts the measurement — and that environment is fixed to the airframe, so it
 *can* be calibrated out.
+
+![PX4 magnetometer / compass calibration rotation positions in QGroundControl](images/mag_calibrate_positions.png)
+
+*Magnetometer calibration asks the operator to rotate the vehicle through many
+orientations (PX4/QGroundControl). The rich rotational coverage is exactly what makes
+the hard-iron offset and soft-iron shape observable — the measured field tips must
+sweep enough of the sphere for the ellipsoid fit (§8.4.3) to converge. Source:
+[PX4 User Guide — Compass](https://docs.px4.io/main/en/config/compass.html).*
 
 ### 8.4.1. Hard-iron and soft-iron error model
 

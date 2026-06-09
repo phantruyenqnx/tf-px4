@@ -126,6 +126,14 @@ has a known fixed resonance (a frame mode, a fixed prop frequency at hover) that
 does not move much with throttle. Simple, zero runtime cost beyond the biquad,
 but blind to RPM changes.
 
+![Actuator-controls FFT showing a tonal noise spike near 32 Hz](images/gyro_notch_32.png)
+
+*An actuator-controls FFT (PX4 log review) with a sharp tonal spike around 32 Hz on
+all three axes — the signature of a structural/propeller resonance. A static notch
+placed at that frequency (`IMU_GYRO_NF0_FRQ = 32`, `IMU_GYRO_NF0_BW = 5`) removes
+the spike while costing almost no broadband phase, because the notch is local
+(§9.2.2). Source: [PX4 User Guide — MC Filter Tuning](https://docs.px4.io/main/en/config_mc/filter_tuning.html).*
+
 ### 9.3.2. Dynamic notch — tracking the motor harmonics
 
 The defining feature of modern multirotor gyro filtering: because **virtually all
@@ -164,6 +172,16 @@ the filtered rate — inherently noisy, since differentiation amplifies high
 frequencies — followed by a **first-order alpha low-pass** at `IMU_DGYRO_CUTOFF`
 to make it usable. This derivative path is for control, not for EKF2, but it
 shares the same conditioned rate.
+
+| Cutoff too low (40 Hz) | Cutoff well-tuned (70 Hz) |
+|---|---|
+| ![Derivative FFT at IMU_DGYRO_CUTOFF = 40 Hz](images/dgyro_cutoff_40.png) | ![Derivative FFT at IMU_DGYRO_CUTOFF = 70 Hz](images/dgyro_cutoff_70.png) |
+
+*Effect of `IMU_DGYRO_CUTOFF` on the derivative spectrum (PX4 log review). A lower
+cutoff removes more high-frequency content but adds phase lag that erodes control
+margin; a higher cutoff preserves responsiveness but lets more noise through — the
+classic low-pass trade-off of §9.2.1, which is why tonal energy is better removed by
+notches first. Source: [PX4 User Guide — MC Filter Tuning](https://docs.px4.io/main/en/config_mc/filter_tuning.html).*
 
 ### 9.3.4. Coning-corrected integration → delta-angle
 
