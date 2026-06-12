@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# @name Gazebo F450 UWB
+#
+# @type Quadrotor
+#
+# F450 quadrotor carrying a GTEC UWB tag (model f450-uwb). Reuses every parameter
+# from the base F450 airframe (4022_gz_f450); only the simulated GZ model differs.
+#
+
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=gz_f450-uwb}
+
+. ${R}etc/init.d-posix/airframes/4022_gz_f450
