@@ -1,0 +1,30 @@
+syntax = "proto3";
+package px4.msgs;
+
+// UWB (ultra-wideband) ranging measurement: one tag->anchor range per message.
+// Published by the gtec_uwb_plugin on /gtec/toa/ranging.
+message Ranging {
+	// Timestamp (microseconds, since system start)
+	int64 time_usec = 1;
+
+	// Anchor identifier
+	int32 anchor_id = 2;
+
+	// Tag identifier
+	int32 tag_id = 3;
+
+	// Measured range (millimetres)
+	double range = 4;
+
+	// Sequence number
+	uint32 seq = 5;
+
+	// Received signal strength (dB)
+	double rss = 6;
+
+	// Error estimation
+	double error_estimation = 7;
+
+	// Planar bearing (radians); NaN when return_angle is disabled
+	double angle = 8;
+}
