@@ -1,0 +1,53 @@
+module_name: ekf2
+parameters:
+- group: EKF2
+  definitions:
+    EKF2_UWB_CTRL:
+      description: { short: UWB range fusion control }
+      type: int32
+      default: 0
+      min: 0
+      max: 1
+      reboot_required: true
+    EKF2_UWB_DELAY:
+      description: { short: UWB range measurement delay relative to IMU }
+      type: float
+      default: 50.0
+      min: 0.0
+      max: 300.0
+      unit: ms
+      reboot_required: true
+      decimal: 1
+    EKF2_UWB_NOISE:
+      description: { short: UWB range measurement noise (1-sigma) }
+      type: float
+      default: 0.05
+      min: 0.01
+      max: 1.0
+      unit: m
+      decimal: 2
+    EKF2_UWB_GATE:
+      description: { short: UWB range innovation gate size (1-sigma) }
+      type: float
+      default: 5.0
+      min: 1.0
+      max: 10.0
+    EKF2_UWB_N_ANCH:
+      description: { short: Number of configured UWB anchors }
+      type: int32
+      default: 4
+      min: 1
+      max: 4
+      reboot_required: true
+    EKF2_UWB_A0_N: { description: { short: UWB anchor 0 North (NED m) }, type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A0_E: { description: { short: UWB anchor 0 East (NED m) },  type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A0_D: { description: { short: UWB anchor 0 Down (NED m) },  type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A1_N: { description: { short: UWB anchor 1 North (NED m) }, type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A1_E: { description: { short: UWB anchor 1 East (NED m) },  type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A1_D: { description: { short: UWB anchor 1 Down (NED m) },  type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A2_N: { description: { short: UWB anchor 2 North (NED m) }, type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A2_E: { description: { short: UWB anchor 2 East (NED m) },  type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A2_D: { description: { short: UWB anchor 2 Down (NED m) },  type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A3_N: { description: { short: UWB anchor 3 North (NED m) }, type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A3_E: { description: { short: UWB anchor 3 East (NED m) },  type: float, default: 0.0, unit: m, decimal: 2 }
+    EKF2_UWB_A3_D: { description: { short: UWB anchor 3 Down (NED m) },  type: float, default: 0.0, unit: m, decimal: 2 }

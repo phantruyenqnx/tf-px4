@@ -187,6 +187,10 @@ if(CONFIG_EKF2_GNSS)
 	list(APPEND EKF_MODULE_PARAMS params_gnss.yaml)
 endif()
 
+if(CONFIG_EKF2_UWB)
+	list(APPEND EKF_MODULE_PARAMS params_uwb.yaml)
+endif()
+
 if(CONFIG_EKF2_GRAVITY_FUSION)
 	list(APPEND EKF_SRCS EKF/aid_sources/gravity/gravity_fusion.cpp)
 	list(APPEND EKF_MODULE_PARAMS params_gravity.yaml)

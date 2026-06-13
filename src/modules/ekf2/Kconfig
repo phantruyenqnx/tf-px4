@@ -91,6 +91,15 @@ depends on MODULES_EKF2
 	---help---
 		EKF2 GNSS yaw fusion support.
 
+menuconfig EKF2_UWB
+depends on MODULES_EKF2
+	bool "UWB range fusion support"
+	default n
+	---help---
+		EKF2 tightly-coupled UWB range fusion (position aiding).
+		Reuses the sensor_uwb topic. Requires anchors with known NED
+		positions (EKF2_UWB_A*_*).
+
 menuconfig EKF2_GRAVITY_FUSION
 depends on MODULES_EKF2
 	bool "gravity fusion support"
