@@ -92,6 +92,28 @@ cmake -DUWB_PLUGIN_TESTS=ON <build-dir> && ninja
 ctest -R "UwbChannelModel|RayObstacleSet|Resolver|Ranging"   # needs GTest
 ```
 
-To watch live output, subscribe to `/gtec/toa/ranging` from a small C++ program that links
-`px4_gz_msgs` (the message is plain protobuf, so `gz topic -e` can't decode it without a
-descriptor).
+## Inspecting the output (`gz topic -e`)
+
+`gz topic -e -t /gtec/toa/ranging` prints **nothing** out of the box — silently, with no
+error — even while the plugin is publishing. The `gz` CLI is a separate process linked only
+against `libgz-msgs`: its message factory knows the built-in `gz.msgs.*` types (so `/clock`
+echoes fine) but not the custom `px4.msgs.Ranging`, so it cannot build the message and drops
+it. (PX4 itself never hits this — `gz_bridge` and the plugin link `px4_gz_msgs` and know the
+type at compile time.)
+
+To let the CLI decode it, point `GZ_DESCRIPTOR_PATH` at a protobuf descriptor set. The PX4
+build generates one automatically (see [`gz_msgs/CMakeLists.txt`](../../gz_msgs/CMakeLists.txt),
+target `px4_gz_msgs_desc`) covering every `px4.msgs.*` message:
+
+```bash
+export GZ_DESCRIPTOR_PATH=$PWD/build/px4_sitl_default/src/modules/simulation/gz_msgs/px4_gz_msgs.desc
+gz topic -e -t /gtec/toa/ranging          # now prints decoded messages
+```
+
+Notes:
+- The `.desc` lives in the build tree, so it is regenerated on the next `make px4_sitl ...`
+  after a `make clean`/`distclean`.
+- proto3 omits zero-valued fields in text output, so messages from `anchor_0` show no
+  `anchor_id:` line — that anchor is working, not missing.
+- Alternatively, subscribe from a small C++ program that links `px4_gz_msgs` (no descriptor
+  needed), or bridge to ROS 2 with `ros_gz_bridge`.
