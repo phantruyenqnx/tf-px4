@@ -17,6 +17,16 @@ Each file below explains **one layer** of the PX4 multicopter control stack: for
 | 7 | Hover Thrust Estimator | `07_hover_thrust_estimator.md` |
 | 8 | GNSS/GPS in EKF2 — sim to real hardware | `08_gnss_gps_sim_to_hardware.md` |
 
+### UWB → EKF2 fusion sub-series
+
+| Topic | File |
+|---|---|
+| UWB fusion — literature review (tight vs loose, observability) | `00_uwb_ekf2_literature_review.md` |
+| UWB tightly-coupled fusion — approach + PX4 integration (paper → reality) | `01_uwb_tightly_coupled_px4.md` |
+| ESKF unified derivation (theory + source navigation) | `02f_ekf2_unified.md` |
+
+Read order for UWB work: literature review (WHY/theory) → `01_uwb_tightly_coupled_px4` (approach + PX4 mapping) → `02f` (ESKF internals).
+
 Notation conventions are kept consistent with `../quadcopter_control_math.md` (§0).
 
 Reference frames: NED $\{W\}$ and Body $\{B\}$ (FRD). Hamilton scalar-first quaternion $\boldsymbol{q}=(q_w,q_x,q_y,q_z)$. Element-wise product $\odot$, quaternion product $\otimes$, error-state addition $\boxplus$.
