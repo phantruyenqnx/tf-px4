@@ -66,6 +66,10 @@
 # include "aid_sources/aux_global_position/aux_global_position.hpp"
 #endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
 
+#if defined(CONFIG_EKF2_UWB)
+# include "aid_sources/uwb/uwb_range.hpp"
+#endif // CONFIG_EKF2_UWB
+
 enum class Likelihood { LOW, MEDIUM, HIGH };
 class ExternalVisionVel;
 
@@ -418,6 +422,7 @@ public:
 	void updateParameters();
 
 	friend class AuxGlobalPosition;
+	friend class UwbRange;
 
 private:
 
@@ -1143,6 +1148,10 @@ private:
 #if defined(CONFIG_EKF2_AUX_GLOBAL_POSITION) && defined(MODULE_NAME)
 	AuxGlobalPosition _aux_global_position {};
 #endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
+
+#if defined(CONFIG_EKF2_UWB) && defined(MODULE_NAME)
+	UwbRange _uwb_range {};
+#endif // CONFIG_EKF2_UWB
 };
 
 #endif // !EKF_EKF_H

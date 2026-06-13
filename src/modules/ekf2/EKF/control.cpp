@@ -119,6 +119,10 @@ void Ekf::controlFusionModes(const imuSample &imu_delayed)
 	_aux_global_position.update(*this, imu_delayed);
 #endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
 
+#if defined(CONFIG_EKF2_UWB) && defined(MODULE_NAME)
+	_uwb_range.update(*this, imu_delayed);
+#endif // CONFIG_EKF2_UWB
+
 #if defined(CONFIG_EKF2_AIRSPEED)
 	controlAirDataFusion(imu_delayed);
 #endif // CONFIG_EKF2_AIRSPEED

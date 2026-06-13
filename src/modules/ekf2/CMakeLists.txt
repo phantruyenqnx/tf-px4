@@ -188,6 +188,7 @@ if(CONFIG_EKF2_GNSS)
 endif()
 
 if(CONFIG_EKF2_UWB)
+	list(APPEND EKF_SRCS EKF/aid_sources/uwb/uwb_range.cpp)
 	list(APPEND EKF_MODULE_PARAMS params_uwb.yaml)
 endif()
 
