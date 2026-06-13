@@ -152,6 +152,12 @@ int GZBridge::init()
 		return PX4_ERROR;
 	}
 
+	// UWB ranging (gtec_uwb_plugin publishes on a fixed, non-namespaced topic)
+	if (!_node.Subscribe("/gtec/toa/ranging", &GZBridge::rangeCallback, this)) {
+		PX4_ERR("failed to subscribe to /gtec/toa/ranging");
+		return PX4_ERROR;
+	}
+
 	if (!_mixing_interface_esc.init(_model_name)) {
 		PX4_ERR("failed to init ESC output");
 		return PX4_ERROR;
@@ -226,6 +232,19 @@ void GZBridge::opticalFlowCallback(const px4::msgs::OpticalFlow &msg)
 	// Distance will come from vehicle distance sensor
 
 	_optical_flow_pub.publish(report);
+}
+
+void GZBridge::rangeCallback(const px4::msgs::Ranging &msg)
+{
+	sensor_uwb_s report{};
+
+	report.timestamp = hrt_absolute_time();
+	report.mac = (uint16_t)msg.anchor_id();       // anchor index carried in mac (0..3 in sim)
+	report.distance = (float)msg.range() * 1e-3f; // proto range is millimetres -> metres
+	report.nlos = 0;                              // ideal LOS sim
+	// aoa_*, fom, offset_*, orientation left 0 (unused by v1 fusion)
+
+	_uwb_pub.publish(report);
 }
 
 void GZBridge::magnetometerCallback(const gz::msgs::Magnetometer &msg)

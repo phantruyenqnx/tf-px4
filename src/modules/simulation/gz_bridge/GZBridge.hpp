@@ -59,6 +59,7 @@
 #include <uORB/topics/sensor_baro.h>
 #include <uORB/topics/sensor_mag.h>
 #include <uORB/topics/sensor_optical_flow.h>
+#include <uORB/topics/sensor_uwb.h>
 #include <uORB/topics/obstacle_distance.h>
 #include <uORB/topics/wheel_encoders.h>
 #include <uORB/topics/vehicle_angular_velocity.h>
@@ -81,6 +82,7 @@
 #include <gz/msgs/scene.pb.h>
 // Custom PX4 proto
 #include <opticalflow.pb.h>
+#include <ranging.pb.h>
 
 using namespace time_literals;
 
@@ -118,6 +120,7 @@ private:
 	void laserScantoLidarSensorCallback(const gz::msgs::LaserScan &msg);
 	void laserScanCallback(const gz::msgs::LaserScan &msg);
 	void opticalFlowCallback(const px4::msgs::OpticalFlow &msg);
+	void rangeCallback(const px4::msgs::Ranging &msg);
 	void magnetometerCallback(const gz::msgs::Magnetometer &msg);
 
 	static void rotateQuaternion(gz::math::Quaterniond &q_FRD_to_NED, const gz::math::Quaterniond q_FLU_to_ENU);
@@ -141,6 +144,7 @@ private:
 	uORB::PublicationMulti<sensor_mag_s>          _sensor_mag_pub{ORB_ID(sensor_mag)};
 	uORB::PublicationMulti<vehicle_odometry_s>    _visual_odometry_pub{ORB_ID(vehicle_visual_odometry)};
 	uORB::PublicationMulti<sensor_optical_flow_s> _optical_flow_pub{ORB_ID(sensor_optical_flow)};
+	uORB::PublicationMulti<sensor_uwb_s>          _uwb_pub{ORB_ID(sensor_uwb)};
 
 
 	GZMixingInterfaceESC   _mixing_interface_esc{_node};
