@@ -38,7 +38,8 @@
 | `src/modules/ekf2/EKF/aid_sources/uwb/uwb_range.cpp` | Create | `update()`, `anchorPos()`, `fuse()` |
 | `src/modules/ekf2/EKF/ekf.h` | Modify | `#include`, `friend class UwbRange;`, `UwbRange _uwb_range{};` member |
 | `src/modules/ekf2/EKF/control.cpp` | Modify | `_uwb_range.update(*this, imu_delayed);` |
-| `src/modules/ekf2/EKF/CMakeLists.txt` | Modify | conditionally compile `uwb/uwb_range.cpp` |
+| `src/modules/ekf2/EKF/CMakeLists.txt` | Modify | compile `uwb/uwb_range.cpp` into `ecl_EKF` |
+| `src/modules/ekf2/CMakeLists.txt` | Modify | compile `EKF/aid_sources/uwb/uwb_range.cpp` into the `ekf2` **module** (MODULE_NAME) — required, else `undefined reference` |
 | `boards/px4/sitl/default.px4board` | Modify | `CONFIG_EKF2_UWB=y` |
 
 **Untouched:** `common.h`, `estimator_interface.{h,cpp}`, `EKF2.{hpp,cpp}` — class is self-contained. **No new uORB message.**
@@ -371,19 +372,28 @@ Next to `_aux_global_position.update(*this, imu_delayed);` (~line 119):
 #endif // CONFIG_EKF2_UWB && MODULE_NAME
 ```
 
-- [ ] **Step 5: EKF/CMakeLists.txt — conditional compile**
+- [ ] **Step 5: conditional compile — BOTH CMakeLists**
+
+EKF aid sources are compiled twice: once into the standalone `ecl_EKF` lib (no `MODULE_NAME`) and once into the `ekf2` module (with `MODULE_NAME`, where `update()` is actually defined). The source must be listed in **both** or the module build hits `undefined reference to UwbRange::update`.
+
+`src/modules/ekf2/EKF/CMakeLists.txt` (ecl_EKF), next to the aux_global block:
 ```cmake
 if(CONFIG_EKF2_UWB)
-	list(APPEND EKF_SRCS
-		aid_sources/uwb/uwb_range.cpp
-	)
+	list(APPEND EKF_SRCS aid_sources/uwb/uwb_range.cpp)
+endif()
+```
+`src/modules/ekf2/CMakeLists.txt` (module — merge with the params block from Task 2; note the `EKF/` path prefix):
+```cmake
+if(CONFIG_EKF2_UWB)
+	list(APPEND EKF_SRCS EKF/aid_sources/uwb/uwb_range.cpp)
+	list(APPEND EKF_MODULE_PARAMS params_uwb.yaml)
 endif()
 ```
 
 - [ ] **Step 6: Build**
 
-Run: `make px4_sitl gz_f450-uwb_uwb 2>&1 | tail -15`
-Expected: clean; `UwbRange::update` linked and called (no-op).
+Run: `make px4_sitl_default 2>&1 | tail -8`  (compile-only; avoids launching the sim)
+Expected: clean link, no `undefined reference`.
 
 - [ ] **Step 7: Commit**
 ```bash
