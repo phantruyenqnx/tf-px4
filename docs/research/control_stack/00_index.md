@@ -23,9 +23,10 @@ Each file below explains **one layer** of the PX4 multicopter control stack: for
 |---|---|
 | UWB fusion — literature review (tight vs loose, observability) | `00_uwb_ekf2_literature_review.md` |
 | UWB tightly-coupled fusion — approach + PX4 integration (paper → reality) | `01_uwb_tightly_coupled_px4.md` |
+| UWB tightly-coupled fusion — implementation plan (task-by-task) | `03_uwb_ekf2_implementation_plan.md` |
 | ESKF unified derivation (theory + source navigation) | `02f_ekf2_unified.md` |
 
-Read order for UWB work: literature review (WHY/theory) → `01_uwb_tightly_coupled_px4` (approach + PX4 mapping) → `02f` (ESKF internals).
+Read order for UWB work: literature review (WHY/theory) → `01_uwb_tightly_coupled_px4` (approach + PX4 mapping) → `03_uwb_ekf2_implementation_plan` (HOW, task-by-task) → `02f` (ESKF internals).
 
 Notation conventions are kept consistent with `../quadcopter_control_math.md` (§0).
 
