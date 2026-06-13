@@ -222,7 +222,8 @@ If the list is explicit, add `params_uwb.yaml` the way `params_gnss.yaml` is ref
 - [ ] **Step 6: Build**
 
 Run: `make px4_sitl gz_f450-uwb_uwb 2>&1 | tail -8`
-Expected: builds; `param show EKF2_UWB*` lists params; `estimator_aid_src_uwb` topic generates.
+Expected: builds; `estimator_aid_src_uwb` topic generates.
+Runtime check (in `pxh>`): `param set EKF2_UWB_NOISE 0.07` succeeds (proves the param is registered), then `param show -c EKF2_UWB*` lists it. NOTE: plain `param show EKF2_UWB*` shows **nothing** here — `param show <pattern>` only lists *used* params (`do_show` passes `only_used=true`), and EKF2_UWB_* stay "unused" until Task 5's `UwbRange` references them via `DEFINE_PARAMETERS`. Use `param set`/`param show -c`/`param show -a` to verify before Task 5.
 
 - [ ] **Step 7: Commit**
 ```bash
@@ -635,7 +636,7 @@ git commit -m "docs(research): record UWB EKF2 SITL validation results"
   1. **`mac` as anchor index:** sim bridge sets `mac = anchor_id`. For real hardware later, either the driver writes the index into `mac`, or add a `mac→index` param map (still no msg change). Confirm `mac` is `uint16` and indices 0..3 fit (they do).
   2. **`_gpos` projection (Task 5):** plan projects `ekf._gpos` (delayed-horizon global pos) via `ekf._local_origin_lat_lon`. Confirm `_gpos` is delayed-horizon and that projecting it matches how other delayed aiding gets position.
   3. **`control_status_flags()` accessor (Task 4):** confirm exact method name used by `AuxGlobalPosition`; gate uses `.tilt_align`.
-  4. **params yaml discovery (Task 2 Step 5):** glob vs explicit list; verify `param show EKF2_UWB*`.
+  4. **params yaml discovery (Task 2 Step 5):** glob vs explicit list. Verify with `param set EKF2_UWB_NOISE 0.07` + `param show -c EKF2_UWB*` (NOT plain `param show EKF2_UWB*` — it hides unused params until Task 5 references them).
   5. **`MODULE_NAME` guards:** all uORB + param access under `#if defined(MODULE_NAME)`, matching `AuxGlobalPosition`, so the EKF lib still builds for unit tests (where `update()` is a no-op; `fuse`/`anchorPos` defined only under `MODULE_NAME` and only called there → no undefined-reference).
   6. **`RingBuffer<UwbSample>{20}`:** 4 anchors × 25 Hz vs EKF delayed horizon; mirrors `AuxGlobalPosition`'s TODO. Bump if pops miss.
   7. **ENU→NED anchor mapping (Task 6):** gz world is ENU, PX4 is NED — verify the conversion before trusting numbers.
