@@ -142,8 +142,24 @@ Summary table: CEP_A/B1/B2, RMSE_A/B1/B2, % improvement.
 - [ ] **S6: USER verify** — (a) realism: EKF `vehicle_local_position` slowly wanders ~1-2 m vs groundtruth, `xy_valid:True`, `dead_reckoning:False`, no persistent "GPS drift too high"; (b) reproducible: same `SIM_GPS_SEED` → same trace; `SIM_GPS_NSC 0` → ~0 error.
 - [ ] **S7: commit** (after approval).
 
-### Task 2 — MAVSDK mission runner (`Tools/uwb_landing/mission.py`)
-- [ ] MAVSDK-Python: connect, set scenario params + 12 anchors + `SIM_GPS_SEED`/`SC`, upload ~50 m box (`--laps`), arm→start→wait→`action.land()`→wait on-ground, append run CSV. `--runs N` (seed=base+i), `--headless` opt-in.
+### Task 2 — mission runner (`Tools/uwb_landing/mission.py`)
+**Tooling = pymavlink** (`mavutil`), not MAVSDK: pymavlink is PX4's own pure-Python tool stack
+(`Tools/mavlink_shell.py`, `mavlink_ulog_streaming.py`), already installed, no ROS / no server
+binary. (PX4's MAVSDK tests are C++ in `test/mavsdk_tests/`; MAVROS needs ROS.)
+- [ ] One run = one already-booted SITL: connect `udpin:0.0.0.0:14540`; set scenario params
+  (`EKF2_GPS_CTRL=7`; A:`EKF2_UWB_CTRL=0` / B1:`UWB_CTRL=1,UWB_GPS=0` / B2:`UWB_CTRL=1,UWB_GPS=1`);
+  upload AUTO mission (TAKEOFF → ~50 m box, `--laps`, kept >14 m from pad so GPS drift accrues
+  uncorrected) → `NAV_RETURN_TO_LAUNCH` (RTL returns to the HOME set at arm and AUTO.LANDs — the
+  realistic return-and-land reference, so landing error = GPS drift since arm); arm → `MISSION_START`;
+  wait `landed_state=ON_GROUND`; record EKF landing x,y + wall-clock; disarm; append CSV row.
+  **read-before-set params** (a redundant `param_set` triggers a parameter_update that drops EKF GPS
+  aiding ~6 s → must avoid); after any change wait for GPS re-converge; `wait_position_stable()`
+  before arming. Args `--scenario`,
+  `--laps`, `--alt`, `--box`, `--out`.
+  > **Seed note:** `SIM_GPS_SEED` is consumed at sim boot, so per-seed runs are driven by a launcher
+  > that reboots SITL per seed (Task 7 `run_all.sh`, same pattern as `verify_gps_noise.sh`), which
+  > then calls `mission.py`. True landing error (vs pad ground-truth) is computed by `analyze.py`
+  > from the ulog (ground-truth isn't on the MAVLink link).
 - [ ] **USER verify** single run; **commit** after approval.
 
 ### Task 3 — Log analysis + plots (`Tools/uwb_landing/analyze.py`)
