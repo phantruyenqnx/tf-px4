@@ -2,18 +2,18 @@
 
 > **What this file covers:** the chosen approach — **tightly-coupled** range fusion — argued
 > *from the literature* and then carried *to a concrete PX4 EKF2 integration path*. Every design
-> decision is backed by a cited paper (see [`00_uwb_ekf2_literature_review.md`](00_uwb_ekf2_literature_review.md)
+> decision is backed by a cited paper (see [`00_uwb_ekf2_literature_review.md`](01_literature_review.md)
 > for the full review) and grounded in the *actual* EKF2 source tree of this repo.
 >
-> **Read order:** [`00_uwb_ekf2_literature_review.md`](00_uwb_ekf2_literature_review.md) (WHY / theory)
-> → this file (approach + PX4 mapping) → [`02f_ekf2_unified.md`](02f_ekf2_unified.md) (ESKF internals).
+> **Read order:** [`00_uwb_ekf2_literature_review.md`](01_literature_review.md) (WHY / theory)
+> → this file (approach + PX4 mapping) → [`02f_ekf2_unified.md`](../control_stack/02f_ekf2_unified.md) (ESKF internals).
 >
 > **Scope:** ideal LOS, ~4 **fixed anchors at known surveyed positions** (matches `worlds/uwb.sdf`),
 > GPS-denied. NLOS / anchor self-survey / clock-sync are out of scope.
 
 This file is **self-contained**: the papers the approach rests on are named in [§0](#0-the-papers-this-approach-is-built-on)
 and fully cited in [§10 References](#10-references). `[n]` markers resolve to §10 in this file (and match
-the same numbers in [`00_uwb_ekf2_literature_review.md`](00_uwb_ekf2_literature_review.md#9-annotated-bibliography)).
+the same numbers in [`00_uwb_ekf2_literature_review.md`](01_literature_review.md#9-annotated-bibliography)).
 
 ---
 
@@ -259,7 +259,7 @@ Cross-checks that the implementation matches what the papers predict (review §4
 ## 10. References
 
 All citations below were verified against the publisher / arXiv records (June 2026). Numbering is
-shared with [`00_uwb_ekf2_literature_review.md` §9](00_uwb_ekf2_literature_review.md#9-annotated-bibliography).
+shared with [`00_uwb_ekf2_literature_review.md` §9](01_literature_review.md#9-annotated-bibliography).
 
 <a id="ref1"></a>**[1]** M. W. Mueller, M. Hamer, R. D'Andrea. *Fusing ultra-wideband range measurements
 with accelerometers and rate gyroscopes for quadrocopter state estimation.* IEEE International
@@ -299,7 +299,7 @@ https://link.springer.com/article/10.1007/s10846-012-9742-1
 ---
 
 *This document supersedes the earlier implementation-only guide. ESKF internals in
-[`02f_ekf2_unified.md`](02f_ekf2_unified.md); the full tight-vs-loose review (with refuted claims) in
-[`00_uwb_ekf2_literature_review.md`](00_uwb_ekf2_literature_review.md). All PX4 file:line references
+[`02f_ekf2_unified.md`](../control_stack/02f_ekf2_unified.md); the full tight-vs-loose review (with refuted claims) in
+[`00_uwb_ekf2_literature_review.md`](01_literature_review.md). All PX4 file:line references
 were verified against the current source tree on the `EKF-UWB-fusion` branch — re-verify after
 upstream merges.*

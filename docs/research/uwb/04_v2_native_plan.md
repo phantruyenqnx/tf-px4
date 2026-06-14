@@ -533,4 +533,4 @@ bool Ekf::tryInitUwb()
 
 ---
 
-*Plan v2. Builds on v1 (commits `7478550675`…`5ed64770ad`). Approach/theory: [`01_uwb_tightly_coupled_px4.md`](01_uwb_tightly_coupled_px4.md); v1 task plan: [`03_uwb_ekf2_implementation_plan.md`](03_uwb_ekf2_implementation_plan.md).*
+*Plan v2. Builds on v1 (commits `7478550675`…`5ed64770ad`). Approach/theory: [`01_uwb_tightly_coupled_px4.md`](02_tightly_coupled_px4.md); v1 task plan: [`03_uwb_ekf2_implementation_plan.md`](03_v1_implementation_plan.md).*

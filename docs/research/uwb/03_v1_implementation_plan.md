@@ -4,7 +4,7 @@
 
 **Goal:** Fuse simulated UWB tag→anchor ranges into PX4 EKF2 as a tightly-coupled scalar position-aiding source, end-to-end from the `gtec_uwb_plugin` gz topic to a converging `vehicle_local_position` with GPS off — on a code path that the future DWM3000 hardware driver reuses unchanged.
 
-**Architecture:** Follow PX4's self-contained aiding-source class template (`AuxGlobalPosition`). All UWB fusion lives in one class `UwbRange` (`aid_sources/uwb/uwb_range.{hpp,cpp}`) that self-subscribes to the **existing** `sensor_uwb` uORB topic, owns its `EKF2_UWB_*` params, buffers samples, fuses each range as a **scalar** measurement `z=‖p−a‖` (Jacobian `H_pos = (p−a)/‖p−a‖`) via the public `ekf.measurementUpdate()`, and publishes its own aid-source status. It plugs into the filter as a `friend class` with one member + one call. Upstream, `gtec_uwb_plugin` already publishes `px4::msgs::Ranging`; a `gz_bridge` callback converts it to `sensor_uwb`. Design + citations: [`docs/research/control_stack/01_uwb_tightly_coupled_px4.md`](01_uwb_tightly_coupled_px4.md).
+**Architecture:** Follow PX4's self-contained aiding-source class template (`AuxGlobalPosition`). All UWB fusion lives in one class `UwbRange` (`aid_sources/uwb/uwb_range.{hpp,cpp}`) that self-subscribes to the **existing** `sensor_uwb` uORB topic, owns its `EKF2_UWB_*` params, buffers samples, fuses each range as a **scalar** measurement `z=‖p−a‖` (Jacobian `H_pos = (p−a)/‖p−a‖`) via the public `ekf.measurementUpdate()`, and publishes its own aid-source status. It plugs into the filter as a `friend class` with one member + one call. Upstream, `gtec_uwb_plugin` already publishes `px4::msgs::Ranging`; a `gz_bridge` callback converts it to `sensor_uwb`. Design + citations: [`docs/research/control_stack/01_uwb_tightly_coupled_px4.md`](02_tightly_coupled_px4.md).
 
 **Tech Stack:** PX4 EKF2 (ESKF, 24-state), uORB, gz-transport (Harmonic) + `gz_bridge`, protobuf (`px4_gz_msgs`), CMake/Kconfig, SITL (`make px4_sitl gz_f450-uwb_uwb`).
 
@@ -641,7 +641,7 @@ Make one anchor wrong/NLOS: remaining 3 keep `fused=true`, position degrades gra
 
 - [ ] **Step 5: Record results + commit**
 
-Append innovation stats + GPS-off RMSE to [`01_uwb_tightly_coupled_px4.md`](01_uwb_tightly_coupled_px4.md) §9.
+Append innovation stats + GPS-off RMSE to [`01_uwb_tightly_coupled_px4.md`](02_tightly_coupled_px4.md) §9.
 ```bash
 git add docs/research/control_stack/01_uwb_tightly_coupled_px4.md
 git commit -m "docs(research): record UWB EKF2 SITL validation results"
@@ -666,4 +666,4 @@ git commit -m "docs(research): record UWB EKF2 SITL validation results"
 
 ---
 
-*Plan saved 2026-06-13 (rev 3 — reuse `sensor_uwb`, DWM3000-ready, AuxGlobalPosition self-contained-class template). Approach + citations: [`docs/research/control_stack/01_uwb_tightly_coupled_px4.md`](01_uwb_tightly_coupled_px4.md).*
+*Plan saved 2026-06-13 (rev 3 — reuse `sensor_uwb`, DWM3000-ready, AuxGlobalPosition self-contained-class template). Approach + citations: [`docs/research/control_stack/01_uwb_tightly_coupled_px4.md`](02_tightly_coupled_px4.md).*

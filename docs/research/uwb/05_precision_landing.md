@@ -4,8 +4,8 @@
 > **accurately** when GPS has drifted during the mission. En-route the drone flies on GPS; on
 > return it enters UWB range (≤ ~14 m of the pad) and UWB corrects the accumulated GPS error so it
 > touches down on the pad. Built on the UWB→EKF2 fusion in
-> [`01_uwb_tightly_coupled_px4.md`](01_uwb_tightly_coupled_px4.md) /
-> [`04_uwb_ekf2_v2_native_plan.md`](04_uwb_ekf2_v2_native_plan.md).
+> [`01_uwb_tightly_coupled_px4.md`](02_tightly_coupled_px4.md) /
+> [`04_uwb_ekf2_v2_native_plan.md`](04_v2_native_plan.md).
 >
 > **Scope here:** Mode **UWB+GPS** only. Landing via standard **AUTO.LAND**. Everything scripted
 > (MAVSDK) + analyzed with plots/metrics.

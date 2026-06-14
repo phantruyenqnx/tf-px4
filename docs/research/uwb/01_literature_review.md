@@ -4,8 +4,8 @@
 > tag-to-anchor ranges into an IMU-driven Extended / error-state Kalman filter of the PX4 EKF2
 > kind. It is a **literature review only** — measurement models, observability, sequential-vs-batch
 > fusion, and the tight-vs-loose architecture trade-off, with cited sources. It does **not**
-> prescribe code; for the implementation plan see [`03_uwb_ekf2_implementation.md`](03_uwb_ekf2_implementation.md),
-> and for EKF2 ESKF internals see [`02f_ekf2_unified.md`](02f_ekf2_unified.md).
+> prescribe code; for the implementation plan see [`03_uwb_ekf2_implementation.md`](03_v1_implementation_plan.md),
+> and for EKF2 ESKF internals see [`02f_ekf2_unified.md`](../control_stack/02f_ekf2_unified.md).
 >
 > **Scope assumed** (matches the simulation world `worlds/uwb.sdf`): clear line-of-sight, a small
 > set (≈4) of **fixed anchors at known surveyed positions**, GPS-denied. NLOS mitigation, anchor
@@ -49,7 +49,7 @@ and is qualitatively less accurate. The strongest single reference is Mueller, H
 ## 1. Notation
 
 Consistent with [`../quadcopter_control_math.md`](../quadcopter_control_math.md) §0 and
-[`02f_ekf2_unified.md`](02f_ekf2_unified.md):
+[`02f_ekf2_unified.md`](../control_stack/02f_ekf2_unified.md):
 
 | Symbol | Meaning |
 |---|---|
@@ -195,7 +195,7 @@ open question, §8.)
 ## 6. Mapping onto the PX4 EKF2 ESKF position-aiding pattern
 
 Both architectures slot into EKF2's existing position-aiding structure
-([`02f_ekf2_unified.md`](02f_ekf2_unified.md), PX4 ECL-EKF tuning guide [[11]](#ref11)):
+([`02f_ekf2_unified.md`](../control_stack/02f_ekf2_unified.md), PX4 ECL-EKF tuning guide [[11]](#ref11)):
 
 - **Loosely-coupled** is the *minimal* path: a trilaterated fix is just another position
   observation, fused like GPS/EV — no new measurement model in the filter core. This is why vendor

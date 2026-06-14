@@ -1,6 +1,6 @@
 # GNSS / GPS in EKF2 — From Simulation to Real Hardware
 
-> Companion to `02_ekf2.md`, `02c_ekf2_source_guide.md`, and `03_uwb_ekf2_implementation.md`.
+> Companion to `02_ekf2.md`, `02c_ekf2_source_guide.md`, and the UWB series in `../uwb/`.
 > Focus: everything that touches `src/modules/ekf2/EKF/aid_sources/gnss/` plus the full pipeline that
 > feeds it — from a fake fix in a unit test, through Gazebo/HIL SITL, to a real u-blox receiver on a UART.
 >
