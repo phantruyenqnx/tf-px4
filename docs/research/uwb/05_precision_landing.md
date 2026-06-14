@@ -6,9 +6,10 @@
 > down on the pad. Built on the UWB→EKF2 fusion in [`02_tightly_coupled_px4.md`](02_tightly_coupled_px4.md)
 > / [`04_v2_native_plan.md`](04_v2_native_plan.md).
 >
-> **Scope:** Mode **UWB+GPS** only. Landing via standard **AUTO.LAND**. Everything scripted (MAVSDK)
-> + analyzed with plots/metrics. This file is both the **methodology/scenario** and the
-> **task-by-task implementation plan**.
+> **Scope:** two scenarios only — **A = GPS-only** (baseline) and **B = GPS+UWB** (UWB-dominant near
+> the pad). Landing via an AUTO mission that descends to a low approach waypoint over the pad (UWB
+> range) then **AUTO.LAND**s. Everything scripted (pymavlink) + analyzed with plots/metrics. This
+> file is both the **methodology/scenario** and the **task-by-task implementation plan**.
 >
 > **Workflow rule:** each task → build/script → run in SITL → **reviewer approves plots/metrics** →
 > commit (one task per commit; no committing un-reviewed work).
@@ -20,10 +21,14 @@
 - **Scenario A — GPS-only (baseline):** takeoff from pad → fly a multi-lap mission far from the pad
   for several minutes (GPS error accumulates) → return → LAND. The EKF believes it is over the pad,
   but it is offset by the GPS error → **lands off-pad** by ~the GPS drift (~1-2 m for M9N).
-- **Scenario B — GPS+UWB:** same mission, same GPS error; near the pad UWB injects pad-relative
-  position → corrects the drift → **lands on the pad**.
+- **Scenario B — GPS+UWB (UWB-dominant):** same mission, same GPS error; on return the drone enters
+  UWB range, UWB re-locks the position to the anchor frame and is trusted over the drifted GPS, so the
+  estimate snaps to the pad → **lands on the pad**.
 
-Value proposition: **UWB precision landing in GPS-weakened areas.**
+Value proposition: **UWB precision landing in GPS-weakened areas.** SITL result (laps=1): A lands
+**1.07 m** off the pad (EKF blind — thinks it is on the pad, ~0.9 m bias); B lands **0.16 m** off
+(EKF accurate, ~0.06 m bias). Same mission/approach for both — the only difference is the position
+estimate.
 
 ---
 
@@ -45,27 +50,38 @@ Value proposition: **UWB precision landing in GPS-weakened areas.**
 
 **Honest caveats:** dedicated UWB precision-**landing** experiments are scarce ([[1]](#ref1) is the
 only true touchdown-error study; others inform architecture/degradation). The loiter-then-handoff
-profile is **not cleanly demonstrated in any single paper** → our active GPS down-weight (scenario
-B-ii) is a defensible synthesis. **Innovation chi-squared gating is weak against slow GPS bias
+profile is **not cleanly demonstrated in any single paper** → our active GPS down-weight (scenario B)
+is a defensible synthesis. **Innovation chi-squared gating is weak against slow GPS bias
 drift** (good at noise spikes) → the gate alone won't fully correct accumulated drift; we need
 adaptive R / GPS down-weighting.
 
 ---
 
-## 3. The fusion-conflict design (why scenario B-ii matters)
+## 3. Scenario B design — making UWB win near the pad (`EKF2_UWB_GPS`)
 
-On return with ~1-2 m of accumulated GPS error and pad-accurate UWB: GPS says "over the pad", UWB
-says "off by 1-2 m". Because the bias built up **slowly**, neither innovation is a sharp spike, so
-the chi-squared gate does **not** reject GPS → the estimate sits **between** GPS and UWB → still
-lands partly off-pad.
+Three coupled problems had to be solved for B to actually land on the pad; each was found by reading
+the SITL ulogs (see commit history). All are gated on UWB being active and well-constrained
+(`control_status.flags.uwb` **and ≥3 anchors with a range < 0.5 s old**), and enabled by
+`EKF2_UWB_GPS=1`:
 
-- **B-(i) passive (tuning only):** keep both GPS+UWB, tune `EKF2_UWB_NOISE`/gate. Expect UWB pulls
-  the estimate **partway** to the pad; slow drift only partially corrected. *Measures how far tuning
-  gets us.*
-- **B-(ii) active GPS down-weight:** when UWB is active & trusted, **inflate GNSS position R** so UWB
-  dominates near the pad (adaptive-R, [[2]](#ref2)). **R is the GPS-trust knob**:
-  `K = P Hᵀ (HPHᵀ + R)⁻¹` — larger R ⇒ smaller gain ⇒ EKF trusts GPS less. Expect estimate snaps to
-  pad → cm–dm landing. Default keeps EKF2's normal behavior; `EKF2_UWB_GPS=1` enables the inflation.
+1. **Fusion conflict → adaptive R.** On return GPS (drifted ~1-2 m) and UWB (pad-accurate) disagree,
+   but the bias grew **slowly** so the chi-squared gate doesn't reject GPS → the estimate sits
+   *between* them. Fix: **inflate GNSS R ×100** (horizontal **and** vertical) so the Kalman gain
+   `K = P Hᵀ(HPHᵀ+R)⁻¹` trusts GPS far less and UWB dominates (adaptive-R, [[2]](#ref2)).
+2. **Re-acquisition after drift.** Flying the box takes the drone out of UWB range; the EKF drifts on
+   GPS, so when ranges return the UWB innovations are large (~1.9 m) and **73 % get gated out**
+   (chicken-and-egg). Fix: when ≥3 anchors are ranging but UWB keeps being rejected, **snap the
+   horizontal position to the UWB trilateration solution** (a position reset, like GPS
+   reset-on-large-innovation) so UWB re-locks; adaptive-R then holds it.
+3. **Z is mandatory and must be observable.** A range `r = √(rh² + Δz²)` couples horizontal and
+   vertical — you cannot get XY from a range without the vertical separation Δz, and **coplanar
+   anchors give no vertical observability** (vertical error amplified, height aiding required
+   [[1]](#ref1)-class result). Fix: **anchors are non-coplanar** (staggered heights 0.5/3.0 m) so the
+   full **3-D range fusion observes N/E/D** and UWB owns altitude too — no GPS/baro height crutch.
+   Sensitivity `∂rh/∂Δz = −Δz/rh` is huge when high above the pad → UWB horizontal is only reliable
+   when **low** (near the anchor plane), which is exactly the final-approach phase.
+
+Out of the UWB zone (`flags.uwb` cleared on timeout) none of this applies → GPS keeps full weight.
 
 ---
 
@@ -99,16 +115,16 @@ noise, consolidate into a single seeded RNG in the bridge.
 
 ## 5. Test scenarios & mission
 
-**Common mission (scripted, identical):** arm + takeoff from pad (origin = anchor-frame origin) →
-multi-lap **~50 m box** outside UWB range (>14 m) so GPS error accumulates uncorrected, for ~3-5 min
-→ return toward pad → **AUTO.LAND** inside UWB range (≤14 m). Record touchdown (ground truth) vs pad
-center (0,0).
+**Common mission (scripted, identical for A and B):** arm + takeoff from the pad (= take-off point =
+EKF local origin) → multi-lap **~50 m box** outside UWB range (>14 m) so GPS error accumulates
+uncorrected → return → descend to a **low approach waypoint (~6 m) over the pad** (inside UWB range;
+tight `NAV_ACC_RAD` so the drone centres on the pad) → **AUTO.LAND**. Land target = the EKF origin
+(maps to local (0,0) = pad regardless of GPS bias). Record touchdown (ground truth) vs pad (0,0).
 
-| Scenario | Config | Expected landing error |
+| Scenario | Config | Result (laps=1) |
 |---|---|---|
-| **A — GPS-only** | `EKF2_UWB_CTRL=0` | ≈ GPS error at landing (~1-2 m, M9N) |
-| **B-(i) — GPS+UWB passive** | `EKF2_UWB_CTRL=1`, `EKF2_UWB_GPS=0` | partial correction (slow-drift caveat) |
-| **B-(ii) — GPS+UWB + GPS R-inflation** | `EKF2_UWB_CTRL=1`, `EKF2_UWB_GPS=1` | cm–dm (UWB dominates) |
+| **A — GPS-only** | `EKF2_UWB_CTRL=0` | **1.07 m** off (EKF blind, ~0.9 m bias) |
+| **B — GPS+UWB** | `EKF2_UWB_CTRL=1`, `EKF2_UWB_GPS=1` | **0.16 m** off (EKF accurate, ~0.06 m bias) |
 
 ---
 
@@ -121,13 +137,13 @@ From the `.ulg` (estimate) + `*_groundtruth` (truth):
 4. **`estimator_aid_src_uwb`** innovation/test_ratio + `cs_uwb`/`cs_gnss_pos` flags vs time.
 5. **Touchdown scatter + CEP circles** (A vs B) over N runs.
 
-Summary table: CEP_A/B1/B2, RMSE_A/B1/B2, % improvement.
+Summary table: CEP_A/CEP_B, RMSE_A/RMSE_B, % improvement (over N seeds, Task 7).
 
 ---
 
 ## 7. Implementation plan (task-by-task)
 
-**Tooling:** `Tools/uwb_landing/` (Python MAVSDK + pyulog), consistent with `Tools/ecl_ekf/`.
+**Tooling:** `Tools/uwb_landing/` (pymavlink + pyulog + matplotlib).
 
 ### Task 1 — f450 navsat → x500 default + M9N seeded Gauss-Markov noise
 **Files:** `Tools/simulation/gz/models/f450_base/model.sdf`; `src/modules/simulation/gz_bridge/GZBridge.{hpp,cpp}`; sim GPS params file.
@@ -146,39 +162,50 @@ Summary table: CEP_A/B1/B2, RMSE_A/B1/B2, % improvement.
 **Tooling = pymavlink** (`mavutil`), not MAVSDK: pymavlink is PX4's own pure-Python tool stack
 (`Tools/mavlink_shell.py`, `mavlink_ulog_streaming.py`), already installed, no ROS / no server
 binary. (PX4's MAVSDK tests are C++ in `test/mavsdk_tests/`; MAVROS needs ROS.)
-- [ ] One run = one already-booted SITL: connect `udpin:0.0.0.0:14540`; set scenario params
-  (`EKF2_GPS_CTRL=7`; A:`EKF2_UWB_CTRL=0` / B1:`UWB_CTRL=1,UWB_GPS=0` / B2:`UWB_CTRL=1,UWB_GPS=1`);
-  upload AUTO mission (TAKEOFF → ~50 m box, `--laps`, kept >14 m from pad so GPS drift accrues
-  uncorrected) → `NAV_RETURN_TO_LAUNCH` (RTL returns to the HOME set at arm and AUTO.LANDs — the
-  realistic return-and-land reference, so landing error = GPS drift since arm); arm → `MISSION_START`;
-  wait `landed_state=ON_GROUND`; record EKF landing x,y + wall-clock; disarm; append CSV row.
-  **read-before-set params** (a redundant `param_set` triggers a parameter_update that drops EKF GPS
-  aiding ~6 s → must avoid); after any change wait for GPS re-converge; `wait_position_stable()`
-  before arming. Args `--scenario`,
-  `--laps`, `--alt`, `--box`, `--out`.
+- [x] One run = one already-booted SITL: connect to the **autopilot** heartbeat on
+  `udpin:0.0.0.0:14540` (filter sys≠0/comp=AUTOPILOT1); set scenario params (`EKF2_GPS_CTRL=7`;
+  A:`EKF2_UWB_CTRL=0` / B:`UWB_CTRL=1,UWB_GPS=1`); upload AUTO mission (TAKEOFF → ~50 m box `--laps`
+  kept >14 m from pad → **low approach waypoint over the pad** at `--approach-alt` → `NAV_LAND` at the
+  pad). Land/pad coordinate = **EKF global origin** (`GPS_GLOBAL_ORIGIN`) which maps to local (0,0) =
+  take-off point regardless of GPS bias (NOT RTL/home, which targets the GPS-biased home and lands a
+  full bias off). arm → `MISSION_START` → wait `landed_state=ON_GROUND`; record EKF landing x,y;
+  disarm; append CSV. Robustness learned in SITL: **INT params are bit-cast into the MAVLink float
+  field** by PX4 (encode/decode with struct or they corrupt, e.g. 7→1088421888); **read-before-set**
+  (a redundant param_set resets EKF GPS aiding ~6 s); `wait_position_stable()` before arming; tight
+  `NAV_ACC_RAD` so the drone centres before the final descent; log flight-mode transitions.
   > **Seed note:** `SIM_GPS_SEED` is consumed at sim boot, so per-seed runs are driven by a launcher
-  > that reboots SITL per seed (Task 7 `run_all.sh`, same pattern as `verify_gps_noise.sh`), which
-  > then calls `mission.py`. True landing error (vs pad ground-truth) is computed by `analyze.py`
-  > from the ulog (ground-truth isn't on the MAVLink link).
-- [ ] **USER verify** single run; **commit** after approval.
+  > that reboots SITL per seed (Task 7 `run_all.sh`). True landing error (vs pad ground-truth) is
+  > computed by `analyze.py` from the ulog (ground-truth isn't on the MAVLink link).
+- [x] **USER verified** in SITL: A lands 1.07 m off (EKF blind), B lands 0.16 m off (EKF accurate).
 
 ### Task 3 — Log analysis + plots (`Tools/uwb_landing/analyze.py`)
-- [ ] pyulog extract est/truth/flags/uwb-aid/sensor_gps; metrics landing_error, RMSE, CEP=1.1774σ; the §6 plots (matplotlib; may reuse `Tools/ecl_ekf/plotting`).
-- [ ] **USER verify** on a Task-2 log (A landing_error ~1-2 m); **commit** after approval.
+- [x] pyulog: per ulog detect touchdown (last arm→disarm), TRUE landing error = ground-truth landing
+  vs pad (ground-truth origin); scenario auto-labelled from `EKF2_UWB_CTRL`/`EKF2_UWB_GPS` active at
+  flight time. Per-scenario **mean / CEP50 (median radius) / RMSE / worst**; 3 plots (touchdown
+  scatter + CEP circles, EKF−truth error vs time, trajectory truth vs EKF) plus detail charts (3-D
+  trajectory, X/Y/Z, roll/pitch/yaw, Vx/Vy/Vz). Shows an interactive window by default (`--out` to
+  save, `--no-show` headless). Verified on real ulogs: A 1.07 m, B 0.16 m (match hand calc).
+- [x] **USER verified.**
 
-### Task 4 — Scenario A baseline (GPS-only)
-- [ ] Run `--scenario A` fixed seed; analyze. **USER review**: landing_error_A ~1-2 m, drift in `pos_err(t)`.
+### Task 6 — Scenario B feature: `EKF2_UWB_GPS` (UWB-dominant near the pad)
+**Files:** `aid_sources/uwb/uwb_range_control.cpp`, `aid_sources/gnss/gps_control.cpp`,
+`aid_sources/gnss/gnss_height_control.cpp`, `ekf.h`, `common.h`, `EKF2.{hpp,cpp}`, `params_uwb.yaml`,
+`ROMFS/.../4023_gz_f450-uwb`, gz submodule `worlds/uwb.sdf`.
+- [x] **Non-coplanar anchors** (worlds/uwb.sdf staggered 0.5/3.0 m + matching `EKF2_UWB_A*` forced in
+  the airframe) → UWB observes N/E/D → **full 3-D range fusion** (`fuseUwbRange`).
+- [x] param **`EKF2_UWB_GPS`** (0=normal, 1=UWB-dominant). When set AND `flags.uwb` AND
+  `countRecentUwbAnchors() >= 3`: inflate GNSS **horizontal** (`gps_control`) and **vertical**
+  (`gnss_height_control`) R ×100 so UWB wins.
+- [x] **Re-acquisition reset**: after ≥5 consecutive gated UWB ranges with ≥3 anchors, snap the
+  position to the UWB trilateration solution (`tryInitUwb`) so UWB re-locks after the box drift.
+- [x] **USER verified**: B estimate snaps to the pad on return, lands 0.16 m off (EKF bias 0.06 m).
 
-### Task 5 — Scenario B-(i) passive (GPS+UWB)
-- [ ] Same seed, `EKF2_UWB_CTRL=1`, `EKF2_UWB_GPS=0`; analyze. **USER review**: partial pull-in.
-
-### Task 6 — `EKF2_UWB_GPS` R-inflation (B-ii)
-**Files:** `gps_control.cpp`, `common.h`, `EKF2.{hpp,cpp}`, `params_uwb.yaml`.
-- [ ] param `EKF2_UWB_GPS` (0=normal default, 1=inflate GNSS pos R when `cs_uwb`, 2=stop GNSS hpos — optional). Apply ×~100 R scale in GNSS pos fusion when `_control_status.flags.uwb`.
-- [ ] **USER verify** estimate snaps to pad on return; **commit** after approval.
-
-### Task 7 — N-run CEP sweep + final report
-- [ ] `run_all.sh` (headless opt-in): {A,B1,B2}×N (seed=base+i) → mission → analyze aggregate; final CEP/RMSE table + CEP-circle plot. **USER review**; record results here.
+### Task 7 — N-seed CEP sweep + final report
+- [ ] `run_all.sh` (headless): for each scenario {A,B} × N seeds, reboot SITL (so `SIM_GPS_SEED`
+  applies and A vs B see the **same** GPS bias trace per seed) → run `mission.py` → collect ulogs →
+  `analyze.py` aggregate. Final CEP/RMSE table + CEP-circle scatter. **USER review**; record here.
+  *(Rigorous same-seed A-vs-B numbers; the single-run 1.07 vs 0.16 above is illustrative — different
+  boots.)*
 
 ---
 

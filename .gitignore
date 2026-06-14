@@ -112,3 +112,6 @@ keys/
 
 # Scratch plans written by agent tooling (keep finalized docs under docs/research/)
 docs/superpowers/
+
+# UWB precision-landing run outputs (CSV/plots)
+Tools/uwb_landing/results/

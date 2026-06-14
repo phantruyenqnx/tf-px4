@@ -74,9 +74,8 @@ def mode_name(custom_mode):
 
 
 SCENARIOS = {
-    'A':  {'EKF2_UWB_CTRL': 0},
-    'B1': {'EKF2_UWB_CTRL': 1, 'EKF2_UWB_GPS': 0},
-    'B2': {'EKF2_UWB_CTRL': 1, 'EKF2_UWB_GPS': 1},
+    'A': {'EKF2_UWB_CTRL': 0},                          # GPS only (baseline)
+    'B': {'EKF2_UWB_CTRL': 1, 'EKF2_UWB_GPS': 1},       # GPS + UWB, UWB-dominant near the pad
 }
 
 EARTH_R = 6378137.0
@@ -148,8 +147,10 @@ class Mission:
         if cur is not None and abs(cur - float(value)) < 1e-3:
             log(f"param {name} already {value} (skip)")
             return False
-        self.set_param(name, value, ptype)
-        return True
+        ok = self.set_param(name, value, ptype)
+        if not ok:
+            log(f"param {name} not available — skipping (feature not built?)")
+        return ok  # 'changed' only if actually set
 
     # ---- streams ------------------------------------------------------------
     def request_stream(self, msg_id, hz):
@@ -227,19 +228,34 @@ class Mission:
             current, 1, p1, 0.0, 0.0, float('nan'),
             int(lat * 1e7), int(lon * 1e7), float(alt), MISSION_TYPE)
 
-    def build(self, lat0, lon0, alt, box, laps):
+    def get_global_origin(self, timeout=10):
+        """EKF local-frame origin (lat/lon). A global setpoint maps to local via this FIXED
+        origin, so it is the right reference for 'land at the pad' (bias cancels in the
+        global->local conversion)."""
+        self.m.mav.command_long_send(
+            self.tsys, self.tcomp, mavutil.mavlink.MAV_CMD_REQUEST_MESSAGE, 0,
+            mavutil.mavlink.MAVLINK_MSG_ID_GPS_GLOBAL_ORIGIN, 0, 0, 0, 0, 0, 0)
+        msg = self._wait('GPS_GLOBAL_ORIGIN', timeout)
+        return (msg.latitude / 1e7, msg.longitude / 1e7) if msg else None
+
+    def build(self, lat_pad, lon_pad, alt, box, laps, approach_alt):
+        """Take off, fly a box >14 m from the pad, return over the pad and AUTO.LAND on it.
+        The pad is the UWB anchor centroid expressed via the EKF origin, so NAV_LAND maps to the
+        local anchor centroid: with UWB the estimate is pad-accurate -> lands on the pad; GPS-only
+        -> lands off by the GPS error. (Not RTL: RTL targets the GPS-biased home, not the pad.)"""
         h = box / 2.0
         corners = [(h, h), (h, -h), (-h, -h), (-h, h)]  # NE, SE, SW, NW (N,E)
         items, seq = [], 0
-        items.append(self._item(seq, CMD_TAKEOFF, lat0, lon0, alt, current=1)); seq += 1
+        items.append(self._item(seq, CMD_TAKEOFF, lat_pad, lon_pad, alt, current=1)); seq += 1
         for _ in range(laps):
             for dn, de in corners:
-                la, lo = offset_ll(lat0, lon0, dn, de)
+                la, lo = offset_ll(lat_pad, lon_pad, dn, de)
                 items.append(self._item(seq, CMD_WAYPOINT, la, lo, alt)); seq += 1
-        # Return To Launch: PX4 RTL flies back to the HOME set at arm and lands (AUTO.LAND).
-        # This makes the landing reference the real home-at-arm (like a real return-and-land),
-        # so the landing error = GPS drift accumulated since arm.
-        items.append(self._item(seq, CMD_RTL, 0.0, 0.0, 0.0, frame=FRAME_MISSION)); seq += 1
+        # Low approach waypoint over the pad: descend into UWB range and let UWB + the full-authority
+        # position controller centre on the pad (small NAV_ACC_RAD) BEFORE the short final descent,
+        # so the drone doesn't touch down while still flying back to (0,0).
+        items.append(self._item(seq, CMD_WAYPOINT, lat_pad, lon_pad, approach_alt)); seq += 1
+        items.append(self._item(seq, CMD_LAND, lat_pad, lon_pad, 0.0)); seq += 1      # land on pad
         return items
 
     # ---- arm / mode ---------------------------------------------------------
@@ -311,12 +327,18 @@ class Mission:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--scenario', choices=SCENARIOS, default='A')
+    ap.add_argument('--scenario', choices=SCENARIOS, default='A',
+                    help='A = GPS-only baseline; B = GPS+UWB (UWB-dominant near the pad)')
     ap.add_argument('--connect', default='udpin:0.0.0.0:14540')
-    ap.add_argument('--alt', type=float, default=30.0, help='mission + RTL return altitude [m]')
+    ap.add_argument('--alt', type=float, default=30.0, help='mission altitude [m]')
     ap.add_argument('--box', type=float, default=50.0, help='box edge [m] (>28 keeps >14 m from pad)')
     ap.add_argument('--laps', type=int, default=2)
-    ap.add_argument('--out', default='uwb_landing_runs.csv')
+    ap.add_argument('--approach-alt', type=float, default=6.0,
+                    help='low approach altitude over the pad [m] (within UWB range, centre then land)')
+    ap.add_argument('--acc-rad', type=float, default=0.5, help='waypoint acceptance radius [m]')
+    ap.add_argument('--out', default=os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'results', 'runs.csv'),
+        help='CSV to append run results to (default: Tools/uwb_landing/results/runs.csv)')
     ap.add_argument('--seed', type=int, default=-1, help='SIM_GPS_SEED the sim booted with (for the CSV)')
     ap.add_argument('--timeout', type=float, default=600.0)
     args = ap.parse_args()
@@ -326,23 +348,34 @@ def main():
         mis.request_stream(ms, 5)
 
     # EKF aiding params: a redundant param_set still resets GPS aiding -> read-before-set + wait.
+    # (EKF2_HGT_REF=baro is set at BOOT by the f450-uwb airframe -- a runtime change doesn't
+    # re-reference the height, so it must not be done here.)
     changed = mis.ensure_param('EKF2_GPS_CTRL', 7)
     for k, v in SCENARIOS[args.scenario].items():
         changed = mis.ensure_param(k, v) or changed
+    # Tight waypoint acceptance so the drone centres on the pad (UWB) before the final descent.
+    mis.ensure_param('NAV_ACC_RAD', args.acc_rad)
     if changed:
         log("EKF param(s) changed -> waiting 15 s for GPS aiding to re-converge")
         time.sleep(15)
 
-    # Navigator params (safe to set anytime, no EKF disruption): RTL returns at the mission
-    # altitude so it goes straight home and lands without first climbing.
-    mis.ensure_param('RTL_RETURN_ALT', args.alt)
-
     mis.wait_global_pos()
     mis.wait_position_stable()
-    lat0, lon0, _ = mis.wait_global_pos()
-    log(f"pad/home reference: lat={lat0:.7f} lon={lon0:.7f}")
 
-    items = mis.build(lat0, lon0, args.alt, args.box, args.laps)
+    # Pad = the take-off point = EKF local origin (local 0,0). Landing at the EKF origin global
+    # maps back to local (0,0) regardless of GPS bias (it cancels in the global<->local conversion).
+    # With UWB the drone's local position is accurate in the anchor frame, so it returns precisely
+    # to where it took off; GPS-only drifts and lands off. (The take-off point need not be the
+    # anchor centroid — UWB is accurate anywhere inside the anchor field with >=3 anchors.)
+    origin = mis.get_global_origin()
+    if origin:
+        lat_pad, lon_pad = origin
+        log(f"pad = take-off point (EKF local origin) -> {lat_pad:.7f},{lon_pad:.7f}")
+    else:
+        lat_pad, lon_pad, _ = mis.wait_global_pos()
+        log(f"WARN no GPS_GLOBAL_ORIGIN; using current fix as pad {lat_pad:.7f},{lon_pad:.7f}")
+
+    items = mis.build(lat_pad, lon_pad, args.alt, args.box, args.laps, args.approach_alt)
     if not mis.upload(items):
         log("ERROR mission upload failed"); sys.exit(1)
     if not mis.arm():
@@ -360,6 +393,7 @@ def main():
     row = {'scenario': args.scenario, 'seed': args.seed,
            'ekf_land_x': round(x, 3), 'ekf_land_y': round(y, 3),
            'flight_s': round(dur, 1), 'wall_time': int(time.time())}
+    os.makedirs(os.path.dirname(args.out) or '.', exist_ok=True)
     new = not os.path.exists(args.out)
     with open(args.out, 'a', newline='') as f:
         w = csv.DictWriter(f, fieldnames=list(row))
