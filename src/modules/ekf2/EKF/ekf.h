@@ -1152,9 +1152,11 @@ private:
 #if defined(CONFIG_EKF2_UWB)
 	void controlUwbRangeFusion(const imuSample &imu_delayed);
 	bool fuseUwbRange(const uwbSample &sample, estimator_aid_source1d_s &aid_src);
+	bool tryInitUwb();
 	matrix::Vector3f getUwbAnchorPos(uint8_t anchor_id) const;
 
 	estimator_aid_source1d_s _aid_src_uwb[4] {};
+	uwbSample _uwb_latest[4] {};
 	uint64_t _time_last_uwb_fuse{0};
 #endif // CONFIG_EKF2_UWB
 };

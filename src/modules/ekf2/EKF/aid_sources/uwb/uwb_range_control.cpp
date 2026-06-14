@@ -22,24 +22,12 @@ matrix::Vector3f Ekf::getUwbAnchorPos(uint8_t anchor_id) const
 
 bool Ekf::fuseUwbRange(const uwbSample &sample, estimator_aid_source1d_s &aid_src)
 {
-	// v1 (Phase 1): UWB enhances an existing position estimate; needs a position origin.
-	if (!_local_origin_lat_lon.isInitialized()) {
-		return false;
-	}
-
-	// vehicle NED position relative to the EKF origin at the delayed (fusion) horizon
-	float pn;
-	float pe;
-	_local_origin_lat_lon.project(_gpos.latitude_deg(), _gpos.longitude_deg(), pn, pe);
-
-	uint64_t origin_time;
-	double ref_lat;
-	double ref_lon;
-	float ref_alt;
-	getEkfGlobalOrigin(origin_time, ref_lat, ref_lon, ref_alt);
-	const float pd = ref_alt - (float)_gpos.altitude(); // NED down relative to origin
-
-	const Vector3f pos_ned(pn, pe, pd);
+	// vehicle NED position in the EKF local frame at the delayed (fusion) horizon.
+	// getLocalHorizontalPosition() works with or without a global (GPS) origin, so this
+	// path also supports GPS-denied / UWB-only operation (Phase 3).
+	const Vector2f pos_ne = getLocalHorizontalPosition();
+	const float pd = -(float)(_gpos.altitude() - getEkfGlobalOriginAltitude()); // NED down rel. origin
+	const Vector3f pos_ned(pos_ne(0), pos_ne(1), pd);
 	const Vector3f anchor = getUwbAnchorPos(sample.anchor_id);
 	const Vector3f diff = pos_ned - anchor;
 	const float predicted = diff.norm();
@@ -86,6 +74,75 @@ bool Ekf::fuseUwbRange(const uwbSample &sample, estimator_aid_source1d_s &aid_sr
 	return true;
 }
 
+bool Ekf::tryInitUwb()
+{
+	// 2-D horizontal trilateration: solve for (N, E) only (height stays on baro).
+	// This handles coplanar anchors (e.g. all at the same height) which make a 3-D
+	// solve singular, and matches the fact that we only resetHorizontalPositionTo().
+	// Needs >= 3 anchors.
+	const int n = math::min((int)_params.uwb_n_anchors, 4);
+
+	if (n < 3) {
+		return false;
+	}
+
+	// require a recent range from every configured anchor
+	for (int i = 0; i < n; i++) {
+		if (!isRecent(_uwb_latest[i].time_us, (uint64_t)5e5) || (_uwb_latest[i].range <= 0.f)) {
+			return false;
+		}
+	}
+
+	// remove the vertical leg using the current height estimate (down, NED rel. origin)
+	const float pd = -(float)(_gpos.altitude() - getEkfGlobalOriginAltitude());
+
+	const Vector3f a0 = getUwbAnchorPos(0);
+	const float rh0_sq = sq(_uwb_latest[0].range) - sq(pd - a0(2)); // horizontal range^2 to anchor 0
+
+	// Linearize, subtract anchor 0:  2 (c_i - c_0)^T q = (|c_i|^2 - |c_0|^2) - (rh_i^2 - rh_0^2)
+	// Solve the (n-1 x 2) least-squares system via the 2x2 normal equations A^T A q = A^T b.
+	matrix::SquareMatrix<float, 2> AtA;
+	Vector2f Atb;
+	AtA.setZero();
+	Atb.setZero();
+
+	for (int i = 1; i < n; i++) {
+		const Vector3f ai = getUwbAnchorPos(i);
+		const float rhi_sq = sq(_uwb_latest[i].range) - sq(pd - ai(2));
+		const Vector2f arow(2.f * (ai(0) - a0(0)), 2.f * (ai(1) - a0(1)));
+		const float brow = (ai(0) * ai(0) + ai(1) * ai(1) - a0(0) * a0(0) - a0(1) * a0(1))
+				   - (rhi_sq - rh0_sq);
+
+		AtA(0, 0) += arow(0) * arow(0);
+		AtA(0, 1) += arow(0) * arow(1);
+		AtA(1, 0) += arow(1) * arow(0);
+		AtA(1, 1) += arow(1) * arow(1);
+		Atb(0) += arow(0) * brow;
+		Atb(1) += arow(1) * brow;
+	}
+
+	matrix::SquareMatrix<float, 2> AtA_inv;
+
+	if (!matrix::inv(AtA, AtA_inv)) {
+		return false; // anchors collinear / degenerate horizontal geometry
+	}
+
+	const Vector2f q = AtA_inv * Atb; // vehicle NE position in the anchor (local) frame
+
+	if (!q.isAllFinite()) {
+		return false;
+	}
+
+	const float var = sq(math::max(_params.uwb_noise, 0.1f)) * 4.f;
+	resetHorizontalPositionTo(q, Vector2f(var, var));
+
+	enableControlStatusUwb();
+	_time_last_uwb_fuse = _time_delayed_us;
+	_time_last_hor_pos_fuse = _time_delayed_us;
+	ECL_INFO("UWB position initialized by trilateration");
+	return true;
+}
+
 void Ekf::controlUwbRangeFusion(const imuSample &imu_delayed)
 {
 	if (_uwb_buffer == nullptr) {
@@ -113,11 +170,16 @@ void Ekf::controlUwbRangeFusion(const imuSample &imu_delayed)
 			continue;
 		}
 
-		// Needs an initial position. Once UWB is the active source it counts as
-		// horizontal aiding (so it self-sustains, e.g. after GPS drops out).
-		// Phase 3 will relax this with trilateration-based initialization.
+		_uwb_latest[sample.anchor_id] = sample; // keep newest per anchor for cold-start init
+
+		// Needs an initial position. With GPS/EV active, refine it. With no other
+		// horizontal aiding (indoor GPS-denied), bootstrap it via trilateration.
+		// Once UWB is the active source it counts as horizontal aiding, so it
+		// self-sustains (e.g. after GPS drops out).
 		if (!isHorizontalAidingActive() && !_control_status.flags.uwb) {
-			continue;
+			if (!tryInitUwb()) {
+				continue;
+			}
 		}
 
 		any_fused |= fuseUwbRange(sample, _aid_src_uwb[sample.anchor_id]);
