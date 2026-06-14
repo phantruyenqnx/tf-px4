@@ -25,6 +25,7 @@ Each file below explains **one layer** of the PX4 multicopter control stack: for
 | UWB tightly-coupled fusion — approach + PX4 integration (paper → reality) | `01_uwb_tightly_coupled_px4.md` |
 | UWB tightly-coupled fusion — v1 implementation plan (Pattern B, done) | `03_uwb_ekf2_implementation_plan.md` |
 | UWB v2 — native aiding source + GPS-denied (Pattern A, control_status, trilateration) | `04_uwb_ekf2_v2_native_plan.md` |
+| UWB precision landing in GPS-degraded zones — scenario, fairness, test plan | `05_uwb_precision_landing.md` |
 | ESKF unified derivation (theory + source navigation) | `02f_ekf2_unified.md` |
 
 Read order for UWB work: literature review (WHY/theory) → `01_uwb_tightly_coupled_px4` (approach + PX4 mapping) → `03_uwb_ekf2_implementation_plan` (HOW, task-by-task) → `02f` (ESKF internals).
