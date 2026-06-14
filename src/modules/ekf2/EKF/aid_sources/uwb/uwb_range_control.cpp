@@ -82,15 +82,26 @@ bool Ekf::fuseUwbRange(const uwbSample &sample, estimator_aid_source1d_s &aid_sr
 	aid_src.fused = true;
 	aid_src.time_last_fuse = _time_delayed_us;
 	_time_last_uwb_fuse = _time_delayed_us;
+	_time_last_hor_pos_fuse = _time_delayed_us; // credit UWB as horizontal-position aiding
 	return true;
 }
 
 void Ekf::controlUwbRangeFusion(const imuSample &imu_delayed)
 {
-	if ((_uwb_buffer == nullptr) || (_params.uwb_ctrl == 0)) {
+	if (_uwb_buffer == nullptr) {
 		return;
 	}
 
+	if (_params.uwb_ctrl == 0) {
+		if (_control_status.flags.uwb) {
+			disableControlStatusUwb();
+			ECL_INFO("stopping UWB fusion (disabled)");
+		}
+
+		return;
+	}
+
+	bool any_fused = false;
 	uwbSample sample;
 
 	while (_uwb_buffer->pop_first_older_than(imu_delayed.time_us, &sample)) {
@@ -102,13 +113,24 @@ void Ekf::controlUwbRangeFusion(const imuSample &imu_delayed)
 			continue;
 		}
 
-		// Phase 1 parity: only fuse when another source already provides position.
+		// Needs an initial position. Once UWB is the active source it counts as
+		// horizontal aiding (so it self-sustains, e.g. after GPS drops out).
 		// Phase 3 will relax this with trilateration-based initialization.
-		if (!isHorizontalAidingActive()) {
+		if (!isHorizontalAidingActive() && !_control_status.flags.uwb) {
 			continue;
 		}
 
-		fuseUwbRange(sample, _aid_src_uwb[sample.anchor_id]);
+		any_fused |= fuseUwbRange(sample, _aid_src_uwb[sample.anchor_id]);
+	}
+
+	if (any_fused && !_control_status.flags.uwb) {
+		ECL_INFO("starting UWB fusion");
+		enableControlStatusUwb();
+	}
+
+	if (_control_status.flags.uwb && isTimedOut(_time_last_uwb_fuse, _params.reset_timeout_max)) {
+		disableControlStatusUwb();
+		ECL_INFO("stopping UWB fusion (timeout)");
 	}
 }
 
