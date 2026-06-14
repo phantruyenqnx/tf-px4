@@ -603,15 +603,26 @@ git commit -m "ekf2: tightly-coupled UWB scalar range fusion + aid-source publis
 
 - [ ] **Step 1: Configure anchors + enable**
 
-In `pxh>` (verify the ENU→NED mapping against the world file first):
+In `pxh>` (verify the ENU→NED mapping against the world file first). NOTE: the pxh shell
+does **not** support `;` command chaining — enter one `param set` per line, or only the first
+on each line is applied (a real trap: it silently leaves E/D at 0 → huge innovation, rejected).
+Params apply live (updateParameters is wired), so no reboot is needed.
 ```
 param set EKF2_UWB_CTRL 1
-param set EKF2_UWB_A0_N -2.5 ; param set EKF2_UWB_A0_E -2.5 ; param set EKF2_UWB_A0_D -2.0
-param set EKF2_UWB_A1_N -2.5 ; param set EKF2_UWB_A1_E  2.5 ; param set EKF2_UWB_A1_D -2.0
-param set EKF2_UWB_A2_N  2.5 ; param set EKF2_UWB_A2_E  2.5 ; param set EKF2_UWB_A2_D -2.0
-param set EKF2_UWB_A3_N  2.5 ; param set EKF2_UWB_A3_E -2.5 ; param set EKF2_UWB_A3_D -2.0
+param set EKF2_UWB_A0_N -2.5
+param set EKF2_UWB_A0_E -2.5
+param set EKF2_UWB_A0_D -2.0
+param set EKF2_UWB_A1_N -2.5
+param set EKF2_UWB_A1_E 2.5
+param set EKF2_UWB_A1_D -2.0
+param set EKF2_UWB_A2_N 2.5
+param set EKF2_UWB_A2_E 2.5
+param set EKF2_UWB_A2_D -2.0
+param set EKF2_UWB_A3_N 2.5
+param set EKF2_UWB_A3_E -2.5
+param set EKF2_UWB_A3_D -2.0
 ```
-Then `reboot`, Play.
+Verify with `param show -c EKF2_UWB*` that all 12 N/E/D are set (none stray at 0). Press Play.
 
 - [ ] **Step 2: Baseline (GPS on) — fusion consistency**
 
