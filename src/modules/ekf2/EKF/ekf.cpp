@@ -390,6 +390,10 @@ void Ekf::updateParameters()
 #if defined(CONFIG_EKF2_AUX_GLOBAL_POSITION) && defined(MODULE_NAME)
 	_aux_global_position.updateParameters();
 #endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
+
+#if defined(CONFIG_EKF2_UWB) && defined(MODULE_NAME)
+	_uwb_range.updateParameters();
+#endif // CONFIG_EKF2_UWB
 }
 
 template<typename T>
