@@ -437,6 +437,37 @@ void EstimatorInterface::setAuxVelData(const auxVelSample &auxvel_sample)
 }
 #endif // CONFIG_EKF2_AUXVEL
 
+#if defined(CONFIG_EKF2_UWB)
+void EstimatorInterface::setUwbData(const uwbSample &uwb_sample)
+{
+	if (!_initialised) {
+		return;
+	}
+
+	if (_uwb_buffer == nullptr) {
+		_uwb_buffer = new RingBuffer<uwbSample>(_obs_buffer_length);
+
+		if (_uwb_buffer == nullptr || !_uwb_buffer->valid()) {
+			delete _uwb_buffer;
+			_uwb_buffer = nullptr;
+			printBufferAllocationFailed("UWB");
+			return;
+		}
+	}
+
+	const int64_t time_us = uwb_sample.time_us
+				- static_cast<int64_t>(_params.uwb_delay_ms * 1000)
+				- static_cast<int64_t>(_dt_ekf_avg * 5e5f); // seconds to microseconds divided by 2
+
+	if (time_us >= static_cast<int64_t>(_uwb_buffer->get_newest().time_us + _min_obs_interval_us)) {
+		uwbSample uwb_sample_new{uwb_sample};
+		uwb_sample_new.time_us = time_us;
+		_uwb_buffer->push(uwb_sample_new);
+		_time_last_uwb_buffer_push = _time_latest_us;
+	}
+}
+#endif // CONFIG_EKF2_UWB
+
 void EstimatorInterface::setSystemFlagData(const systemFlagUpdate &system_flags)
 {
 	if (!_initialised) {

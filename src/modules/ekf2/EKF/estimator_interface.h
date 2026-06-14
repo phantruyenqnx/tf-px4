@@ -141,6 +141,10 @@ public:
 	void setAuxVelData(const auxVelSample &auxvel_sample);
 #endif // CONFIG_EKF2_AUXVEL
 
+#if defined(CONFIG_EKF2_UWB)
+	void setUwbData(const uwbSample &uwb_sample);
+#endif // CONFIG_EKF2_UWB
+
 	void setSystemFlagData(const systemFlagUpdate &system_flags);
 
 	// return a address to the parameters struct
@@ -444,6 +448,10 @@ protected:
 #if defined(CONFIG_EKF2_AUXVEL)
 	RingBuffer<auxVelSample> *_auxvel_buffer {nullptr};
 #endif // CONFIG_EKF2_AUXVEL
+#if defined(CONFIG_EKF2_UWB)
+	RingBuffer<uwbSample> *_uwb_buffer {nullptr};
+	uint64_t _time_last_uwb_buffer_push{0};
+#endif // CONFIG_EKF2_UWB
 	RingBuffer<systemFlagUpdate> *_system_flag_buffer {nullptr};
 
 #if defined(CONFIG_EKF2_BAROMETER)
