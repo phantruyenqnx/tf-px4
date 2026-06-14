@@ -66,9 +66,6 @@
 # include "aid_sources/aux_global_position/aux_global_position.hpp"
 #endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
 
-#if defined(CONFIG_EKF2_UWB)
-# include "aid_sources/uwb/uwb_range.hpp"
-#endif // CONFIG_EKF2_UWB
 
 enum class Likelihood { LOW, MEDIUM, HIGH };
 class ExternalVisionVel;
@@ -416,13 +413,16 @@ public:
 	const auto &aid_src_aux_vel() const { return _aid_src_aux_vel; }
 #endif // CONFIG_EKF2_AUXVEL
 
+#if defined(CONFIG_EKF2_UWB)
+	const auto &aid_src_uwb() const { return _aid_src_uwb; }
+#endif // CONFIG_EKF2_UWB
+
 	bool resetGlobalPosToExternalObservation(double latitude, double longitude, float altitude, float eph, float epv,
 			uint64_t timestamp_observation);
 
 	void updateParameters();
 
 	friend class AuxGlobalPosition;
-	friend class UwbRange;
 
 private:
 
@@ -1149,8 +1149,13 @@ private:
 	AuxGlobalPosition _aux_global_position {};
 #endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
 
-#if defined(CONFIG_EKF2_UWB) && defined(MODULE_NAME)
-	UwbRange _uwb_range {};
+#if defined(CONFIG_EKF2_UWB)
+	void controlUwbRangeFusion(const imuSample &imu_delayed);
+	bool fuseUwbRange(const uwbSample &sample, estimator_aid_source1d_s &aid_src);
+	matrix::Vector3f getUwbAnchorPos(uint8_t anchor_id) const;
+
+	estimator_aid_source1d_s _aid_src_uwb[4] {};
+	uint64_t _time_last_uwb_fuse{0};
 #endif // CONFIG_EKF2_UWB
 };
 

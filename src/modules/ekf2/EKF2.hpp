@@ -106,6 +106,10 @@
 # include <uORB/topics/sensor_gps.h>
 #endif // CONFIG_EKF2_GNSS
 
+#if defined(CONFIG_EKF2_UWB)
+# include <uORB/topics/sensor_uwb.h>
+#endif // CONFIG_EKF2_UWB
+
 #if defined(CONFIG_EKF2_MAGNETOMETER)
 # include <uORB/topics/vehicle_magnetometer.h>
 #endif // CONFIG_EKF2_MAGNETOMETER
@@ -219,6 +223,10 @@ private:
 	void PublishYawEstimatorStatus(const hrt_abstime &timestamp);
 	void UpdateGpsSample(ekf2_timestamps_s &ekf2_timestamps);
 #endif // CONFIG_EKF2_GNSS
+
+#if defined(CONFIG_EKF2_UWB)
+	void UpdateUwbSample(ekf2_timestamps_s &ekf2_timestamps);
+#endif // CONFIG_EKF2_UWB
 #if defined(CONFIG_EKF2_OPTICAL_FLOW)
 	bool UpdateFlowSample(ekf2_timestamps_s &ekf2_timestamps);
 	void PublishOpticalFlowVel(const hrt_abstime &timestamp);
@@ -473,6 +481,12 @@ private:
 # endif // CONFIG_EKF2_GNSS_YAW
 #endif // CONFIG_EKF2_GNSS
 
+#if defined(CONFIG_EKF2_UWB)
+	uORB::Subscription _sensor_uwb_sub{ORB_ID(sensor_uwb)};
+	uORB::PublicationMulti<estimator_aid_source1d_s> _estimator_aid_src_uwb_pub{ORB_ID(estimator_aid_src_uwb)};
+	hrt_abstime _status_uwb_pub_last{0};
+#endif // CONFIG_EKF2_UWB
+
 #if defined(CONFIG_EKF2_GRAVITY_FUSION)
 	hrt_abstime _status_gravity_pub_last {0};
 	uORB::PublicationMulti<estimator_aid_source3d_s> _estimator_aid_src_gravity_pub{ORB_ID(estimator_aid_src_gravity)};
@@ -539,6 +553,26 @@ private:
 		(ParamExtFloat<px4::params::EKF2_GSF_TAS>) _param_ekf2_gsf_tas_default,
 		(ParamFloat<px4::params::EKF2_GPS_YAW_OFF>) _param_ekf2_gps_yaw_off,
 #endif // CONFIG_EKF2_GNSS
+
+#if defined(CONFIG_EKF2_UWB)
+		(ParamExtInt<px4::params::EKF2_UWB_CTRL>)    _param_ekf2_uwb_ctrl,
+		(ParamExtFloat<px4::params::EKF2_UWB_DELAY>) _param_ekf2_uwb_delay,
+		(ParamExtFloat<px4::params::EKF2_UWB_NOISE>) _param_ekf2_uwb_noise,
+		(ParamExtFloat<px4::params::EKF2_UWB_GATE>)  _param_ekf2_uwb_gate,
+		(ParamExtInt<px4::params::EKF2_UWB_N_ANCH>)  _param_ekf2_uwb_n_anch,
+		(ParamExtFloat<px4::params::EKF2_UWB_A0_N>) _param_ekf2_uwb_a0_n,
+		(ParamExtFloat<px4::params::EKF2_UWB_A0_E>) _param_ekf2_uwb_a0_e,
+		(ParamExtFloat<px4::params::EKF2_UWB_A0_D>) _param_ekf2_uwb_a0_d,
+		(ParamExtFloat<px4::params::EKF2_UWB_A1_N>) _param_ekf2_uwb_a1_n,
+		(ParamExtFloat<px4::params::EKF2_UWB_A1_E>) _param_ekf2_uwb_a1_e,
+		(ParamExtFloat<px4::params::EKF2_UWB_A1_D>) _param_ekf2_uwb_a1_d,
+		(ParamExtFloat<px4::params::EKF2_UWB_A2_N>) _param_ekf2_uwb_a2_n,
+		(ParamExtFloat<px4::params::EKF2_UWB_A2_E>) _param_ekf2_uwb_a2_e,
+		(ParamExtFloat<px4::params::EKF2_UWB_A2_D>) _param_ekf2_uwb_a2_d,
+		(ParamExtFloat<px4::params::EKF2_UWB_A3_N>) _param_ekf2_uwb_a3_n,
+		(ParamExtFloat<px4::params::EKF2_UWB_A3_E>) _param_ekf2_uwb_a3_e,
+		(ParamExtFloat<px4::params::EKF2_UWB_A3_D>) _param_ekf2_uwb_a3_d,
+#endif // CONFIG_EKF2_UWB
 
 #if defined(CONFIG_EKF2_BAROMETER)
 		(ParamExtInt<px4::params::EKF2_BARO_CTRL>) _param_ekf2_baro_ctrl,///< barometer control selection

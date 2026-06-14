@@ -65,7 +65,7 @@ if(CONFIG_EKF2_AUX_GLOBAL_POSITION)
 endif()
 
 if(CONFIG_EKF2_UWB)
-	list(APPEND EKF_SRCS aid_sources/uwb/uwb_range.cpp)
+	list(APPEND EKF_SRCS aid_sources/uwb/uwb_range_control.cpp)
 endif()
 
 if(CONFIG_EKF2_AUXVEL)

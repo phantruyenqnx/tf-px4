@@ -98,6 +98,25 @@ EKF2::EKF2(bool multi_mode, const px4::wq_config_t &config, bool replay_mode):
 	_param_ekf2_req_vdrift(_params->req_vdrift),
 	_param_ekf2_gsf_tas_default(_params->EKFGSF_tas_default),
 #endif // CONFIG_EKF2_GNSS
+#if defined(CONFIG_EKF2_UWB)
+	_param_ekf2_uwb_ctrl(_params->uwb_ctrl),
+	_param_ekf2_uwb_delay(_params->uwb_delay_ms),
+	_param_ekf2_uwb_noise(_params->uwb_noise),
+	_param_ekf2_uwb_gate(_params->uwb_innov_gate),
+	_param_ekf2_uwb_n_anch(_params->uwb_n_anchors),
+	_param_ekf2_uwb_a0_n(_params->uwb_anchor_n[0]),
+	_param_ekf2_uwb_a0_e(_params->uwb_anchor_e[0]),
+	_param_ekf2_uwb_a0_d(_params->uwb_anchor_d[0]),
+	_param_ekf2_uwb_a1_n(_params->uwb_anchor_n[1]),
+	_param_ekf2_uwb_a1_e(_params->uwb_anchor_e[1]),
+	_param_ekf2_uwb_a1_d(_params->uwb_anchor_d[1]),
+	_param_ekf2_uwb_a2_n(_params->uwb_anchor_n[2]),
+	_param_ekf2_uwb_a2_e(_params->uwb_anchor_e[2]),
+	_param_ekf2_uwb_a2_d(_params->uwb_anchor_d[2]),
+	_param_ekf2_uwb_a3_n(_params->uwb_anchor_n[3]),
+	_param_ekf2_uwb_a3_e(_params->uwb_anchor_e[3]),
+	_param_ekf2_uwb_a3_d(_params->uwb_anchor_d[3]),
+#endif // CONFIG_EKF2_UWB
 #if defined(CONFIG_EKF2_BAROMETER)
 	_param_ekf2_baro_ctrl(_params->baro_ctrl),
 	_param_ekf2_baro_delay(_params->baro_delay_ms),
@@ -772,6 +791,9 @@ void EKF2::Run()
 #if defined(CONFIG_EKF2_GNSS)
 		UpdateGpsSample(ekf2_timestamps);
 #endif // CONFIG_EKF2_GNSS
+#if defined(CONFIG_EKF2_UWB)
+		UpdateUwbSample(ekf2_timestamps);
+#endif // CONFIG_EKF2_UWB
 #if defined(CONFIG_EKF2_MAGNETOMETER)
 		UpdateMagSample(ekf2_timestamps);
 #endif // CONFIG_EKF2_MAGNETOMETER
@@ -992,6 +1014,12 @@ void EKF2::PublishAidSourceStatus(const hrt_abstime &timestamp)
 	PublishAidSourceStatus(_ekf.aid_src_gnss_yaw(), _status_gnss_yaw_pub_last, _estimator_aid_src_gnss_yaw_pub);
 # endif // CONFIG_EKF2_GNSS_YAW
 #endif // CONFIG_EKF2_GNSS
+
+#if defined(CONFIG_EKF2_UWB)
+	for (int i = 0; i < math::min(_param_ekf2_uwb_n_anch.get(), (int32_t)4); i++) {
+		PublishAidSourceStatus(_ekf.aid_src_uwb()[i], _status_uwb_pub_last, _estimator_aid_src_uwb_pub);
+	}
+#endif // CONFIG_EKF2_UWB
 
 #if defined(CONFIG_EKF2_MAGNETOMETER)
 	// mag 3d
@@ -2476,6 +2504,32 @@ float EKF2::altAmslToEllipsoid(float amsl_alt) const
 	return amsl_alt + _geoid_height_lpf.getState();
 }
 #endif // CONFIG_EKF2_GNSS
+
+#if defined(CONFIG_EKF2_UWB)
+void EKF2::UpdateUwbSample(ekf2_timestamps_s &ekf2_timestamps)
+{
+	sensor_uwb_s uwb;
+
+	while (_sensor_uwb_sub.update(&uwb)) {
+		// anchor index is carried in mac; sim sets mac = anchor_id (0..3)
+		if (uwb.mac >= (uint16_t)_param_ekf2_uwb_n_anch.get()) {
+			continue;
+		}
+
+		if (!PX4_ISFINITE(uwb.distance) || uwb.distance <= 0.f) {
+			continue;
+		}
+
+		uwbSample sample{};
+		sample.time_us   = uwb.timestamp;   // sensor_uwb has no timestamp_sample
+		sample.anchor_id = (uint8_t)uwb.mac;
+		sample.range     = uwb.distance;
+		sample.range_var = 0.f;
+
+		_ekf.setUwbData(sample);
+	}
+}
+#endif // CONFIG_EKF2_UWB
 
 #if defined(CONFIG_EKF2_MAGNETOMETER)
 void EKF2::UpdateMagSample(ekf2_timestamps_s &ekf2_timestamps)
