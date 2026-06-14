@@ -9,8 +9,7 @@ GPS-degraded precision landing. Read in order.
 | 2 | Tightly-coupled approach + PX4 EKF2 integration (paper → code) | `02_tightly_coupled_px4.md` |
 | 3 | v1 implementation plan (Pattern B, self-contained class) — done | `03_v1_implementation_plan.md` |
 | 4 | v2 plan — native aiding refactor + control_status + GPS-denied (3 modes) — done | `04_v2_native_plan.md` |
-| 5 | Precision landing in GPS-degraded zones — scenario, fairness, test plan | `05_precision_landing.md` |
-| 6 | Precision-landing implementation plan (task-by-task) | `06_precision_landing_plan.md` |
+| 5 | Precision landing in GPS-degraded zones — methodology + task-by-task implementation plan | `05_precision_landing.md` |
 
 **Implementation status:** v1 + v2 fusion implemented and verified in SITL (3 modes: UWB+GPS,
 GPS-only, UWB-only incl. trilateration cold-start). Precision-landing application is in planning
