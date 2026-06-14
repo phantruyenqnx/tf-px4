@@ -559,6 +559,7 @@ private:
 		(ParamExtFloat<px4::params::EKF2_UWB_DELAY>) _param_ekf2_uwb_delay,
 		(ParamExtFloat<px4::params::EKF2_UWB_NOISE>) _param_ekf2_uwb_noise,
 		(ParamExtFloat<px4::params::EKF2_UWB_GATE>)  _param_ekf2_uwb_gate,
+		(ParamExtInt<px4::params::EKF2_UWB_GPS>)     _param_ekf2_uwb_gps,
 		(ParamExtInt<px4::params::EKF2_UWB_N_ANCH>)  _param_ekf2_uwb_n_anch,
 		(ParamExtFloat<px4::params::EKF2_UWB_A0_N>) _param_ekf2_uwb_a0_n,
 		(ParamExtFloat<px4::params::EKF2_UWB_A0_E>) _param_ekf2_uwb_a0_e,

@@ -264,7 +264,20 @@ void Ekf::updateGnssPos(const gnssSample &gnss_sample, estimator_aid_source2d_s 
 		}
 	}
 
-	const float pos_var = math::max(sq(pos_noise), sq(0.01f));
+	float pos_var = math::max(sq(pos_noise), sq(0.01f));
+
+#if defined(CONFIG_EKF2_UWB)
+	// Adaptive R: when UWB is active AND well-constrained (>=3 anchors ranging), down-weight the
+	// GNSS horizontal position so UWB dominates near the pad (EKF2_UWB_GPS=1). The >=3-anchor gate
+	// matters: with only 1-2 ranges the horizontal fix is under-constrained, so we must NOT yet
+	// distrust GPS. Out of the UWB zone (flags.uwb cleared on timeout) GPS keeps full weight.
+	// Inflating GNSS R (~100x variance) makes the Kalman gain trust GPS far less so the estimate
+	// snaps to the UWB-defined frame.
+	if (_params.uwb_gps != 0 && _control_status.flags.uwb && countRecentUwbAnchors() >= 3) {
+		pos_var *= 100.f;
+	}
+#endif // CONFIG_EKF2_UWB
+
 	const Vector2f pos_obs_var(pos_var, pos_var);
 	const matrix::Vector2d observation(measurement_corrected.latitude_deg(), measurement_corrected.longitude_deg());
 

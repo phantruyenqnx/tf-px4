@@ -103,6 +103,7 @@ EKF2::EKF2(bool multi_mode, const px4::wq_config_t &config, bool replay_mode):
 	_param_ekf2_uwb_delay(_params->uwb_delay_ms),
 	_param_ekf2_uwb_noise(_params->uwb_noise),
 	_param_ekf2_uwb_gate(_params->uwb_innov_gate),
+	_param_ekf2_uwb_gps(_params->uwb_gps),
 	_param_ekf2_uwb_n_anch(_params->uwb_n_anchors),
 	_param_ekf2_uwb_a0_n(_params->uwb_anchor_n[0]),
 	_param_ekf2_uwb_a0_e(_params->uwb_anchor_e[0]),

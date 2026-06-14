@@ -25,6 +25,9 @@ bool Ekf::fuseUwbRange(const uwbSample &sample, estimator_aid_source1d_s &aid_sr
 	// vehicle NED position in the EKF local frame at the delayed (fusion) horizon.
 	// getLocalHorizontalPosition() works with or without a global (GPS) origin, so this
 	// path also supports GPS-denied / UWB-only operation (Phase 3).
+	// vehicle NED position in the EKF local frame at the delayed (fusion) horizon.
+	// getLocalHorizontalPosition() works with or without a global (GPS) origin, so this
+	// path also supports GPS-denied / UWB-only operation.
 	const Vector2f pos_ne = getLocalHorizontalPosition();
 	const float pd = -(float)(_gpos.altitude() - getEkfGlobalOriginAltitude()); // NED down rel. origin
 	const Vector3f pos_ned(pos_ne(0), pos_ne(1), pd);
@@ -36,6 +39,9 @@ bool Ekf::fuseUwbRange(const uwbSample &sample, estimator_aid_source1d_s &aid_sr
 		return false; // singular Jacobian (vehicle on top of anchor)
 	}
 
+	// Full 3-D range fusion. The anchors are NON-coplanar (staggered heights), so the range gives
+	// vertical observability too: UWB constrains N/E/D. Height stays well-conditioned because the
+	// LOS Jacobian has a real vertical component.
 	const Vector3f los = diff / predicted;
 	VectorState H;
 	H.setZero();
@@ -143,6 +149,20 @@ bool Ekf::tryInitUwb()
 	return true;
 }
 
+uint8_t Ekf::countRecentUwbAnchors() const
+{
+	uint8_t n = 0;
+	const int n_anch = math::min((int)_params.uwb_n_anchors, 4);
+
+	for (int i = 0; i < n_anch; i++) {
+		if (_uwb_latest[i].range > 0.f && isRecent(_uwb_latest[i].time_us, (uint64_t)5e5)) {
+			n++;
+		}
+	}
+
+	return n;
+}
+
 void Ekf::controlUwbRangeFusion(const imuSample &imu_delayed)
 {
 	if (_uwb_buffer == nullptr) {
@@ -182,7 +202,25 @@ void Ekf::controlUwbRangeFusion(const imuSample &imu_delayed)
 			}
 		}
 
-		any_fused |= fuseUwbRange(sample, _aid_src_uwb[sample.anchor_id]);
+		if (fuseUwbRange(sample, _aid_src_uwb[sample.anchor_id])) {
+			any_fused = true;
+			_uwb_reject_count = 0;
+
+		} else if (_aid_src_uwb[sample.anchor_id].innovation_rejected && _uwb_reject_count < 250) {
+			_uwb_reject_count++;
+		}
+	}
+
+	// Re-acquisition: after flying out of UWB range the EKF drifts on GPS; when the ranges return
+	// the UWB innovations are large and get gated out (chicken-and-egg, ~73% rejected in tests). If
+	// UWB is meant to dominate (EKF2_UWB_GPS) and >=3 anchors are ranging but fusion keeps being
+	// rejected, snap the horizontal position to the UWB trilateration solution so UWB re-locks; the
+	// R-inflation on GNSS then keeps the estimate on the UWB-defined frame for the landing.
+	if (_params.uwb_gps != 0 && _uwb_reject_count >= 5 && countRecentUwbAnchors() >= 3) {
+		if (tryInitUwb()) {
+			_uwb_reject_count = 0;
+			ECL_INFO("UWB re-acquired by trilateration reset (EKF had drifted)");
+		}
 	}
 
 	if (any_fused && !_control_status.flags.uwb) {

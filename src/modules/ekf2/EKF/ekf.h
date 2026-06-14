@@ -1154,10 +1154,12 @@ private:
 	bool fuseUwbRange(const uwbSample &sample, estimator_aid_source1d_s &aid_src);
 	bool tryInitUwb();
 	matrix::Vector3f getUwbAnchorPos(uint8_t anchor_id) const;
+	uint8_t countRecentUwbAnchors() const;   // anchors with a range newer than 0.5 s
 
 	estimator_aid_source1d_s _aid_src_uwb[4] {};
 	uwbSample _uwb_latest[4] {};
 	uint64_t _time_last_uwb_fuse{0};
+	uint8_t _uwb_reject_count{0};   ///< consecutive gated UWB ranges (triggers re-acquisition reset)
 #endif // CONFIG_EKF2_UWB
 };
 

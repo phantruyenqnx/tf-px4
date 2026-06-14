@@ -11,3 +11,21 @@
 PX4_SIM_MODEL=${PX4_SIM_MODEL:=gz_f450-uwb}
 
 . ${R}etc/init.d-posix/airframes/4022_gz_f450
+
+# UWB anchor geometry (must match the anchors in worlds/uwb.sdf). Forced at boot so it always
+# matches the world regardless of any stale saved value. NON-coplanar heights (D = 0.5 / 3.0 m up)
+# give vertical observability, so the 3-D range fusion constrains N/E/D and UWB owns the full
+# position near the pad -- no baro-height crutch needed. gz ENU(x,y,z) -> EKF NED(N=y, E=x, D=-z).
+param set EKF2_UWB_N_ANCH 4
+param set EKF2_UWB_A0_N -2.5
+param set EKF2_UWB_A0_E -2.5
+param set EKF2_UWB_A0_D -0.5
+param set EKF2_UWB_A1_N -2.5
+param set EKF2_UWB_A1_E 2.5
+param set EKF2_UWB_A1_D -3.0
+param set EKF2_UWB_A2_N 2.5
+param set EKF2_UWB_A2_E 2.5
+param set EKF2_UWB_A2_D -0.5
+param set EKF2_UWB_A3_N 2.5
+param set EKF2_UWB_A3_E -2.5
+param set EKF2_UWB_A3_D -3.0

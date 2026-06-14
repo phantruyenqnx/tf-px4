@@ -65,7 +65,16 @@ void Ekf::controlGnssHeightFusion(const gnssSample &gps_sample)
 		const float gnss_alt = gps_sample.alt + pos_offset_earth(2);
 
 		const float measurement = gnss_alt;
-		const float measurement_var = sq(noise);
+		float measurement_var = sq(noise);
+
+#if defined(CONFIG_EKF2_UWB)
+		// Adaptive R: when UWB is active and well-constrained (>=3 non-coplanar anchors), down-weight
+		// the GNSS height too (EKF2_UWB_GPS) so UWB owns the full 3-D position near the pad instead of
+		// the estimate being dragged by the GPS vertical bias.
+		if (_params.uwb_gps != 0 && _control_status.flags.uwb && countRecentUwbAnchors() >= 3) {
+			measurement_var *= 100.f;
+		}
+#endif // CONFIG_EKF2_UWB
 
 		const bool measurement_valid = PX4_ISFINITE(measurement) && PX4_ISFINITE(measurement_var);
 

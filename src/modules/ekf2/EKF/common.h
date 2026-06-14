@@ -370,6 +370,7 @@ struct parameters {
 	float    uwb_delay_ms{50.f};          ///< UWB measurement delay relative to the IMU (ms)
 	float    uwb_noise{0.05f};            ///< baseline range measurement sigma (m)
 	float    uwb_innov_gate{5.f};         ///< range innovation consistency gate size (STD)
+	int32_t  uwb_gps{0};                  ///< 1=inflate GNSS horizontal pos R while UWB is aiding
 	int32_t  uwb_n_anchors{4};            ///< number of configured anchors (1-4)
 	float    uwb_anchor_n[4]{};           ///< anchor North positions (m), EKF NED origin frame
 	float    uwb_anchor_e[4]{};           ///< anchor East positions (m)

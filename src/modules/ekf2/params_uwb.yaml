@@ -32,6 +32,22 @@ parameters:
       default: 5.0
       min: 1.0
       max: 10.0
+    EKF2_UWB_GPS:
+      description:
+        short: Make UWB dominant over GNSS while UWB is aiding (precision landing)
+        long: |
+          0 = normal GNSS weighting. 1 = when UWB is active and well-constrained
+          (control_status.flags.uwb and >= 3 anchors with a recent range): inflate the GNSS
+          horizontal AND vertical observation variance (~100x) so the Kalman gain trusts GNSS far
+          less and UWB dominates the full 3-D position near the pad (adaptive-R); and if UWB ranges
+          keep being gated out because the estimate drifted while out of UWB range, snap the
+          horizontal position to the UWB trilateration solution so UWB re-locks. Lets the estimate
+          snap to the UWB-defined pad for precision landing instead of sitting between drifted GPS
+          and UWB. Out of the UWB zone GNSS keeps full weight.
+      type: int32
+      default: 0
+      min: 0
+      max: 1
     EKF2_UWB_N_ANCH:
       description: { short: Number of configured UWB anchors }
       type: int32
