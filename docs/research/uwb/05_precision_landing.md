@@ -131,14 +131,15 @@ Summary table: CEP_A/B1/B2, RMSE_A/B1/B2, % improvement.
 
 ### Task 1 — f450 navsat → x500 default + M9N seeded Gauss-Markov noise
 **Files:** `Tools/simulation/gz/models/f450_base/model.sdf`; `src/modules/simulation/gz_bridge/GZBridge.{hpp,cpp}`; sim GPS params file.
-- [ ] **S1:** comment the `<navsat>` noise block of `navsat_sensor` in `f450_base/model.sdf` (~293-326) → bare sensor like x500; leave `navsat_ground_truth`.
-- [ ] **S2:** dedicated seeded RNG — member `std::mt19937 _gps_rng` + `normal_distribution`, seeded from `SIM_GPS_SEED`; replace `generate_wgn()`'s global `rand()`.
-- [ ] **S3:** M9N Gauss-Markov in `addGpsNoise()` (`GZBridge.cpp:548`), per axis:
-  `a=expf(-dt/tau); bias=a*bias+sqrtf(1-a*a)*sigma_bias*n01(); white=sigma_white*n01(); out=truth+SC*(bias+white)+const_bias;`
-  defaults (NED): H sigma_white 0.3, sigma_bias 1.5, tau 120 s (→ H CEP≈1.8 m); V 0.5 / 2.5; vel 0.05/0.10 m/s.
-- [ ] **S4:** params `SIM_GPS_SEED` (int=1), `SIM_GPS_NOISE_SC` (float=1; 0⇒off), `SIM_GPS_BIAS_N/E` (float=0, optional).
-- [ ] **S5:** build `make px4_sitl gz_f450-uwb_uwb`.
-- [ ] **S6: USER verify** — (a) realism: `sensor_gps` wanders ~1.5-2 m vs groundtruth, EKF drifts ~metres; (b) reproducible: same `SIM_GPS_SEED` → same trace.
+- [x] **S1:** comment the `<navsat>` noise block of `navsat_sensor` in `f450_base/model.sdf` → bare sensor like x500; leave `navsat_ground_truth`. (Original M9N block preserved in git/this doc.)
+- [x] **S2:** dedicated seeded RNG — file-static `std::mt19937 s_gps_rng` + `normal_distribution`, seeded once from `SIM_GPS_SEED`; replaces `generate_wgn()`'s global `rand()`.
+- [x] **S3:** M9N error in `addGpsNoise()` = **white + first-order Gauss-Markov dynamic bias**, replicating
+  gz-sensors `GaussianNoiseModel` [[4]](#ref4) faithfully (so it is seeded/scalable, which gz's RNG is not):
+  `phi_d=expf(-dt/tau); sbd=sqrtf(-sigma_b*sigma_b*tau*0.5f*expm1f(-2*dt/tau)); bias=phi_d*bias+sbd*n01(); out=truth+SC*(bias+sigma_white*n01())+const_bias;`
+  Params based on the f450 SDF block being replaced, with a longer M9N-realistic correlation time (NED): `tau=300 s` (minutes-scale, so the on-ground drift rate stays well under `EKF2_REQ_HDRIFT`=0.1 m/s and the EKF reliably accepts GPS — a `tau=150 s` drift sits on that gate and is intermittently rejected, ~94% accept); `sigma_b_h=0.1225` (steady σ=`sigma_b*sqrt(tau/2)`≈1.5 m → H CEP≈1.8 m), `sigma_b_v=0.245` (steady ≈3 m); white H 0.022 / V 0.05 m; vel white 0.05/0.10 m/s. Bias **warm-started at steady-state** so the EKF takes its first reference already biased (no 0→1.5 m ramp). **Why drift (not a frozen offset):** a constant bias is absorbed into the EKF local origin (local pos reads ~0) → land-at-home would miss by 0 m; the *slow drift* (bias at take-off ≠ at landing) is the physical source of the GPS-only landing error.
+- [x] **S4:** params `SIM_GPS_SEED` (int=1), `SIM_GPS_NSC` (float=1; 0⇒off), `SIM_GPS_BIAS_N/E` (float=0, optional).
+- [x] **S5:** build `make px4_sitl gz_f450-uwb_uwb` (EXIT 0).
+- [ ] **S6: USER verify** — (a) realism: EKF `vehicle_local_position` slowly wanders ~1-2 m vs groundtruth, `xy_valid:True`, `dead_reckoning:False`, no persistent "GPS drift too high"; (b) reproducible: same `SIM_GPS_SEED` → same trace; `SIM_GPS_NSC 0` → ~0 error.
 - [ ] **S7: commit** (after approval).
 
 ### Task 2 — MAVSDK mission runner (`Tools/uwb_landing/mission.py`)
@@ -178,7 +179,14 @@ RMSE, 89.4 % improvement over 5.26 m GNSS/INS-only.
 <a id="ref3"></a>**[3]** West Virginia University, *Tightly-Coupled GPS/UWB for Formation Flight*,
 ION GNSS+ 2014. https://navigationlab.wvu.edu/ — multipath as Gauss-Markov σ=1.6 m, τ=2 min.
 
-**[4]** Zhao et al. *Indoor UAV Localization, ESKF tightly- vs loosely-coupled.* Sensors 2025,
+<a id="ref4"></a>**[4]** Gazebo `gz-sensors`, `GaussianNoiseModel` (navsat white + dynamic bias). The
+sensor error = white Gaussian + a first-order Gauss-Markov (Ornstein-Uhlenbeck) dynamic bias:
+`sigma_b_d=sqrt(-sigma_b²·tau/2·expm1(-2·dt/tau)); phi_d=exp(-dt/tau); bias=phi_d·bias+N(0,sigma_b_d); out=in+bias+white`.
+Steady-state bias σ = `sigma_b·sqrt(tau/2)`. https://github.com/gazebosim/gz-sensors —
+`src/GaussianNoiseModel.cc`. Matches the standard GNSS error model (white + 1st-order Gauss-Markov,
+correlation `R(Δt)=σ²e^(-|Δt|/τ)`) in the GNSS stochastic-modelling literature.
+
+**[5]** Zhao et al. *Indoor UAV Localization, ESKF tightly- vs loosely-coupled.* Sensors 2025,
 25(24):7673. https://pmc.ncbi.nlm.nih.gov/articles/PMC12737027/ — tightly-coupled ~30.7 % better RMSE.
 
 **[M9N]** u-blox NEO-M9N datasheet (standard precision, ~2 m CEP):

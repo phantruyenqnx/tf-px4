@@ -42,6 +42,7 @@
 
 #include <iostream>
 #include <string>
+#include <random>
 
 GZBridge::GZBridge(const std::string &world, const std::string &model_name) :
 	ModuleParams(nullptr),
@@ -514,68 +515,85 @@ void GZBridge::odometryCallback(const gz::msgs::OdometryWithCovariance &msg)
 	_visual_odometry_pub.publish(report);
 }
 
+// Dedicated, seeded RNG for the GPS noise so the error trace is reproducible across
+// runs (fair A/B). Seeded from SIM_GPS_SEED via seed_gps_rng() at the first navsat update.
+static std::mt19937 s_gps_rng(1);
+static std::normal_distribution<float> s_gps_norm(0.0f, 1.0f);
+
+static void seed_gps_rng(uint32_t seed)
+{
+	s_gps_rng.seed(seed);
+}
+
 static float generate_wgn()
 {
-	// generate white Gaussian noise sample with std=1
-
-	// algorithm 1:
-	// float temp=((float)(rand()+1))/(((float)RAND_MAX+1.0f));
-	// return sqrtf(-2.0f*logf(temp))*cosf(2.0f*M_PI_F*rand()/RAND_MAX);
-	// algorithm 2: from BlockRandGauss.hpp
-	static float V1, V2, S;
-	static bool phase = true;
-	float X;
-
-	if (phase) {
-		do {
-			float U1 = (float)rand() / (float)RAND_MAX;
-			float U2 = (float)rand() / (float)RAND_MAX;
-			V1 = 2.0f * U1 - 1.0f;
-			V2 = 2.0f * U2 - 1.0f;
-			S = V1 * V1 + V2 * V2;
-		} while (S >= 1.0f || fabsf(S) < 1e-8f);
-
-		X = V1 * float(sqrtf(-2.0f * float(logf(S)) / S));
-
-	} else {
-		X = V2 * float(sqrtf(-2.0f * float(logf(S)) / S));
-	}
-
-	phase = !phase;
-	return X;
+	// white Gaussian noise sample, std = 1, from the dedicated seeded RNG
+	return s_gps_norm(s_gps_rng);
 }
 
 void GZBridge::addGpsNoise(double &latitude, double &longitude, double &altitude,
 			   float &vel_north, float &vel_east, float &vel_down)
 {
-	_gps_pos_noise_n = _pos_markov_time * _gps_pos_noise_n +
-			   _pos_random_walk * generate_wgn() * _pos_noise_amplitude -
-			   0.02f * _gps_pos_noise_n;
+	const float sc = _sim_gps_nsc.get();   // noise scale (1 = realistic M9N, 0 = off)
 
-	_gps_pos_noise_e = _pos_markov_time * _gps_pos_noise_e +
-			   _pos_random_walk * generate_wgn() * _pos_noise_amplitude -
-			   0.02f * _gps_pos_noise_e;
+	// ---- NEO-M9N GNSS error model -----------------------------------------------------------
+	// Standard GNSS positioning error = small white noise + a slowly-varying (correlated) bias
+	// modelled as a first-order Gauss-Markov / Ornstein-Uhlenbeck process. This is exactly what
+	// gz-sensors' navsat sensor does (GaussianNoiseModel: white + dynamic_bias). We replicate its
+	// update here so the error trace is SEEDED/reproducible (SIM_GPS_SEED) and runtime-scalable
+	// (SIM_GPS_NSC) for fair A/B + N-run CEP sweeps -- gz's internal RNG is neither. The bias drift
+	// is SLOW and smooth (not jumps); it is the physical reason a GPS-only landing misses the pad
+	// (bias at take-off != bias at landing). Refs: gz-sensors GaussianNoiseModel.cc;
+	// GNSS error literature (white + 1st-order Gauss-Markov). See docs/research/uwb/05.
+	//
+	//   sigma_b_d = sqrt(-sigma_b^2 * tau/2 * expm1(-2*dt/tau));   phi_d = exp(-dt/tau)
+	//   bias      = phi_d*bias + N(0, sigma_b_d);   out = truth + bias + white   (gz-sensors)
+	// Steady-state bias std = sigma_b*sqrt(tau/2). Based on the f450 SDF block this replaces, but with
+	// a longer M9N-realistic correlation time (tau=300 s, minutes-scale) so the on-ground bias drift
+	// rate stays well under EKF2_REQ_HDRIFT (0.1 m/s) -> the EKF reliably accepts GPS (a tau=150 s
+	// drift sits right on that gate and gets intermittently rejected). Steady-state kept at ~1.5 m H /
+	// ~3 m V: tau=300 s; sigma_b_h=0.1225 m, sigma_b_v=0.245 m; white_h=0.022 m, white_v=0.05 m; vel 0.05/0.10.
+	const float tau         = 300.0f;
+	const float sigma_b_h   = 0.1225f, sigma_b_v = 0.245f;  // [m] GM drive -> steady sigma_b*sqrt(tau/2)=1.5/3.0 m
+	const float sig_white_h = 0.022f, sig_white_v = 0.05f;  // [m] fix-to-fix white jitter
 
-	_gps_pos_noise_d = _pos_markov_time * _gps_pos_noise_d +
-			   _pos_random_walk * generate_wgn() * _pos_noise_amplitude * 1.5f -
-			   0.02f * _gps_pos_noise_d;
+	// time step for the Gauss-Markov update
+	const hrt_abstime now = hrt_absolute_time();
+	float dt = (_gps_last_us > 0) ? (now - _gps_last_us) * 1e-6f : 0.05f;
+	dt = math::constrain(dt, 1e-3f, 1.0f);
+	_gps_last_us = now;
 
-	latitude += math::degrees((double)_gps_pos_noise_n / CONSTANTS_RADIUS_OF_EARTH);
-	longitude += math::degrees((double)_gps_pos_noise_e / CONSTANTS_RADIUS_OF_EARTH);
-	altitude += (double)_gps_pos_noise_d;
+	// Seed RNG once and warm-start the bias at its steady-state (std = sigma_b*sqrt(tau/2)) so the
+	// EKF takes its first GPS reference already biased -- avoids a 0 -> steady ramp at startup.
+	if (!_gps_rng_seeded) {
+		seed_gps_rng((uint32_t)_sim_gps_seed.get());
+		_gps_rng_seeded = true;
+		const float ss = sqrtf(tau * 0.5f);
+		_gps_pos_noise_n = sigma_b_h * ss * generate_wgn();
+		_gps_pos_noise_e = sigma_b_h * ss * generate_wgn();
+		_gps_pos_noise_d = sigma_b_v * ss * generate_wgn();
+	}
 
-	_gps_vel_noise_n = _vel_markov_time * _gps_vel_noise_n +
-			   _vel_noise_density * generate_wgn() * _vel_noise_amplitude;
+	// First-order Gauss-Markov dynamic-bias update (gz-sensors GaussianNoiseModel)
+	const float phi_d = expf(-dt / tau);
+	const float sbd_h = sqrtf(-sigma_b_h * sigma_b_h * tau * 0.5f * expm1f(-2.0f * dt / tau));
+	const float sbd_v = sqrtf(-sigma_b_v * sigma_b_v * tau * 0.5f * expm1f(-2.0f * dt / tau));
+	_gps_pos_noise_n = phi_d * _gps_pos_noise_n + sbd_h * generate_wgn();
+	_gps_pos_noise_e = phi_d * _gps_pos_noise_e + sbd_h * generate_wgn();
+	_gps_pos_noise_d = phi_d * _gps_pos_noise_d + sbd_v * generate_wgn();
 
-	_gps_vel_noise_e = _vel_markov_time * _gps_vel_noise_e +
-			   _vel_noise_density * generate_wgn() * _vel_noise_amplitude;
+	const double err_n = (double)(sc * (_gps_pos_noise_n + sig_white_h * generate_wgn()) + _sim_gps_bias_n.get());
+	const double err_e = (double)(sc * (_gps_pos_noise_e + sig_white_h * generate_wgn()) + _sim_gps_bias_e.get());
+	const double err_d = (double)(sc * (_gps_pos_noise_d + sig_white_v * generate_wgn()));
 
-	_gps_vel_noise_d = _vel_markov_time * _gps_vel_noise_d +
-			   _vel_noise_density * generate_wgn() * _vel_noise_amplitude * 1.2f;
+	latitude  += math::degrees(err_n / CONSTANTS_RADIUS_OF_EARTH);
+	longitude += math::degrees(err_e / CONSTANTS_RADIUS_OF_EARTH);
+	altitude  += err_d;
 
-	vel_north += _gps_vel_noise_n;
-	vel_east += _gps_vel_noise_e;
-	vel_down += _gps_vel_noise_d;
+	// velocity white noise (M9N ~0.05 m/s horizontal)
+	vel_north += sc * 0.05f * generate_wgn();
+	vel_east  += sc * 0.05f * generate_wgn();
+	vel_down  += sc * 0.10f * generate_wgn();
 }
 
 void GZBridge::navSatCallback(const gz::msgs::NavSat &msg)

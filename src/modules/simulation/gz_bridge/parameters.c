@@ -39,3 +39,50 @@
  * @group UAVCAN
  */
 PARAM_DEFINE_INT32(SIM_GZ_EN, 0);
+
+/**
+ * Simulated GPS noise RNG seed
+ *
+ * Fixed seed for the gz_bridge GPS noise generator so the GPS error trace is
+ * reproducible across runs (fair A/B comparison). Vary it for statistical (CEP) sweeps.
+ *
+ * @min 1
+ * @group Simulation
+ */
+PARAM_DEFINE_INT32(SIM_GPS_SEED, 1);
+
+/**
+ * Simulated GPS noise scale
+ *
+ * Scales the gz_bridge GPS noise (white + Gauss-Markov bias). 1.0 = realistic
+ * NEO-M9N (~2 m CEP). 0 = no random noise (truth + constant bias only).
+ *
+ * @min 0.0
+ * @max 10.0
+ * @decimal 2
+ * @group Simulation
+ */
+PARAM_DEFINE_FLOAT(SIM_GPS_NSC, 1.0f);
+
+/**
+ * Simulated GPS constant bias North
+ *
+ * Deterministic North offset added to the simulated GPS (m, NED). Optional, for
+ * controlled probes; default 0.
+ *
+ * @unit m
+ * @decimal 2
+ * @group Simulation
+ */
+PARAM_DEFINE_FLOAT(SIM_GPS_BIAS_N, 0.0f);
+
+/**
+ * Simulated GPS constant bias East
+ *
+ * Deterministic East offset added to the simulated GPS (m, NED). Optional; default 0.
+ *
+ * @unit m
+ * @decimal 2
+ * @group Simulation
+ */
+PARAM_DEFINE_FLOAT(SIM_GPS_BIAS_E, 0.0f);

@@ -183,7 +183,14 @@ private:
 	const float _vel_noise_density = 0.2f;      // Velocity noise process density
 	const float _vel_markov_time = 0.85f;       // Velocity Markov process coefficient
 
+	hrt_abstime _gps_last_us{0};                // last navsat callback time (Gauss-Markov dt)
+	bool _gps_rng_seeded{false};                // seed the GPS noise RNG + warm-start bias once
+
 	DEFINE_PARAMETERS(
-		(ParamInt<px4::params::SIM_GPS_USED>) _sim_gps_used
+		(ParamInt<px4::params::SIM_GPS_USED>) _sim_gps_used,
+		(ParamInt<px4::params::SIM_GPS_SEED>) _sim_gps_seed,
+		(ParamFloat<px4::params::SIM_GPS_NSC>) _sim_gps_nsc,
+		(ParamFloat<px4::params::SIM_GPS_BIAS_N>) _sim_gps_bias_n,
+		(ParamFloat<px4::params::SIM_GPS_BIAS_E>) _sim_gps_bias_e
 	)
 };
