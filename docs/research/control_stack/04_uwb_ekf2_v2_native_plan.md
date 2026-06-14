@@ -500,6 +500,26 @@ bool Ekf::tryInitUwb()
 
 ---
 
+## Implementation status (verified in SITL)
+
+| Phase / Task | Commits | Result |
+|---|---|---|
+| Phase 1 — refactor B→A (uORB-free core) | `42f7047e97`, `6cc68ddb31`, `64d9297339` | parity with v1 (`fused=true`, innov ~2 cm) |
+| Phase 2 Task 7 — add `control_status.flags.uwb` | `315f23a9e6` | `cs_uwb` published |
+| Phase 2 Task 8 — set/clear + credit horizontal aiding | `567d3c47af` | GPS-on: `cs_uwb=True`; after GPS off: `cs_uwb=True`, `dead_reckoning=False`, pos holds |
+| Phase 3 Task 9 — UWB-only 2-D trilateration cold-start | `c996565498` | boot with `EKF2_GPS_CTRL=0`: trilateration init, `cs_uwb=True`, `xy_valid=True`, no global origin |
+
+**Three modes verified:**
+- **UWB + GPS** — both `cs_gnss_pos` and `cs_uwb` true, both fuse.
+- **GPS-only** (`EKF2_UWB_CTRL=0`) — GPS as before, `cs_uwb=False`.
+- **UWB-only** — (a) GPS drops mid-flight → UWB holds (Task 8); (b) cold boot with no GPS → trilateration brings up position (Task 9). `ref_lat/lon=nan`, `xy_global=False` confirm GPS is never fused.
+
+**Key fix found during validation:** the 4 sim anchors are **coplanar** (all `D=-2.0`), so a 3-D trilateration solve is singular. Task 9 uses **2-D** trilateration (solve N/E only, remove the vertical leg with the baro height) — correct since we only `resetHorizontalPositionTo()`. Needs ≥3 anchors.
+
+**Remaining (optional) robustness sweep (Task 10):** block one anchor (3 remaining still fuse); UWB dropout > `reset_timeout_max` → `stopUwbFusion` then re-init on return; GPS re-enable transition. `z`/height accuracy is baro-driven (anchor frame assumed to share the height origin).
+
+---
+
 ## Self-Review Notes (for the reviewer)
 
 - **Highest-risk task = Task 9 (trilateration + reset).** The frame must be consistent: anchor params are NED relative to the EKF origin; in GPS-denied mode the EKF local frame *is* the anchor frame (origin at anchor-frame origin). Confirm `resetHorizontalPositionTo(Vector2f,Vector2f)` with no global origin behaves like the EV path. Height/z init left to baro initially.
