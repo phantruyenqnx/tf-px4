@@ -642,6 +642,7 @@ uint64_t mag_heading_consistent  :
 		uint64_t constant_pos            : 1; ///< 42 - true if the vehicle is at a constant position
 		uint64_t baro_fault              : 1; ///< 43 - true when the baro has been declared faulty and is no longer being used
 		uint64_t gnss_vel                : 1; ///< 44 - true if GNSS velocity measurement fusion is intended
+		uint64_t uwb                     : 1; ///< 45 - true if UWB range measurement fusion is intended
 	} flags;
 	uint64_t value;
 };

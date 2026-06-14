@@ -650,7 +650,8 @@ int EstimatorInterface::getNumberOfActiveHorizontalPositionAidingSources() const
 {
 	return int(_control_status.flags.gnss_pos)
 	       + int(_control_status.flags.ev_pos)
-	       + int(_control_status.flags.aux_gpos);
+	       + int(_control_status.flags.aux_gpos)
+	       + int(_control_status.flags.uwb);
 }
 
 int EstimatorInterface::getNumberOfActiveHorizontalVelocityAidingSources() const
