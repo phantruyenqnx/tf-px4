@@ -255,6 +255,15 @@ struct auxVelSample {
 };
 #endif // CONFIG_EKF2_AUXVEL
 
+#if defined(CONFIG_EKF2_UWB)
+struct uwbSample {
+	uint64_t time_us{};    ///< timestamp of the measurement (uSec)
+	uint8_t  anchor_id{};  ///< 0-indexed anchor slot
+	float    range{};      ///< measured distance (m)
+	float    range_var{};  ///< measurement variance (m^2); 0 = use EKF2_UWB_NOISE^2
+};
+#endif // CONFIG_EKF2_UWB
+
 struct systemFlagUpdate {
 	uint64_t time_us{};
 	bool at_rest{false};
@@ -355,6 +364,17 @@ struct parameters {
 	const float EKFGSF_yaw_err_max{0.262f};         ///< Composite yaw 1-sigma uncertainty threshold used to check for convergence (rad)
 
 #endif // CONFIG_EKF2_GNSS
+
+#if defined(CONFIG_EKF2_UWB)
+	int32_t  uwb_ctrl{0};                 ///< 1=enable UWB range fusion
+	float    uwb_delay_ms{50.f};          ///< UWB measurement delay relative to the IMU (ms)
+	float    uwb_noise{0.05f};            ///< baseline range measurement sigma (m)
+	float    uwb_innov_gate{5.f};         ///< range innovation consistency gate size (STD)
+	int32_t  uwb_n_anchors{4};            ///< number of configured anchors (1-4)
+	float    uwb_anchor_n[4]{};           ///< anchor North positions (m), EKF NED origin frame
+	float    uwb_anchor_e[4]{};           ///< anchor East positions (m)
+	float    uwb_anchor_d[4]{};           ///< anchor Down positions (m)
+#endif // CONFIG_EKF2_UWB
 
 	float pos_noaid_noise{10.0f};           ///< observation noise for non-aiding position fusion (m)
 
