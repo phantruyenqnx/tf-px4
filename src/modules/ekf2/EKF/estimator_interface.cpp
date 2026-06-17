@@ -73,6 +73,13 @@ EstimatorInterface::~EstimatorInterface()
 #if defined(CONFIG_EKF2_AUXVEL)
 	delete _auxvel_buffer;
 #endif // CONFIG_EKF2_AUXVEL
+#if defined(CONFIG_EKF2_UWB)
+
+	for (uint8_t i = 0; i < kMaxUwbAnchors; i++) {
+		delete _uwb_buffer[i];
+	}
+
+#endif // CONFIG_EKF2_UWB
 }
 
 // Accumulate imu data and store to buffer at desired rate
@@ -444,12 +451,20 @@ void EstimatorInterface::setUwbData(const uwbSample &uwb_sample)
 		return;
 	}
 
-	if (_uwb_buffer == nullptr) {
-		_uwb_buffer = new RingBuffer<uwbSample>(_obs_buffer_length);
+	const uint8_t id = uwb_sample.anchor_id;
 
-		if (_uwb_buffer == nullptr || !_uwb_buffer->valid()) {
-			delete _uwb_buffer;
-			_uwb_buffer = nullptr;
+	if (id >= kMaxUwbAnchors) {
+		return;
+	}
+
+	// Lazily allocate this anchor's own delay buffer. Each anchor is an independent range source, so
+	// it gets its own monotonic buffer -- this is what fixes B1 (anchors no longer evict each other).
+	if (_uwb_buffer[id] == nullptr) {
+		_uwb_buffer[id] = new RingBuffer<uwbSample>(_obs_buffer_length);
+
+		if (_uwb_buffer[id] == nullptr || !_uwb_buffer[id]->valid()) {
+			delete _uwb_buffer[id];
+			_uwb_buffer[id] = nullptr;
 			printBufferAllocationFailed("UWB");
 			return;
 		}
@@ -459,12 +474,10 @@ void EstimatorInterface::setUwbData(const uwbSample &uwb_sample)
 				- static_cast<int64_t>(_params.uwb_delay_ms * 1000)
 				- static_cast<int64_t>(_dt_ekf_avg * 5e5f); // seconds to microseconds divided by 2
 
-	if (time_us >= static_cast<int64_t>(_uwb_buffer->get_newest().time_us + _min_obs_interval_us)) {
-		uwbSample uwb_sample_new{uwb_sample};
-		uwb_sample_new.time_us = time_us;
-		_uwb_buffer->push(uwb_sample_new);
-		_time_last_uwb_buffer_push = _time_latest_us;
-	}
+	uwbSample uwb_sample_new{uwb_sample};
+	uwb_sample_new.time_us = time_us;
+	_uwb_buffer[id]->push(uwb_sample_new);
+	_time_last_uwb_buffer_push = _time_latest_us;
 }
 #endif // CONFIG_EKF2_UWB
 

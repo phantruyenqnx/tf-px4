@@ -165,10 +165,6 @@ uint8_t Ekf::countRecentUwbAnchors() const
 
 void Ekf::controlUwbRangeFusion(const imuSample &imu_delayed)
 {
-	if (_uwb_buffer == nullptr) {
-		return;
-	}
-
 	if (_params.uwb_ctrl == 0) {
 		if (_control_status.flags.uwb) {
 			disableControlStatusUwb();
@@ -179,35 +175,41 @@ void Ekf::controlUwbRangeFusion(const imuSample &imu_delayed)
 	}
 
 	bool any_fused = false;
-	uwbSample sample;
+	const int n_anch = math::min((int)_params.uwb_n_anchors, (int)kMaxUwbAnchors);
 
-	while (_uwb_buffer->pop_first_older_than(imu_delayed.time_us, &sample)) {
-		if (!_control_status.flags.tilt_align) {
+	// Fuse from each anchor's own buffer. Every anchor with a range due at this horizon is fused this
+	// cycle (no cross-anchor eviction), so the position fix is constrained by all visible anchors.
+	for (int id = 0; id < n_anch; id++) {
+		if (_uwb_buffer[id] == nullptr) {
 			continue;
 		}
 
-		if (sample.anchor_id >= (uint8_t)_params.uwb_n_anchors) {
-			continue;
-		}
+		uwbSample sample;
 
-		_uwb_latest[sample.anchor_id] = sample; // keep newest per anchor for cold-start init
-
-		// Needs an initial position. With GPS/EV active, refine it. With no other
-		// horizontal aiding (indoor GPS-denied), bootstrap it via trilateration.
-		// Once UWB is the active source it counts as horizontal aiding, so it
-		// self-sustains (e.g. after GPS drops out).
-		if (!isHorizontalAidingActive() && !_control_status.flags.uwb) {
-			if (!tryInitUwb()) {
+		while (_uwb_buffer[id]->pop_first_older_than(imu_delayed.time_us, &sample)) {
+			if (!_control_status.flags.tilt_align) {
 				continue;
 			}
-		}
 
-		if (fuseUwbRange(sample, _aid_src_uwb[sample.anchor_id])) {
-			any_fused = true;
-			_uwb_reject_count = 0;
+			_uwb_latest[sample.anchor_id] = sample; // keep newest per anchor for cold-start init
 
-		} else if (_aid_src_uwb[sample.anchor_id].innovation_rejected && _uwb_reject_count < 250) {
-			_uwb_reject_count++;
+			// Needs an initial position. With GPS/EV active, refine it. With no other
+			// horizontal aiding (indoor GPS-denied), bootstrap it via trilateration.
+			// Once UWB is the active source it counts as horizontal aiding, so it
+			// self-sustains (e.g. after GPS drops out).
+			if (!isHorizontalAidingActive() && !_control_status.flags.uwb) {
+				if (!tryInitUwb()) {
+					continue;
+				}
+			}
+
+			if (fuseUwbRange(sample, _aid_src_uwb[sample.anchor_id])) {
+				any_fused = true;
+				_uwb_reject_count = 0;
+
+			} else if (_aid_src_uwb[sample.anchor_id].innovation_rejected && _uwb_reject_count < 250) {
+				_uwb_reject_count++;
+			}
 		}
 	}
 

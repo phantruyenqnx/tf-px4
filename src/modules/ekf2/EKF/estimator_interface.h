@@ -452,7 +452,11 @@ protected:
 	RingBuffer<auxVelSample> *_auxvel_buffer {nullptr};
 #endif // CONFIG_EKF2_AUXVEL
 #if defined(CONFIG_EKF2_UWB)
-	RingBuffer<uwbSample> *_uwb_buffer {nullptr};
+	// One delay buffer PER anchor. Each anchor's ranges are an independent, monotonic single source,
+	// so the RingBuffer's "discard older on pop" semantics are correct again. (Multiplexing all
+	// anchors into one buffer dropped every anchor but the last-pushed on each pop -- see B1.)
+	static constexpr uint8_t kMaxUwbAnchors = 4;
+	RingBuffer<uwbSample> *_uwb_buffer[kMaxUwbAnchors] {};
 	uint64_t _time_last_uwb_buffer_push{0};
 #endif // CONFIG_EKF2_UWB
 	RingBuffer<systemFlagUpdate> *_system_flag_buffer {nullptr};
