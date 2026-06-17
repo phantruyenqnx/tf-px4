@@ -483,8 +483,13 @@ private:
 
 #if defined(CONFIG_EKF2_UWB)
 	uORB::Subscription _sensor_uwb_sub{ORB_ID(sensor_uwb)};
-	uORB::PublicationMulti<estimator_aid_source1d_s> _estimator_aid_src_uwb_pub{ORB_ID(estimator_aid_src_uwb)};
-	hrt_abstime _status_uwb_pub_last{0};
+	// One ORB instance per anchor so each anchor's fusion status is logged independently (a single
+	// muxed publisher hides the per-anchor split -- which is exactly what we need to see for UWB).
+	uORB::PublicationMulti<estimator_aid_source1d_s> _estimator_aid_src_uwb_pub[4] {
+		ORB_ID(estimator_aid_src_uwb), ORB_ID(estimator_aid_src_uwb),
+		ORB_ID(estimator_aid_src_uwb), ORB_ID(estimator_aid_src_uwb)
+	};
+	hrt_abstime _status_uwb_pub_last[4] {};
 #endif // CONFIG_EKF2_UWB
 
 #if defined(CONFIG_EKF2_GRAVITY_FUSION)

@@ -1018,7 +1018,7 @@ void EKF2::PublishAidSourceStatus(const hrt_abstime &timestamp)
 
 #if defined(CONFIG_EKF2_UWB)
 	for (int i = 0; i < math::min(_param_ekf2_uwb_n_anch.get(), (int32_t)4); i++) {
-		PublishAidSourceStatus(_ekf.aid_src_uwb()[i], _status_uwb_pub_last, _estimator_aid_src_uwb_pub);
+		PublishAidSourceStatus(_ekf.aid_src_uwb()[i], _status_uwb_pub_last[i], _estimator_aid_src_uwb_pub[i]);
 	}
 #endif // CONFIG_EKF2_UWB
 

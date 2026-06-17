@@ -3,6 +3,10 @@
 
 uint64 	timestamp		# time since system start (microseconds)
 
+# Several anchors are reported in the same cycle (one message each), so the queue must be deep
+# enough to hold them all -- with the default depth of 1 a subscriber only sees the last anchor.
+uint8 ORB_QUEUE_LENGTH = 8
+
 uint32 	sessionid		# UWB SessionID
 uint32 	time_offset		# Time between Ranging Rounds in ms
 uint32 	counter			# Number of Ranges since last Start of Ranging

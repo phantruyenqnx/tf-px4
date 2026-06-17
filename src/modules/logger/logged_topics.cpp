@@ -122,6 +122,7 @@ void LoggedTopics::add_default_topics()
 	add_optional_topic("sensor_correction");
 	add_optional_topic("sensor_gyro_fft", 50);
 	add_topic("sensor_selection");
+	add_optional_topic("sensor_uwb");                  // raw UWB anchor ranges (UWB landing survey)
 	add_topic("sensors_status_imu", 200);
 	add_optional_topic("spoilers_setpoint", 1000);
 	add_topic("system_power", 500);
@@ -181,6 +182,9 @@ void LoggedTopics::add_default_topics()
 	add_optional_topic_multi("estimator_sensor_bias", 1000);
 	add_optional_topic_multi("estimator_status", 200);
 	add_optional_topic_multi("estimator_status_flags", 10);
+	add_optional_topic_multi("estimator_aid_src_uwb");          // UWB fusion innovations (debug)
+	add_optional_topic_multi("estimator_aid_src_gnss_pos");     // GNSS pos fusion (debug)
+	add_optional_topic_multi("estimator_aid_src_gnss_vel");     // GNSS vel fusion (debug)
 	add_optional_topic_multi("yaw_estimator_status", 1000);
 
 	// log all raw sensors at minimal rate (at least 1 Hz)
