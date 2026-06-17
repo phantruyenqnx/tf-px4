@@ -30,6 +30,11 @@ Value proposition: **UWB precision landing in GPS-weakened areas.** SITL result 
 (EKF accurate, ~0.06 m bias). Same mission/approach for both — the only difference is the position
 estimate.
 
+> **Update (2026-06-17, post-B1 fix):** the multi-anchor drop bug (B1) found in the later audit was
+> fixed (per-anchor buffers); with all 4 anchors fusing, a 3-seed A/B re-run gives **B CEP50 = 0.03 m
+> vs A 1.54 m (true error vs ground-truth pad)** — the 0.16 m figure above predates that fix. See
+> [`08_fix_plan.md`](08_fix_plan.md).
+
 ---
 
 ## 2. What the literature establishes (verified, cited)
@@ -201,11 +206,15 @@ binary. (PX4's MAVSDK tests are C++ in `test/mavsdk_tests/`; MAVROS needs ROS.)
 - [x] **USER verified**: B estimate snaps to the pad on return, lands 0.16 m off (EKF bias 0.06 m).
 
 ### Task 7 — N-seed CEP sweep + final report
-- [ ] `run_all.sh` (headless): for each scenario {A,B} × N seeds, reboot SITL (so `SIM_GPS_SEED`
-  applies and A vs B see the **same** GPS bias trace per seed) → run `mission.py` → collect ulogs →
-  `analyze.py` aggregate. Final CEP/RMSE table + CEP-circle scatter. **USER review**; record here.
-  *(Rigorous same-seed A-vs-B numbers; the single-run 1.07 vs 0.16 above is illustrative — different
-  boots.)*
+- [x] `run_all.sh [N] [base_seed] [laps]`: for each seed × scenario {A,B}, two headless boots — a
+  **config boot** (set `SIM_GPS_SEED` + `EKF2_UWB_CTRL`/`EKF2_UWB_GPS`, `param save`) then a
+  **measure boot** (run `mission.py`) — so A & B see the **same** GPS bias per seed (fair). Collects
+  the ulogs and runs `analyze.py --compare`.
+- [x] `analyze.py --compare`: the standard landing-accuracy charts — **(1)** touchdown scatter with
+  **CEP50 (solid) / R95 (dashed)** circles, **(2)** horizontal-error **CDF**, **(3)** metric bars
+  (mean / CEP50 / R95 / RMSE) — all A (red) vs B (green), n shown; plus a printed table with the
+  **CEP50 improvement %**. Interactive window by default (user saves if wanted).
+- [ ] **USER review** the sweep result; record final CEP/RMSE table here.
 
 ---
 

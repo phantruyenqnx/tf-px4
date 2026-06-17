@@ -1,0 +1,1689 @@
+
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ @media screen and (min-width: 64em) {
+ div.pmc-wm {
+ background: repeat-y;
+ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='350' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter x='-.02' y='0' width='1.05' height='1' id='c'%3E%3CfeFlood flood-color='%23FFF'/%3E%3CfeComposite in='SourceGraphic'/%3E%3C/filter%3E%3Ctext id='b' font-family='Helvetica' font-size='11pt' style='opacity:1;fill:%23005ea2;stroke:none;text-anchor:middle' x='175' y='14'%3E%3C/text%3E%3Cpath id='a' style='fill:%23005ea2' d='M0 8h350v3H0z'/%3E%3C/defs%3E%3Cuse xlink:href='%23a' transform='rotate(90 10 10)'/%3E%3Cuse xlink:href='%23b' transform='rotate(90 10 10)' filter='url(%23c)'/%3E%3C/svg%3E");
+ padding-left: 3rem;
+ }
+ }
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+# 
+ Multi-GNSS Precise Point Positioning with UWB Tightly Coupled Integration - PMC
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ Skip to main content
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ An official website of the United States government
+ 
+ Here's how you know
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ Here's how you know
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+Official websites use .gov
+ 
+ A
+ .gov website belongs to an official
+ government organization in the United States.
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+
+Secure .gov websites use HTTPS
+ 
+ A lock (
+ 
+ 
+ 
+
+# Lock
+ 
+ Locked padlock icon
+ 
+ 
+ 
+) or https:// means you've safely
+ connected to the .gov website. Share sensitive
+ information only on official, secure websites.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ Search
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ Log in
+
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Dashboard
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Publications
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Account settings
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ Log out
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ Search…
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ Search NCBI
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ Primary site navigation
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ Search
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+ Logged in as:
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Dashboard
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Publications
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Account settings
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ Log in
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+Search PMC Full-Text Archive
+
+Search in PMC
+
+ 
+ 
+ 
+ 
+ 
+ Journal List
+ 
+ 
+ 
+ 
+ 
+ 
+ User Guide
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+## PERMALINK
+
+ 
+ 
+ 
+ 
+ Copy
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ As a library, NLM provides access to scientific literature. Inclusion in an NLM database does not imply endorsement of, or agreement with,
+ the contents by NLM or the National Institutes of Health.
+ Learn more:
+ PMC Disclaimer
+ |
+ 
+ PMC Copyright Notice
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+Sensors (Basel). 2022 Mar 14;22(6):2232. doi: 10.3390/s22062232
+
+Search in PMC
+Search in PubMed
+View in NLM Catalog
+Add to search
+
+## Multi-GNSS Precise Point Positioning with UWB Tightly Coupled Integration
+
+Zhenchuan Huang
+
+## Zhenchuan Huang
+
+1School of Communication and Information Engineering, Shanghai University, Shanghai 200444, China; huangzhenchuan@whu.edu.cn
+
+2Shanghai Astronomical Observatory, Chinese Academy of Sciences, Shanghai 200030, China; suke17@mails.ucas.ac.cn
+Find articles by Zhenchuan Huang
+
+1,2, Shuanggen Jin
+
+## Shuanggen Jin
+
+2Shanghai Astronomical Observatory, Chinese Academy of Sciences, Shanghai 200030, China; suke17@mails.ucas.ac.cn
+
+3School of Surveying and Land Information Engineering, Henan Polytechnic University, Jiaozuo 454000, China
+
+4School of Remote Sensing and Geomatics Engineering, Nanjing University of Information Science and Technology, Nanjing 210044, China; xu.tang@nuist.edu.cn
+Find articles by Shuanggen Jin
+
+2,3,4,*, Ke Su
+
+## Ke Su
+
+2Shanghai Astronomical Observatory, Chinese Academy of Sciences, Shanghai 200030, China; suke17@mails.ucas.ac.cn
+Find articles by Ke Su
+
+2, Xu Tang
+
+## Xu Tang
+
+4School of Remote Sensing and Geomatics Engineering, Nanjing University of Information Science and Technology, Nanjing 210044, China; xu.tang@nuist.edu.cn
+Find articles by Xu Tang
+
+4
+
+Editor: Miquel Garcia-Fernandez
+
+Author information
+Article notes
+Copyright and License information
+
+1School of Communication and Information Engineering, Shanghai University, Shanghai 200444, China; huangzhenchuan@whu.edu.cn
+
+2Shanghai Astronomical Observatory, Chinese Academy of Sciences, Shanghai 200030, China; suke17@mails.ucas.ac.cn
+
+3School of Surveying and Land Information Engineering, Henan Polytechnic University, Jiaozuo 454000, China
+
+4School of Remote Sensing and Geomatics Engineering, Nanjing University of Information Science and Technology, Nanjing 210044, China; xu.tang@nuist.edu.cn
+
+*
+
+Correspondence: sgjin@shao.ac.cn; Tel.: +86-21-34775292
+
+## Roles
+
+Miquel Garcia-Fernandez: Academic Editor
+
+© 2022 by the authors.
+
+https://creativecommons.org/licenses/by/4.0/).
+PMC Copyright notice
+
+PMCID: PMC8950949  PMID: 35336403
+
+## Abstract
+
+Keywords: precise point positioning (PPP), ultra-wideband (UWB), time difference of arrival (TDOA), tightly coupled integration
+
+## 1. Introduction
+
+1], have been widely used in various fields, such as navigation and timing, geodesy, seismic monitoring and gravity field [2,3,4,5,6]. However, GNSS positioning performance becomes seriously degraded in a challenging GNSS environment with few observing satellites and multipath effects. To further improve the reliability and availability of GNSS positioning, multi-sensors have been integrated into the GNSS [7]. Ultra-wideband (UWB) has a high transmission rate, strong anti-interference ability and multipath capability [8]. It applies a unique pulse signal for the short-distance communication, with a frequency range of 3.1~10.6 GHz and a pulse width of nanosecond or sub-nanosecond level [9]. Some research on the integration of GPS and UWB has been carried out, which could lead to the achievement of excellent positioning accuracy in GPS-challenging environments. The loosely coupled integration was employed in early GPS/UWB integration research [10,11,12]. The approach is computationally low when GPS is working, but it fails when GPS measurements are not available. Following this, some scholars proposed the GPS/UWB tightly coupled integration, which can increase the redundancy of observations and improve the reliability of the positioning system. For instance, Chui et al. [13] firstly applied GPS/UWB tightly coupled integration in a complex urban environment, which indicated that the positioning error in the east direction was reduced from 5.43 cm to 2.61 cm. Chui et al. [14] also investigated the tightly coupled integration modeling of differential GPS (DGPS) and UWB, although it can only achieve meter-level accuracy in a kinematic environment. Moreover, tightly coupled integration modeling of GPS and UWB for precision applications was provided in MacGougan et al. [15]. The results showed that the ambiguity float solution had increased from half a meter accuracy to sub-meter accuracy, and the convergence time of the ambiguity fixed solution reduced. Thereafter, MacGougan et al. [16] applied GPS/UWB tightly coupled integration in a difficult realistic environment, and maintained sub-meter accuracy. Recently, Shen et al. [17] performed the DGPS/UWB tight integration in RTK for the emerging intelligent transportation systems, but the root mean square (RMS) error of the proposed method was still large.
+
+16,18,19,20]. However, the SPP algorithm can only provide meter-level accuracy and cannot meet high accuracy requirements. Although the RTK method can provide centimeter-level accuracy and rapid convergence, it requires dedicated base stations or a dense network coverage [21]. The positioning performance is highly influenced by the distance between users and base station [22]. Precise Point Positioning (PPP) technology is introduced to overcome these disadvantages [23], which is a flexible and high-precision single-point positioning mode using the GNSS pseudo-range and carrier phase observations as well as satellite precise orbit and clock products provided by International GNSS Service (IGS) [24]. It relies only on one receiver for a user to realize the absolute positioning. The main factors affecting the accuracy of PPP are the number of satellites, spatial geometry structure between user and satellites, and the quality of observations [25]. For GPS positioning, at least four satellites are necessary in open-sky conditions. Once the GPS signal is blocked or subject to multipath interference, the number of available satellites is likely to be less than four and the corresponding availability and accuracy degrades dramatically. Hence, the integration of the multi-constellation GNSS is an effective and direct way by which to improve PPP’s performance [26]. The existing literature has demonstrated that integrating both GPS and GLONASS or other satellite navigation systems can increase the number of observation satellites and significantly improve the positioning performance [27,28,29]. Nevertheless, PPP takes a long time to converge before reaching centimeter-level accuracy [30].
+
+Section 2. Then, a set of the real-measured GPS, GLONASS, and UWB data is processed in GNSS-only and GNSS/UWB modes, respectively. The positioning accuracy and convergence performance of the multi-GNSS/UWB tightly coupled integration under different scenarios are assessed and analyzed in Section 3. Finally, conclusions are provided in Section 4.
+
+## 2. Methods and Models
+
+## 2.1. GNSS Positioning System
+
+s and the GNSS receiver r. Assuming that the satellite clock t^{s} and receiver clock t_{r} are synchronized, there is still a clock difference Δt between them, so the measured distance p_{r}^{s} is called the pseudo-range. The pseudo-range measurement equation is given as follows:
+
+ p_{r}^{s}=ρ_{r}^{s}+c⋅Δt 
+(1)
+
+ ρ_{r}^{s}=sqrt((X−X_{i}^{s})^{2}+(Y−Y_{i}^{s})^{2}+(Z−Z_{i}^{s})^{2}) , is the geometry distance between the receiver and the satellite i ; (X_{i},Y_{i},Z_{i}) is the three-dimensional coordinates of the satellite i in the Earth center Earth fixed (ECEF) coordinate system; (X,Y,Z) is the ECEF coordinates of the receiver; c = 299,792,458 m/s, is the speed of light.
+
+j are written as follows [31]:
+
+ {p_{r,j}^{s}=ρ_{r}^{s}+c(t_{r}−t^{s})+c(d_{r,j}−d_{j}^{s})+T_{r}^{s}+I_{r,j}^{s}+ε_{p_{r,j}^{s}},ε_{p_{r,j}^{s}}~(0,σ_{p_{r,j}^{s}}^{2}) ; φ_{r,j}^{s}=ρ_{r}^{s}+c(t_{r}−t^{s})+λ_{j}(b_{r,j}−b_{j}^{s})+T_{r}^{s}−I_{r,j}^{s}+λ_{j}N_{r,j}^{s}+ε_{φ_{r,j}^{s}},ε_{φ_{r,j}^{s}}~(0,σ_{φ_{r,j}^{s}}^{2}) 
+(2)
+
+ T_{r}^{s} is the tropospheric delay; d_{r,j} and d_{j}^{s} are the uncalibrated code delays (UCDs) with respect to the receiver and satellite; b_{r,j} and b_{j}^{s} are the uncalibrated phase delays (UPDs) with respect to the receiver and satellite; I_{r,j}^{s} is the ionospheric delay; λ_{j} is wavelength of the carrier phase on frequency j; N_{r,j}^{s} is the float ambiguities; ε_{p_{r,j}^{s}} and ε_{φ_{r,j}^{s}} are the pseudo-range and carrier phase observation noises including multipath.
+
+24]:
+
+ {P_{r,IF}^{s}=(f_{1}^{2})/(f_{1}^{2}−f_{2}^{2})P_{1}−(f_{2}^{2})/(f_{1}^{2}−f_{2}^{2})P_{2} ; Φ_{r,IF}^{s}=(f_{1}^{2})/(f_{1}^{2}−f_{2}^{2})Φ_{1}−(f_{2}^{2})/(f_{1}^{2}−f_{2}^{2})Φ_{2} 
+(3)
+
+ P_{r,IF}^{s} and Φ_{r,IF}^{s} are the IF combination of pseudo-range and carrier phase; f_{1} and f_{2} are the corresponding frequencies; P_{1} and P_{2} are the raw pseudo-range on frequency f_{1} and f_{2} ; Φ_{1} and Φ_{2} are the carrier phase on frequency f_{1} and f_{2} .
+
+32]. Thereafter, we should consider the inter-system biases (ISB) arising from the hardware delays of different GNSSs. The corresponding IF combination of pseudo-range and carrier phase can be further simplified as:
+
+ {P_{r,IF}^{s}=ρ_{r}^{s}+c⋅t_{r,G}+ISB_{G}^{sys}+M⋅T_{r}+ε_{P_{r,IF}^{s}} ; Φ_{r,IF}^{s}=ρ_{r}^{s}+c⋅t_{r,G}+ISB_{G}^{sys}+M⋅T_{r}+λ_{r,IF}⋅N_{r,IF}^{s}+ε_{Φ_{r,IF}^{s}} 
+(4)
+
+G represents the GPS satellite, sys represents the BDS, GLONASS, or Galileo satellite. ISB_{G}^{sys}=t_{r,sys}−t_{r,G} , is the ISB of each system with respect to the GPS; N_{r,IF}^{s} is the ambiguity parameter of the IF combination; M is the mapping function of the wet tropospheric delays; λ_{r,IF} is the wavelength of the carrier phase of the IF combination; ε_{P_{r,IF}^{s}} and ε_{Φ_{r,IF}^{s}} denote the observation noises of the IF combination.
+
+ {p_{IF,G}=−u⋅δp+c⋅δt_{r,G}+M⋅δT_{r}+ε_{p_{G}} ; φ_{IF,G}=−u⋅δp+c⋅δt_{r,G}+λ_{IF}⋅δN_{IF,G}+M⋅δT_{r}+ε_{φ_{G}} ; p_{IF,R}=−u⋅δp+c⋅δt_{r,G}+ISB_{G}^{R}+M⋅δT_{r}+ε_{p_{R}} ; φ_{IF,R}=−u⋅δp+c⋅δt_{r,G}+ISB_{G}^{R}+λ_{IF}⋅δN_{IF,R}+M⋅δT_{r}+ε_{φ_{R}} 
+(5)
+
+ p_{IF} and φ_{IF} denote the measurement residuals of the IF combination; u is the unit vector from the receiver to the satellite; δp=[dx, dy, dz] is the positioning increment vector.
+
+## 2.2. UWB Positioning Method
+
+33]. The UWB positioning methods include Two Way Time of Flight (TW-TOF), Time of Arrival (TOA), Received Signal Strength Indication (RSSI), Time Difference of Arrival (TDOA) and Angle of Arrival (AOA) [34]. This paper utilizes the TDOA-based method for the UWB positioning.
+
+ sqrt((X_{i}−x)^{2}+(Y_{i}−y)^{2}+(Z_{i}−z)^{2})=c⋅t_{i} 
+(6)
+
+ (X_{i},Y_{i},Z_{i}) is the three-dimensional coordinates of the base station i in the ECEF coordinate system; (x,y,z) is the three-dimensional coordinates of the estimated positioning tag; t_{i} is the arrival time between the base station i and the positioning tag.
+
+1 with known coordinate as the reference base station, the TDOA observation equations read:
+
+ c⋅(t_{i}−t_{1})=sqrt((X_{i}−x)^{2}+(Y_{i}−y)^{2}+(Z_{i}−z)^{2})−sqrt((X_{1}−x)^{2}+(Y_{1}−y)^{2}+(Z_{1}−z)^{2})+ε_{i,1},ε_{i,1}~(0,σ_{uwb}^{2}) 
+(7)
+
+ σ_{uwb}^{2} is the a priori variance of the UWB measurements, which are mainly determined by the sensor performance and can be obtained by calibration or the prior statistical data.
+
+ d^{uwb}=−v·δp+ε_{d} 
+(8)
+
+ d^{uwb} is the TDOA measurements residuals; v is the difference between the unit vector of the tag to other base stations and the direction from the label to the reference base station.
+
+## 2.3. GNSS/UWB Integration Method
+
+## 2.3.1. GNSS/UWB Integration Model Based on EKF
+
+35]. When both GNSS data and UWB data are available at epoch k , the GNSS/UWB tightly coupled integration model will be implemented.
+
+ z_{k}=H_{k}x_{k}+ε_{k},ε_{k}∼N(0,R_{k}) 
+(9)
+
+ H_{k} is the design matrix, which can be obtained from Equations (5) and (8); R_{k} is the prior covariance matrix of the observation noise ε_{k} .
+
+ z_{k}=[p_{m}^{G}, φ_{m}^{G}, ⋯, p_{n}^{R}, φ_{n}^{R}, ⋯, d_{i}^{uwb}, ⋯]^{T} 
+(10)
+
+m, n and i represent the mth GPS satellite, nth GLONASS satellite and ith UWB base station, respectively.
+
+ x=[δp, δt_{r}, δT_{r}, δN_{IF,G}, δN_{IF,R}]^{T} 
+(11)
+
+ δt_{r}=[δt_{r,G}, ISB_{G}^{R}] is the receiver clock offset vector including the receiver clock and ISB for each individual system.
+
+ {x^_{k,k−1}=Γ_{k,k−1}x^_{k−1}+w_{k−1} ; P_{k,k−1}=Γ_{k,k−1}P_{k−1}Γ_{k,k−1}^{T}+Q_{k−1} 
+(12)
+
+ Γ_{k,k−1} is the state transition matrix; x^_{k,k−1} and P_{k,k−1} denote the predicted state parameter vector and covariance matrix; Q_{k−1} is the covariance matrix of the process noise.
+
+ {K_{k}=P_{k,k−1}H_{k}^{T}(H_{k}P_{k,k−1}H_{k}^{T}+R_{k})^{−1} ; x^_{k}=x^_{k,k−1}+K_{k}(z_{k}−H_{k}x^_{k,k−1}) ; P_{k}=(I−K_{k})P_{k,k−1}(I−K_{k})^{T}+K_{k}R_{k}K_{k}^{T} 
+(13)
+
+ K_{k} is the gain matrix at epoch time k, I is the identity matrix. In this paper, for mildly dynamic scenes, the position states are modeled as random walk processes with process noise in the integration model [16].
+
+## 2.3.2. Implementation of GNSS/UWB Algorithm
+
+Figure 1 shows the architecture of the multi-GNSS/UWB tightly coupled integration positioning system. GNSS data include the raw carrier phase and pseudo-range observations, and UWB data include the positions of the base stations and TDOA observations. The prior approximate receiver coordinate is obtained by an observation file. With the ephemeris of the GNSS satellites, the approximate position is applied in the calculation for the computed pseudo-range and carrier phase IF measurements. The pseudo-range and carrier phase IF measurements corrected by the error correction models and precise orbit and clock products are input with the computed GNSS measurements in the Kalman filter. Simultaneously, the TDOA measurements are computed by combining the known positions of base stations and the approximate receiver position. The observed UWB measurements are likewise input into the Kalman filter along with the computed TDOA measurements. Finally, the positioning result is achieved.
+
+## Figure 1.
+
+Open in a new tab
+
+36]. For GNSS/UWB tightly coupled integration data processing, the approximate coordinate from the observation file is used as a prior for the EKF. Forward Kalman filter is applied to estimate the parameters. According to their prior statistical data, the initial standard deviation of the pseudo-range and carrier phase are 0.3 m and 0.003 m. The standard deviation of UWB measurements is set to 0.1 m, which is determined by the actual accuracy of the UWB range.
+
+## 3. Experiments and Results
+
+## 3.1. Experimental Description
+
+Figure 2. The approximate lever arm between the GNSS antenna and the UWB antenna was measured in advance and compensated for in the data-preprocessing process. Another multi-GNSS receiver (LEICA GR25) used for the GNSS base station was located less than 1 km away, and the position of the GNSS base station was known. The UWB base stations were set up on pre-surveyed locations with the same height. The maximum working distance of UWB base stations is about 20 m. The UWB equipment was provided by Sichuan Kunchen Technology Company.
+
+## Figure 2.
+
+Open in a new tab
+
+a) experimental environment; (b) Testing platform.
+
+Figure 3. The whole trajectory is divided into the following stages:
+
+## Figure 3.
+
+Open in a new tab
+
+## 3.2. Positioning Accuracy
+
+## 3.2.1. Static Results with an Open-Sky Condition
+
+Figure 4. According to the statistics, the average satellite number for GPS and GPS + GLONASS are 6.7 and 12.9, and the corresponding PDOP values are 3.5 and 1.9, respectively. It is clear that the average number of visible GPS + GLONASS satellites is twice that of GPS satellites. Additionally, the PDOP of GPS + GLONASS remains at a lower level throughout the entire experimental process. The sky plots of GPS and GPS + GLONASS satellites during the experiment are depicted in Figure 5. Either GPS or the GLONASS system can provide good satellite continuity.
+
+## Figure 4.
+
+Open in a new tab
+
+top) and PDOP values (bottom).
+
+## Figure 5.
+
+Open in a new tab
+
+a) GPS; (b) GPS + GLONASS.
+
+Figure 6 and Figure 7. It can be seen from Figure 6 that the positioning errors in the three directions with the GPS/UWB integration are obviously reduced when compared to the GPS-only solution. Similarly, when compared with the GPS + GLONASS solution, the time series of the positioning errors of GPS + GLONASS/UWB integration are smoother (Figure 7). As expected, compared with the GNSS-only solutions, the GNSS/UWB solutions have obvious improvements in positioning results and reach centimeter-level accuracy faster. The improvement in the north and east directions is more significant.
+
+## Figure 6.
+
+Open in a new tab
+
+## Figure 7.
+
+Open in a new tab
+
+Table 1 summarizes the RMS values of the positioning errors with respect to GNSS/UWB and GNSS-only solutions. The results show that the RMS values of the GPS/UWB integration are 2.48 cm, 1.67 cm and 6.02 cm with an improvement of 4.46 cm, 5.98 cm and 5.20 cm in the north, east and up components, compared to that of the GPS-only solution. Besides, compared to the RMS values of positioning errors for the GPS + GLONASS solution, the RMS values of positioning errors for GPS + GLONASS/UWB integration show an improvement of about 2.72 cm, 1.68 cm and 2.23 cm in the north, east and up components. Regardless of whether GNSS-only solutions or GNSS/UWB solutions are used, all of them can achieve a centimeter-level positioning accuracy in horizontal directions after convergence. Additionally, the GNSS/UWB tightly coupled integration holds higher positioning accuracy. The RMS improvement percentages of the GNSS/UWB solutions with GNSS-only solutions in the north, east and up components are also shown in Table 1. In terms of positioning accuracy, the RMS values of the positioning errors for GPS/UWB integration in the north, east and up components are improved by 64.26%, 78.16%, and 46.34%, respectively. For multi-GNSS/UWB integration, the RMS values of the positioning errors are improved by 67.83%, 56.94%, 26.54% in the north, east and up components. Likewise, the improvement percentages are the most obvious in the horizontal direction.
+
+## Table 1.
+
+Items
+GPS
+GPS + GLONASS
+
+North
+East
+Up
+North
+East
+Up
+
+GNSS-only (cm)
+6.94
+7.65
+11.22
+4.01
+2.95
+8.40
+
+GNSS/UWB (cm)
+2.48
+1.67
+6.02
+1.29
+1.27
+6.17
+
+Improvement (%)
+64.26
+78.16
+46.34
+67.83
+56.94
+26.54
+
+Open in a new tab
+
+## 3.2.2. Static Results with a Simulation of Complex Environments
+
+Figure 8. Since only three GPS satellites are available most of the time, a GPS-only solution is not shown in the following. It can be seen that the number of observations increased when UWB signals were available. The GNSS-only solution has very poor PDOP values whereas the GNSS/UWB solution still has reasonable PDOP values.
+
+## Figure 8.
+
+Open in a new tab
+
+top) and the corresponding PDOP values (bottom) with a cutoff elevation angle of 40°.
+
+Figure 9. In a simulation of urban environments, the GPS + GLONASS/UWB solution has significant improvement in positioning results, with a smoother time series of the positioning errors compared with the GPS + GLONASS solution. The improvement in the north and east directions is still more dramatic, achieving centimeter accuracy within a few minutes. Table 2 provides a quantitative summary of the positioning errors RMS values for two solutions with a cutoff elevation angle of 40°. The GPS + GLONASS/UWB positioning results are 2.66 cm, 2.63 cm and 60.77 cm, which can achieve centimeter accuracy in the horizontal directions after convergence. The RMS values of the positioning errors of the GPS + GLONASS/UWB solution are improved by 58.50%, 74.26%, 6.86% in the north, east and up components when compared to the GPS + GLONASS solution. However, the error in the vertical direction is still large, which may be caused by the poor quality and insufficient number of satellites.
+
+## Figure 9.
+
+Open in a new tab
+
+## Table 2.
+
+Items
+GPS + GLONASS
+
+North
+East
+Up
+
+GNSS-only solution (cm)
+6.41
+10.22
+65.25
+
+GNSS/UWB solution (cm)
+2.66
+2.63
+60.77
+
+Improvement (%)
+58.50
+74.26
+6.86
+
+Open in a new tab
+
+Figure 5). Secondly, when the UWB measurements are available, GNSS/UWB integration shows more redundancy and effectively improves the geometric structure of the observations.
+
+## 3.3. Convergence Performance
+
+Figure 10 and Figure 11. The GNSS/UWB solutions can significantly improve the convergence time and perform convergence within a few minutes in the horizontal directions, while requiring more than 15 min in the vertical direction. The GNSS-only solutions seldom converge to centimeter-level accuracy within 15 min. Accordingly, the position accuracy could be improved by integrating GNSS and UWB in indoor-outdoor scenario, where GNSS signals are easy to block, especially in the horizontal direction.
+
+## Figure 10.
+
+Open in a new tab
+
+## Figure 11.
+
+Open in a new tab
+
+## 3.4. Positioning Performance during GNSS Outage
+
+Figure 12 illustrates the positioning errors of the GNSS-only and GNSS/UWB solutions. After GNSS outage, the GNSS/UWB integration continues to work well, as can be seen in Figure 12b,d. The GNSS/UWB solutions achieve a decimeter-level accuracy in the initial stage, while GNSS-only solutions need to re-converge, and the initial convergence fluctuations in all components are large. In addition, the positioning errors of GPS-only solution are still large in the later epochs from Figure 12a. This may be caused by an insufficient convergence time. Figure 12c shows that the positioning errors of GPS + GLONASS solution is relatively small. Meanwhile, from Figure 12, we can also see that the GNSS/UWB tightly coupled integration can achieve high accuracy with a faster re-convergence by using both the multi-GNSS data and the UWB data.
+
+## Figure 12.
+
+Open in a new tab
+
+a) GPS PPP; (b) GPS/UWB; (c) GPS + GLONASS PPP; (d) GPS + GLONASS/UWB.
+
+## 4. Conclusions
+
+## Acknowledgments
+
+## Author Contributions
+
+## Funding
+
+## Data Availability Statement
+
+## Conflicts of Interest
+
+## Footnotes
+
+Publisher’s Note: MDPI stays neutral with regard to jurisdictional claims in published maps and institutional affiliations.
+
+## References
+
+1.Montenbruck O., Steigenberger P., Khachikyan R., Weber G., Langley R., Mervart L., Hugentobler U. IGS-MGEX: Preparing the ground for multi-constellation GNSS science. Inside Gnss. 2014;9:42–49. [Google Scholar]
+
+2.Calais E., Minster J.B. GPS detection of ionospheric perturbations following the January 17, 1994, Northridge earthquake. Geophys. Res. Lett. 1995;22:1045–1048. doi: 10.1029/95GL00168. [DOI] [Google Scholar]
+
+3.Larson K.M., Bodin P., Gomberg J. Using 1-Hz GPS data to measure deformations caused by the Denali fault earthquake. Science. 2003;300:1421–1424. doi: 10.1126/science.1084531. [DOI] [PubMed] [Google Scholar]
+
+4.Bender M., Dick G., Wickert J., Ramatschi M., Ge M., Gendt G., Rothacher M., Raabe A., Tetzlaff G. Estimates of the information provided by GPS slant data observed in Germany regarding tomographic applications. J. Geophys. Res. Atmos. 2009;114 doi: 10.1029/2008JD011008. [DOI] [Google Scholar]
+
+5.Moses M., Dodo J.D., Ojigi L.M., Lawal K. Regional TEC modelling over Africa using deep structured supervised neural network. Geod. Geodyn. 2020;11:367–375. doi: 10.1016/j.geog.2020.05.004. [DOI] [Google Scholar]
+
+6.Jin S., Zhang L., Tapley B. The understanding of length-of-day variations from satellite gravity and laser ranging measurements. Geophys. J. Int. 2011;184:651–660. doi: 10.1111/j.1365-246X.2010.04869.x. [DOI] [Google Scholar]
+
+7.Di Pietra V., Dabove P., Piras M. Loosely coupled GNSS and UWB with INS integration for indoor/outdoor pedestrian navigation. Sensors. 2020;20:6292. doi: 10.3390/s20216292. [DOI] [PMC free article] [PubMed] [Google Scholar]
+
+8.Alarifi A., Al-Salman A., Alsaleh M., Alnafessah A., Al-Hadhrami S., Al-Ammar M.A., Al-Khalifa H.S. Ultra Wideband Indoor Positioning Technologies: Analysis and Recent Advances. Sensors. 2016;16:707. doi: 10.3390/s16050707. [DOI] [PMC free article] [PubMed] [Google Scholar]
+
+9.Yang L., Giannakis G.B. Ultra-wideband communications: An idea whose time has come. IEEE Signal Process. Mag. 2004;21:26–54. doi: 10.1109/MSP.2004.1359140. [DOI] [Google Scholar]
+
+10.Opshaug G.R., Enge P. Integrated GPS and UWB navigation system:(Motivates the necessity of non-interference); Proceedings of the 2002 IEEE Conference on Ultra Wideband Systems and Technologies (IEEE Cat. No. 02EX580); Baltimore, MD, USA. 21–23 May 2002; pp. 123–127. [Google Scholar]
+
+11.Fernandez-Madrigal J.A., Cruz-Martin E., Gonzalez J., Galindo C., Blanco J.L. Application of UWB and GPS technologies for vehicle localization in combined indoor-outdoor environments; Proceedings of the 2007 9th International Symposium on Signal Processing and Its Applications; Sharjah, United Arab Emirates. 12–15 February 2007; pp. 1–4. [Google Scholar]
+
+12.Tanigawa M., Hol J.D., Dijkstra F., Luinge H., Slycke P. Augmentation of low-cost GPS/MEMS INS with UWB positioning system for seamless outdoor/indoor positionng; Proceedings of the 21st International Technical Meeting of the Satellite Division of The Institute of Navigation (ION GNSS 2008); Savannah, GA, USA. 16–19 September 2008; pp. 1804–1811. [Google Scholar]
+
+13.Chiu D.S., Macgougan G., O’Keefe K. UWB Assisted GPS RTK in Hostile Environments; Proceedings of the 2008 National Technical Meeting of The Institute of Navigation; San Diego, CA, USA. 28–30 January 2008; pp. 532–542. [Google Scholar]
+
+14.Chiu D.S., O’Keefe K.P. Seamless Outdoor-to-Indoor Pedestrian Navigation using GPS and UWB; Proceedings of the 21st International Technical Meeting of the Satellite Division of The Institute of Navigation (ION GNSS 2008); Savannah, GA, USA. 16–19 September 2008; pp. 2626–2637. [Google Scholar]
+
+15.MacGougan G., O’Keefe K., Klukas R. Tightly-coupled GPS/UWB Integration. J. Navig. 2009;63:1–22. doi: 10.1017/S0373463309990257. [DOI] [Google Scholar]
+
+16.MacGougan G., O’Keefe K., Klukas R. Accuracy and reliability of tightly coupled GPS/ultra-wideband positioning for surveying in urban environments. GPS Solut. 2010;14:351–364. doi: 10.1007/s10291-009-0158-8. [DOI] [Google Scholar]
+
+17.Shen F., Cheong J.W., Dempster A.G. An ultra-wide bandwidth-based range/GPS tight integration approach for relative positioning in vehicular ad hoc networks. Meas. Sci. Technol. 2015;26:045003. doi: 10.1088/0957-0233/26/4/045003. [DOI] [Google Scholar]
+
+18.Tan K.M., Law C.L. GPS and UWB integration for indoor positioning; Proceedings of the 2007 6th International Conference on Information, Communications & Signal Processing; Singapore. 10–13 December 2007; pp. 1–5. [Google Scholar]
+
+19.Petovello M.G., O’Keefe K., Chan B., Spiller S., Pedrosa C., Basnayake C. Demonstration of inter-vehicle UWB ranging to augment DGPS for improved relative positioning; Proceedings of the 23rd International Technical Meeting of the Satellite Division of the Institute of Navigation (ION GNSS 2010); Portland, OR, USA. 21–24 September 2010; pp. 1198–1209. [Google Scholar]
+
+20.Gross J.N., Gu Y., Dewberry B. Tightly-coupled GPS/UWB-ranging for relative navigation during formation flight; Proceedings of the 27th International Technical Meeting of the Satellite Division of the Institute of Navigation (ION GNSS+ 2014); Tampa, FL, USA. 8–12 September 2014; pp. 1698–1708. [Google Scholar]
+
+21.Rizos C., Han S. Reference station network based RTK systems-concepts and progress. Wuhan Univ. J. Nat. Sci. 2003;8:566–574. doi: 10.1007/BF02899820. [DOI] [Google Scholar]
+
+22.Erol S., Alkan R.M., Ozulu İ.M., İlçi V. Performance analysis of real-time and post-mission kinematic precise point positioning in marine environments. Geod. Geodyn. 2020;11:401–410. doi: 10.1016/j.geog.2020.09.002. [DOI] [Google Scholar]
+
+23.Zumberge J.F., Heflin M.B., Jefferson D.C., Watkins M.M., Webb F.H. Precise point positioning for the efficient and robust analysis of GPS data from large networks. J. Geophys. Res. Solid Earth. 1997;102:5005–5017. doi: 10.1029/96JB03860. [DOI] [Google Scholar]
+
+24.Kouba J., Héroux P. Precise point positioning using IGS orbit and clock products. GPS Solut. 2001;5:12–28. doi: 10.1007/PL00012883. [DOI] [Google Scholar]
+
+25.Li B., Shen Y. Global navigation satellite system ambiguity resolution with constraints from normal equations. J. Surv. Eng. 2010;136:63–71. doi: 10.1061/(ASCE)SU.1943-5428.0000017. [DOI] [Google Scholar]
+
+26.Li X., Ge M., Dai X., Ren X., Fritsche M., Wickert J., Schuh H. Accuracy and reliability of multi-GNSS real-time precise positioning: GPS, GLONASS, BeiDou, and Galileo. J. Geod. 2015;89:607–635. doi: 10.1007/s00190-015-0802-8. [DOI] [Google Scholar]
+
+27.Cai C., Gao Y. Modeling and assessment of combined GPS/GLONASS precise point positioning. GPS Solut. 2012;17:223–236. doi: 10.1007/s10291-012-0273-9. [DOI] [Google Scholar]
+
+28.Li P., Zhang X. Integrating GPS and GLONASS to accelerate convergence and initialization times of precise point positioning. GPS Solut. 2013;18:461–471. doi: 10.1007/s10291-013-0345-5. [DOI] [Google Scholar]
+
+29.Xiong J., Han F. Positioning performance analysis on combined GPS/BDS precise point positioning. Geod. Geodyn. 2020;11:78–83. doi: 10.1016/j.geog.2019.11.001. [DOI] [Google Scholar]
+
+30.Yao Y., Yu C., Hu Y. A new method to accelerate PPP convergence time by using a global zenith troposphere delay estimate model. J. Navig. 2014;67:899–910. doi: 10.1017/S0373463314000265. [DOI] [Google Scholar]
+
+31.Zhou F., Dong D., Li W., Jiang X., Wickert J., Schuh H. GAMP: An open-source software of multi-GNSS precise point positioning using undifferenced and uncombined observations. GPS Solut. 2018;22:33. doi: 10.1007/s10291-018-0699-9. [DOI] [Google Scholar]
+
+32.Su K., Jin S., Ge Y. Rapid displacement determination with a stand-alone multi-GNSS receiver: GPS, Beidou, GLONASS, and Galileo. GPS Solut. 2019;23:54. doi: 10.1007/s10291-019-0840-4. [DOI] [Google Scholar]
+
+33.Gabela J., Retscher G., Goel S., Perakis H., Masiero A., Toth C., Gikas V., Kealy A., Koppányi Z., Błaszczak-Bąk W. Experimental evaluation of a UWB-based cooperative positioning system for pedestrians in GNSS-denied environment. Sensors. 2019;19:5274. doi: 10.3390/s19235274. [DOI] [PMC free article] [PubMed] [Google Scholar]
+
+34.Dardari D., Conti A., Ferner U., Giorgetti A., Win M.Z. Ranging with ultrawide bandwidth signals in multipath environments. Proc. IEEE. 2009;97:404–426. doi: 10.1109/JPROC.2008.2008846. [DOI] [Google Scholar]
+
+35.Kalman R.E. A new approach to linear filtering and prediction problems. J. Basic Eng. Mar. 1960;82:35–45. doi: 10.1115/1.3662552. [DOI] [Google Scholar]
+
+36.Wylie M.P., Holtzman J. The non-line of sight problem in mobile location estimation; Proceedings of the ICUPC-5th International Conference on Universal Personal Communications; Cambridge, MA, USA. 2 October 1996; pp. 827–831. [Google Scholar]
+
+## Associated Data
+
+This section collects any data citations, data availability statements, or supplementary materials included in this article.
+
+## Data Availability Statement
+
+Multidisciplinary Digital Publishing Institute (MDPI)
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+## ACTIONS
+
+ 
+ 
+ 
+ 
+ 
+ View on publisher site
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ PDF (4.3 MB)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Cite
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Collections
+ 
+ 
+ 
+ 
+ 
+ Permalink
+ 
+ 
+
+ 
+ 
+
+## PERMALINK
+
+ 
+ 
+ 
+ 
+ Copy
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+## RESOURCES
+
+ 
+ 
+ 
+
+## 
+ 
+ Similar articles
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+## 
+ 
+ Cited by other articles
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+## 
+ 
+ Links to NCBI Databases
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+## Cite
+
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ Copy
+ 
+ 
+ 
+ 
+ 
+ Download .nbib
+ .nbib
+ 
+ 
+ 
+ 
+
+ Format:
+ 
+ 
+ 
+ AMA
+ 
+ 
+ 
+ APA
+ 
+ 
+ 
+ MLA
+ 
+ 
+ 
+ NLM
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+## Add to Collections
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ Create a new collection
+ 
+ 
+ 
+ Add to an existing collection
+ 
+ 
+
+ 
+ 
+ 
+ Name your collection
+ *
+ 
+ 
+ 
+ 
+ 
+ Choose a collection
+ 
+ 
+ 
+ 
+ Unable to load your collection due to an error
+ Please try again
+ 
+ 
+ 
+
+ 
+ 
+ Add
+ 
+ 
+ Cancel
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Follow NCBI
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI on X (formerly known as Twitter)
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI on Facebook
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI on LinkedIn
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI on GitHub
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI RSS feed
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ Connect with NLM
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NLM on X (formerly known as Twitter)
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ NLM on Facebook
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ NLM on YouTube
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+National Library of Medicine
+ 8600 Rockville Pike Bethesda, MD 20894
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Web Policies
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ FOIA
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ HHS Vulnerability Disclosure
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Help
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Accessibility
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Careers
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ NLM
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ NIH
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ HHS
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ USA.gov
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ Back to Top
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ window.ncbi = window.ncbi || {};
+ window.ncbi.pmc = window.ncbi.pmc || {};
+ window.ncbi.pmc.options = {
+ logLevel: 'INFO',
+ 
+ staticEndpoint: 'https://cdn.ncbi.nlm.nih.gov/pmc/pd-medc-pmc-cloudpmc-viewer/production/674d4f95/var/data/static/',
+ 
+ citeCookieName: 'pmc-cf',
+ };
+
+ 
+
+ 
+  
+ 
+ jQuery.getScript("https://cdn.ncbi.nlm.nih.gov/core/alerts/alerts.js", function () {
+ galert(['div.nav_and_browser', 'div.header', '#universal_header', '.usa-banner', 'body > *:nth-child(1)'])
+ });
+ 
+
+ var exports = {};
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+
+ 
+
+

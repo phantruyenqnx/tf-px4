@@ -1,0 +1,2206 @@
+
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ @media screen and (min-width: 64em) {
+ div.pmc-wm {
+ background: repeat-y;
+ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='350' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter x='-.02' y='0' width='1.05' height='1' id='c'%3E%3CfeFlood flood-color='%23FFF'/%3E%3CfeComposite in='SourceGraphic'/%3E%3C/filter%3E%3Ctext id='b' font-family='Helvetica' font-size='11pt' style='opacity:1;fill:%23005ea2;stroke:none;text-anchor:middle' x='175' y='14'%3E%3C/text%3E%3Cpath id='a' style='fill:%23005ea2' d='M0 8h350v3H0z'/%3E%3C/defs%3E%3Cuse xlink:href='%23a' transform='rotate(90 10 10)'/%3E%3Cuse xlink:href='%23b' transform='rotate(90 10 10)' filter='url(%23c)'/%3E%3C/svg%3E");
+ padding-left: 3rem;
+ }
+ }
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+# 
+ Research on Kinematic and Static Filtering of the ESKF Based on INS/GNSS/UWB - PMC
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ Skip to main content
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ An official website of the United States government
+ 
+ Here's how you know
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ Here's how you know
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+Official websites use .gov
+ 
+ A
+ .gov website belongs to an official
+ government organization in the United States.
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+
+Secure .gov websites use HTTPS
+ 
+ A lock (
+ 
+ 
+ 
+
+# Lock
+ 
+ Locked padlock icon
+ 
+ 
+ 
+) or https:// means you've safely
+ connected to the .gov website. Share sensitive
+ information only on official, secure websites.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ Search
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ Log in
+
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Dashboard
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Publications
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Account settings
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ Log out
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ Search…
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ Search NCBI
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ Primary site navigation
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ Search
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+ Logged in as:
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Dashboard
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Publications
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Account settings
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ Log in
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+Search PMC Full-Text Archive
+
+Search in PMC
+
+ 
+ 
+ 
+ 
+ 
+ Journal List
+ 
+ 
+ 
+ 
+ 
+ 
+ User Guide
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+## PERMALINK
+
+ 
+ 
+ 
+ 
+ Copy
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ As a library, NLM provides access to scientific literature. Inclusion in an NLM database does not imply endorsement of, or agreement with,
+ the contents by NLM or the National Institutes of Health.
+ Learn more:
+ PMC Disclaimer
+ |
+ 
+ PMC Copyright Notice
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+Sensors (Basel). 2023 May 14;23(10):4735. doi: 10.3390/s23104735
+
+Search in PMC
+Search in PubMed
+View in NLM Catalog
+Add to search
+
+## Research on Kinematic and Static Filtering of the ESKF Based on INS/GNSS/UWB
+
+Zongbin Ren
+
+## Zongbin Ren
+
+1Institute of Geospatial Information, Information Engineering University, Zhengzhou 450001, China; rzb13017600350@163.com (Z.R.); daijun502@163.com (J.D.); lvyunzhu11@163.com (Y.L.)
+Find articles by Zongbin Ren
+
+1, Songlin Liu
+
+## Songlin Liu
+
+1Institute of Geospatial Information, Information Engineering University, Zhengzhou 450001, China; rzb13017600350@163.com (Z.R.); daijun502@163.com (J.D.); lvyunzhu11@163.com (Y.L.)
+Find articles by Songlin Liu
+
+1,*, Jun Dai
+
+## Jun Dai
+
+1Institute of Geospatial Information, Information Engineering University, Zhengzhou 450001, China; rzb13017600350@163.com (Z.R.); daijun502@163.com (J.D.); lvyunzhu11@163.com (Y.L.)
+
+2School of Aerospace Engineering, Zhengzhou University of Aeronautics, Zhengzhou 450001, China
+Find articles by Jun Dai
+
+1,2, Yunzhu Lv
+
+## Yunzhu Lv
+
+1Institute of Geospatial Information, Information Engineering University, Zhengzhou 450001, China; rzb13017600350@163.com (Z.R.); daijun502@163.com (J.D.); lvyunzhu11@163.com (Y.L.)
+Find articles by Yunzhu Lv
+
+1, Yun Fan
+
+## Yun Fan
+
+3School of Foreign Studies, Henan Polytechnic University, Jiaozuo 454000, China; fy2635909376@163.com
+Find articles by Yun Fan
+
+3
+
+Editors: Hang Guo, Marcin Uradzinski, You Li, Robert Odolinski
+
+Author information
+Article notes
+Copyright and License information
+
+1Institute of Geospatial Information, Information Engineering University, Zhengzhou 450001, China; rzb13017600350@163.com (Z.R.); daijun502@163.com (J.D.); lvyunzhu11@163.com (Y.L.)
+
+2School of Aerospace Engineering, Zhengzhou University of Aeronautics, Zhengzhou 450001, China
+
+3School of Foreign Studies, Henan Polytechnic University, Jiaozuo 454000, China; fy2635909376@163.com
+
+*
+
+Correspondence: lsl759514@126.com; Tel.: +86-137-0088-4031
+
+## Roles
+
+Hang Guo: Academic Editor
+
+Marcin Uradzinski: Academic Editor
+
+You Li: Academic Editor
+
+Robert Odolinski: Academic Editor
+
+© 2023 by the authors.
+
+https://creativecommons.org/licenses/by/4.0/).
+PMC Copyright notice
+
+PMCID: PMC10222699  PMID: 37430649
+
+## Abstract
+
+Keywords: UGV, multi-source fusion, error-state Kalman filter (ESKF), kinematic filtering, static filtering
+
+## 1. Introduction
+
+1]. With the increasing demand for unmanned, intelligent, and autonomous vehicles in various fields, unmanned ground vehicles (UGVs) with flexibility, low cost, strong adaptability, and other characteristics, are widely used in storage and logistics, search and rescue, detection and excavation, reconnaissance and detonation, and other civilian and military fields [2,3,4]. In outdoor environments, the global navigation satellite system (GNSS) can provide high-accuracy positioning for UGVs [5], but when unmanned vehicles are in urban canyons, or in underground or indoor scenes, the GNSS produces a loss of lock, rejection, and other phenomena, which means that the availability, continuity, and reliability of GNSS signals are not guaranteed.
+
+6]. In the indoor environment of GNSS rejection, many scholars have conducted research on different positioning technologies, such as ultra-wide band (UWB) positioning technology [7], the inertial navigation system (INS) [8], wireless local area network (WLAN) positioning technology [9], radio-frequency identification (RFID) positioning technology [10], and Bluetooth positioning technology [11]. Existing communication means, including WLAN, RFID, and Bluetooth, are unable to achieve accurate indoor positioning because of easy disruption; UWB has attracted a great deal of interest because of its high temporal resolution, high reliability, and good obstacle-penetration capabilities [12]. For example, in seamless indoor and outdoor positioning scenes, the authors of [13] conducted experiments related to multi-sensor fusion positioning. Based on the construction of relevant experimental scenes, experiments were conducted using other sensors, such as IMU, GNSS, and UWB, for seamless positioning indoors and outdoors, and the experimental results showed that UWB and IMU can provide high-accuracy positioning for carriers in indoor scenes with GNSS rejection. The authors of [14] proposed a GNSS/INS/UWB tightly coupled, integrated positioning method. In an indoor scene, the method uses UWB-distance measurements to correct INS errors, and in the transition between outdoor and indoor scenes, the method uses a GNSS/INS/UWB tightly coupled, integrated positioning system to ensure the continuity of positioning accuracy and to further improve system reliability. For UWB positioning technology, which offers high overall positioning accuracy, the complexity of indoor environments, building layouts, internal structures, materials, and human movements can cause multipath effects, non-line-of-sight (NLOS) effects, and interference with electronic equipment signals, causing UWB positioning systems to be less accurate or even impossible to locate. An inertial navigation system (INS) cannot be used for indoor positioning alone over a long time period because of the accumulation of errors caused by gyroscope and accelerometer bias and drift.
+
+15]. In environments where multiple wireless technologies coexist, fused positioning aims to utilize multiple signal-measurement data or multiple positioning algorithms simultaneously to provide better position estimations [16]. This method is currently one of the main solutions for improving the accuracy and robustness of the integral system. Currently, the distributed Kalman filter and federated Kalman filter (FKF) are used for fusion navigation, with several sensors on the same carrier. The former can incorporate navigation data from multiple sensors by means of parallel data-processing capabilities and strong error correction, and the latter builds on the former by adding the principle of information sharing to improve the accuracy and robustness of the integral filter. Zhang et al. proposed a multi-source information-fusion localization algorithm based on joint Kalman filtering, which is fault-tolerant and reduces computational effort compared to centralized Kalman filtering [17]. The authors of [18] proposed an adaptive federated filtering algorithm, which can calculate the information-distribution coefficient by using prior information and adjust the information-distribution coefficient in real time.
+
+19] verified that the errors in the suboptimal estimation results of the FKF were excessively large to meet the high-precision-filtering needs of the actual system.
+
+20] proposed a kind of sequential kinematic- and static-filtering-fusion navigation, which divides the local filter into kinematic Kalman filtering and static Kalman filtering. After the kinematic Kalman filtering of the output of either observation ephemeris based on the dynamics model with the base sensor or the first sensor, the navigation information of the remaining sensors is added in a sequential form to create a static Kalman filter and, finally, a fusion solution of all the navigation information is obtained. Shi Jianxian et al. [21] proposed a combined GPS/BDS/INS navigation algorithm based on kinematic and static filtering. The algorithm combines the dynamics model of a satellite-navigation system and an inertial navigation system for a kinematic filtering solution, after which the static filter designed by the principle of sequential parity is used to further correct the kinematic filtering results and obtain the final state vector. Wang Yidi et al. [22] proposed a combined pulsar/CNS deep-space-survey navigation method based on improved kinematic and static filtering, which used a UKF in the kinematic filtering to process starlight-angular-distance measurements with a fast sampling rate, strong non-linearity in the measurement equation, and an EKF in the static filtering to process pulsar measurements with a slow sampling rate and obvious linearity in the measurement equation. This avoids the problem of the non-optimality of the fusion filter owing to the use of the same equation of state for each local filter.
+
+23] proposed a quadratic attitude-estimation method based on the ESKF, which can avoid covariance matrix singularities and maintain the ability to represent random variable uncertainties. Jun Dai et al. [24] proposed an IMU/GNSS/VO (visual odometry)-based UAV with a robust adaptive-positioning algorithm for use in complex environments, in which a combined ESKF-based navigation model of VO/INS and GNSS/INS was constructed as a local filter of the federated filter to improve the accuracy and robustness of the federated filter in complex environments. The authors of [25] proposed a rigorous attitude-and-position computation algorithm using tightly coupled sensor fusion for multi-antenna, multi-GNSS, and inertial sensor observations, which uses an extended Kalman filter (EKF) and current phase post-processed kinematic (PPK) methods to feed attitude information from multi-antenna GNSS measurements back into the INS, focusing on improving the position- and attitude-measurement accuracy of low-cost UAVs.
+
+Section 2. In Section 3, the kinematic and static filtering of the ESKF based on INS/GNSS/UWB is established. In Section 4, simulation experiments based on the proposed method are reported, and a comparison experiment between the loosely coupled GNSS/INS and the loosely coupled UWB/INS schemes with the same parameter settings is reported, demonstrating the usability of the method proposed in this paper. In Section 5, the generalizability of the proposed algorithm is analyzed by reporting the use of settings with different sensor accuracies. Based on this analysis, the robustness of the filtering was explored by adding the systematic errors of the GNSS and UWB and conducting the simulation experiments in a complex environment. Finally, the conclusions are drawn in Section 6.
+
+## 2. Error-State Kalman Filter
+
+ t_{k} , the nominal-state-prediction process and the error-state-prediction process are carried out simultaneously. The prediction is updated for the current moment using the nominal- and error-state quantities from the previous iteration by means of a recursive equation. Next, the true-state estimate at that moment is obtained by injecting the error-state estimate into the nominal-state estimate. Finally, the velocity and position components of the state error are set to zero, and we proceed to the next iteration.
+
+Figure 1. Similar to the Kalman filter, the ESKF includes state prediction and measurement prediction, in which the state is updated based on the kinematic model of the INS. Unlike the Kalman filter, the measurement predictions are updated based on the errors in the velocity and position of the GNSS compared to the INS and the errors in the velocity and position of the UWB compared to the INS.
+
+## Figure 1.
+
+Open in a new tab
+
+## 2.1. Kinematic Models
+
+ X=[q,v,p,a_{b},ω_{b}]^{T} is used as the state vector of the overall system, where v is the attitude of the UGV, q is the velocity of the UGV, p is the position of the UGV, a_{b} is the accelerometer bias, and ω_{b} is the gyroscope bias. In the ESKF, the real-state vector X_{truth} is formed by the nominal-state vector X and the error-state vector δX , and the equation is as follows:
+
+ X_{truth}=X+δX 
+(1)
+
+ X_{truth}=[q_{truth},v_{truth},p_{truth},a_{b_{truth}},ω_{b_{truth}}]^{T} , δX=[δq,δv,δp,δa_{b},δω_{b}]^{T} , X=[q,v,p,a,ω]^{T} .
+
+ {q˙_{truth}=(1)/(2)q_{truth}⊗(ω_{m}−ω_{b_{truth}}−ω_{n}) ; v˙_{truth}=C_{btruth}^{n}(a_{m}−a_{b_{truth}}−a_{n}) ; p˙_{truth}=v_{truth} ; a˙_{b_{truth}}=a_{ω} ; ω˙_{b_{truth}}=ω_{ω} 
+(2)
+
+ a_{n} and ω_{n} represent acceleration and angular velocity measurements and white noise, respectively. The a_{ω} and ω_{ω} represent acceleration bias and angular velocity bias, respectively. C_{btruth}^{n} represents the rotation matrix of the real state, which in the INS system is the coordinate-transformation matrix from the carrier coordinate system b to the navigation coordinate system n . ⊗ represents the quaternion multiplication operation and the extraction of the vector part of the result. The nominal-state IMU-dynamics model is presented as Equation (3):
+
+ {q˙=(1)/(2)q⊗(ω_{m}−ω_{b}) ; v˙=C_{b}^{n}(a_{m}−a_{b}) ; p˙=v ; a˙_{b}=0 ; ω˙_{b}=0 
+(3)
+
+ C_{b}^{n} represents the rotation matrix of the nominal state. The error-state dynamics model of the IMU is obtained from the above equation, as shown in Equation (4):
+
+ {δθ˙=[ω_{m}−ω_{b}]_{×}δθ−δω_{b}−ω_{n} ; δv˙=−C_{b}^{n}[a_{m}−a_{b}]_{×}δθ−C_{b}^{n}δa_{b}−Ra_{n} ; δp˙=δv ; δa˙_{b}=a_{ω} ; δω˙_{b}=ω_{ω} 
+(4)
+
+ [a]_{×} represents the antisymmetric matrix of vector a .
+
+ t_{k} is obtained, as shown in Equation (5):
+
+ {q_{k+1}=q_{k}⊗q_{k}[(ω_{mk}−ω_{bk})Δt] ; v_{k+1}=v_{k}+C_{bk}^{n}[a_{mk}−a_{bk}]Δt ; p_{k+1}=p_{k}+v_{k}Δt+(1)/(2)[C_{bk}^{n}(a_{mk}−a_{bk})]Δt^{2} ; a_{b(k+1)}=a_{bk} ; ω_{b(k+1)}=ω_{bk} 
+(5)
+
+ Δt represents the sampling interval of the IMU. The error-state dynamics model of the IMU at moment t_{k} is derived as shown in Equation (6):
+
+ {δθ_{k+1}=C_{bk}^{nT}[(ω_{mk}−ω_{bk})Δt]δθ_{k}−δω_{bk}Δt−w_{θk} ; δv_{k+1}=δv_{k}−C_{bk}^{n}[a_{mk}−a_{bk}]_{×}δθΔt−R_{k}δa_{bk}Δt−w_{vk} ; δp_{k+1}=δp_{k}+δv_{k}Δt ; δa_{b(k+1)}=δa_{bk}+w_{ak} ; δω_{b(k+1)}=δω_{bk}+w_{ωk} 
+(6)
+
+ w_{θk} represents the Gaussian random pulse noise at attitude. The w_{vk} represents the Gaussian random pulse noise at velocity. The w_{ak} represents the Gaussian random pulse noise at acceleration bias. The w_{ωk} represents the Gaussian random pulse noise at angular velocity bias. Their covariance is defined by Equation (7):
+
+ {w_{θ}=σ_{a_{n}}^{2}Δt^{2}I ; w_{v}=σ_{ω_{n}}^{2}Δt^{2}I ; w_{a}=σ_{a_{ω}}^{2}Δt^{2}I ; w_{ω}=σ_{ω_{ω}}^{2}Δt^{2}I 
+(7)
+
+ σ_{a_{n}}^{2} and σ_{ω_{n}}^{2} represent the standard deviation of Gaussian white noise for acceleration and angular velocity, respectively. The σ_{a_{ω}}^{2} and σ_{ω_{ω}}^{2} represent the standard deviation of Gaussian white noise for acceleration bias and angular velocity bias. The I represents the unit matrix of 3 × 3.
+
+## 2.2. ESKF State-Prediction Model
+
+ x_{k}=[q_{k},v_{k},p_{k},a_{k},ω_{k}]^{T} , the error-state vector as δx_{k}=[δq_{k},δv_{k},δp_{k},δa_{bk},δω_{bk}]^{T} , the IMU acceleration and angular velocity noise-measurement vector as u_{mk}=[a_{mk},ω_{mk}]^{T} , and the IMU attitude, velocity, and acceleration zero-bias and angular velocity zero-bias noise vectors as w_{k}=[w_{θk},w_{vk},w_{ak},w_{ωk}]^{T} . Bringing the vectors defined above into Equation (5), the recursive formula for the nominal-state vector at moment a is denoted by Equation (8):
+
+ x_{k+1}=f(x_{k},u_{mk}) 
+(8)
+
+ f(⋅) represents the recursive function of the nominal-state vector. Combining Equation (6) and linearizing it according to Taylor’s formula, the recursive formula for the error-state vector at moment t_{k+1} is derived as follows:
+
+ δx_{k+1}, =f_{δ}(x_{k},δx_{k},u_{mk},w_{k}) ; , =(I+F_{x_{k}}Δt)δx_{k}+G_{w_{k}}Δtw_{k} ; , =Φ_{k+1,k}δx_{k}+Γ_{k+1,k}w_{k} 
+(9)
+
+ f_{δ}(⋅) represents the recursive function of the error-state vector. The F_{x_{k}} and G_{w_{k}} represent the Jacobi matrices corresponding to the error-state vector and the noise-state vector, respectively. The Φ_{k+1,k} is the state-transfer matrix from moment t_{k} to moment t_{k+1} .
+
+ Γ_{k+1,k} is the noise-transfer matrix from moment t_{k} to moment t_{k+1} . The specific expressions of F_{x_{k}} and G_{w_{k}} are as shown in Equation (10).
+
+ F_{x_{k}}=[C_{b}^{n}[ω_{mk}−ω_{bk}]_{×}, 0_{3×3}, 0_{3×3}, 0_{3×3}, −I_{3×3} ; −C_{b}^{n}[a_{mk}−a_{bk}]_{×}, I_{3×3}, −C_{b}^{n}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, I_{3×3}, I_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, 0_{3×3}, I_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3}, I_{3×3}], ; G_{w_{k}}=[−I_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, −I_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, I_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, 0_{3×3}, I_{3×3}] 
+(10)
+
+ Σ_{x_{k+1}} of error-state vector δx_{k+1} at moment t_{k+1} is derived as shown in Equation (11):
+
+ Σ_{x_{k+1}}=Φ_{k+1,k}Σ_{x_{k}}Φ_{k+1,k}^{T}+Γ_{k+1,k}Q_{w}Γ_{k+1,k}^{T} 
+(11)
+
+ Σ_{x_{k}} represents the covariance matrix of error-state vector δx_{k} at moment t_{k} . The Q_{w} represents the state-noise matrix, which is represented as follows:
+
+ Q_{w}=[w_{θk}, 0_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, w_{vk}, 0_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, 0_{3×3}, w_{ak}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3}, w_{ωk}] 
+(12)
+
+## 2.3. ESKF Measurement-Prediction Model
+
+ L_{k}^{GNSS}=[v_{INS}−v_{GNSS} ; p_{INS}−p_{GNSS}]=H_{k}^{GNSS}x_{k}+v_{k}^{GNSS} 
+(13)
+
+ L_{k}^{GNSS} represents the observation vector of the GNSS/INS-based ESKF. The v_{INS} and v_{GNSS} represent velocity measurements obtained from the INS and GNSS, respectively. The p_{INS} and p_{GNSS} represent position measurements obtained from the INS and GNSS, respectively. The H_{k}^{GNSS}=[0_{3×3}, I_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, I_{3×3}, 0_{3×3}, 0_{3×3}] represents the observation-design matrix of the GNSS/INS-based ESKF. The v_{k}^{GNSS}=[n_{v}^{GNSS}, n_{p}^{GNSS}]^{T} represents the random-measurement-noise matrix of the GNSS/INS-based ESKF. The n_{v}^{GNSS} and n_{p}^{GNSS} are velocity-observation noise and position-observation noise, respectively, both of which are Gaussian white noise.
+
+ L_{k}^{UWB}=[v_{INS}−v_{UWB} ; p_{INS}−p_{UWB}]=H_{k}^{UWB}x_{k}+v_{k}^{UWB} 
+(14)
+
+ L_{k}^{UWB} represents the observation vector of the UWB/INS-based ESKF. The v_{UWB} represents velocity measurements obtained from the UWB. The p_{UWB} represents position measurements obtained from the UWB. The H_{k}^{UWB}=[0_{3×3}, I_{3×3}, 0_{3×3}, 0_{3×3}, 0_{3×3} ; 0_{3×3}, 0_{3×3}, I_{3×3}, 0_{3×3}, 0_{3×3}] represents the observation-design matrix of the UWB/INS-based ESKF. The v_{k}^{UWB}=[n_{v}^{UWB}, n_{p}^{UWB}]^{T} represents the random-measurement-noise matrix of the UWB/INS-based ESKF. The n_{v}^{UWB} and n_{p}^{UWB} are velocity-observation noise and position-observation noise, respectively, both of which are Gaussian white noise.
+
+ t_{k+1} is obtained as shown in Equation (15):
+
+ {V_{k+1}^{GNSS}=H_{k}^{GNSS}δx_{k+1}−L_{k+1}^{GNSS} ; Σ_{V_{k+1}^{GNSS}}=H_{k}^{GNSS}Σ_{x_{k+1}}H_{k}^{GNSS}^{T}+Σ_{k+1} ; K_{k+1}^{GNSS}=Φ_{k+1,k}H_{k}^{GNSS}Σ_{V_{k+1}^{GNSS}}^{−1} ; δx^_{k+1}=δx_{k+1}−K_{k+1}^{GNSS}V_{k+1}^{GNSS} ; Σ_{δx^_{k+1}}=(I−K_{k+1}^{GNSS}H_{k}^{GNSS})Σ_{X¯_{k−1}}(I−H_{k}^{GNSS}^{T}K_{k+1}^{GNSS}^{T})+K_{k+1}^{GNSS}Σ_{k+1}K_{k+1}^{GNSS}^{T} 
+(15)
+
+ V_{k+1}^{GNSS} represents the innovation vector of the GNSS/INS-based ESFK. The Σ_{V_{k+1}^{GNSS}} represents the covariance matrix of the innovation vector. The K_{k+1}^{GNSS} represents the Kalman Gain. The δx^_{k+1} represents the estimated error-state vector at moment t_{k+1} . The Σ_{δx^_{k+1}} represents the covariance matrix of δx^_{k+1} . Similarly, the updated equation of the observation model of UWB/INS-based ESKF at moment t_{k+1} is obtained.
+
+## 2.4. ESKF Error-State-Vector Injection and Zeroing
+
+ x^_{k+1}=x_{k+1}+δx^_{k+1} 
+(16)
+
+ x^_{k+1} represents the estimated truth-state vector at moment t_{k+1} . The x_{k+1} represents the estimated nominal-state vector at moment t_{k+1} . Based on Equation (16), the components are represented in Equation (17).
+
+ {q^_{k+1}=q_{k+1}⊗qδθ^_{k+1} ; v^_{k+1}=v_{k+1}+δv^_{k+1} ; p^_{k+1}=v_{k+1}+δp^_{k+1} ; a^_{b_{k+1}}=a_{b_{k+1}}+δa^_{b_{k+1}} ; ω^_{b_{k+1}}=ω_{b_{k+1}}+δω^_{b_{k+1}} 
+(17)
+
+ δx^_{k+1}^{0}=δx^_{k+1}+Gδx^_{k+1} 
+(18)
+
+ G=[0_{3×3}, −I_{6×6}, 0_{6×6}] represents the zeroing matrix.
+
+## 3. Kinematic and Static Filtering of the ESKF Based on INS/GNSS/UWB
+
+Figure 2. The integral filter is mainly divided into the kinematic ESKF and static ESKF. First, the IMU navigation data in the INS are used as the model of the kinematic ESKF. The position and velocity errors of the INS and GNSS were used as the observation equations of the kinematic ESKF. Subsequently, the kinematic ESKF solution is calculated to obtain the filtered solution of the kinematic ESKF with its covariance. Since the kinematic ESKF filter results in an error-state vector, the kinematic ESKF filter solution needs to be injected into the nominal-state vector. In addition, the velocity and position components of the error-state vector of the kinematic ESKF need to be set to zero. On this basis, the zeroed error-state vector and the covariance of the kinematic ESKF’s estimated state quantity are passed to the static ESKF in a sequential form as the initial value of the static ESKF. The position and velocity errors of the INS and GNSS are used as the observation equations of the static ESKF, and the static ESKF is solved. The error-state vector of the filtered solution of the static ESKF is then injected into the nominal-state vector of the INS to obtain the true-state vector of the INS after the static ESKF after zeroing the velocity and position components of the error-state vector. Finally, the truth-state quantities obtained from the last static ESKF are output as a result of the navigation of the entire system.
+
+## Figure 2.
+
+Open in a new tab
+
+## 3.1. Kinematic ESKF Process
+
+ t_{k+1} can be obtained as shown in Equation (19):
+
+ δx^_{k+1}=δx_{k+1}−K_{k+1}^{GNSS}V_{k+1}^{GNSS} 
+(19)
+
+ K_{k+1}^{GNSS} represents the Kalman gain of the kinematic ESKF, as represented by Equation (20).
+
+ K_{k+1}^{GNSS}=Φ_{k+1,k}H_{k}^{GNSS}(H_{k}^{GNSS}Σ_{x_{k+1}}H_{k}^{GNSS}^{T}+Σ_{k+1})^{−1} 
+(20)
+
+ Σ_{δx^_{k+1}} represents the covariance matrix of δx^_{k+1} , as shown in Equation (21):
+
+ Σ_{δx^_{k+1}}=(I−K_{k+1}^{GNSS}H_{k}^{GNSS})Σ_{X¯_{k−1}}(I−H_{k}^{GNSS}^{T}K_{k+1}^{GNSS}^{T})+K_{k+1}^{GNSS}Σ_{k+1}K_{k+1}^{GNSS}^{T} 
+(21)
+
+ δx^_{k+1} is injected into the nominal state vector x_{k+1} of the INS, the INS truth-state vector x^_{k+1} and the error-state vector δx^_{k+1}^{0} after setting to zero are obtained.
+
+## 3.2. Static ESKF Process
+
+ t_{k} , the kinematic ESKF filter solution is used to obtain the error-state vector δx^_{k+1}^{0} and the covariance matrix Σ_{X^_{1k}} of the error-state vector after zeroing as the static ESKF state vector x_{k+1} and its covariance matrix Σ_{x_{k+1}} . At this point, the state equation of the static ESKF is shown in Equation (22).
+
+ δx_{k+1}=δx^_{1(k+1)}^{0} ; Σ_{x_{k+1}}=Σ_{x^_{1(k+1)}} 
+(22)
+
+ x^_{1(k+1)} from the kinematic ESKF filter solution and the position and velocity data from the UWB observation is used as the observation equation. Equations (9), (14) and (15) are used to obtain the static ESKF filter solution based on the UWB/INS, as shown in Equation (23):
+
+ δx^_{2(k+1)}=δx_{2(k+1)}−K_{2(k+1)}^{UWB}V_{2(k+1)}^{UWB} 
+(23)
+
+ K_{2(k+1)}^{UWB} represents the Kalman gain of the static ESKF, as shown in Equation (24).
+
+ K_{2(k+1)}^{UWB}=Φ_{k+1,k}H_{2k}^{UWB}(H_{2k}^{UWB}Σ_{x^_{1(k+1)}}H_{k}^{UWB}^{T}+Σ_{2(k+1)})^{−1} 
+(24)
+
+ Σ_{δx^_{2(k+1)}} represents the covariance matrix of δx^_{2(k+1)} , as shown in Equation (25).
+
+ Σ_{δx^_{2(k+1)}}=(I−K_{2(k+1)}^{UWB}H_{k}^{UWB})Σ_{x^_{1(k+1)}}(I−H_{k}^{UWB}^{T}K_{2(k+1)}^{UWB}^{T})+K_{2(k+1)}^{UWB}Σ_{2(k+1)}K_{2(k+1)}^{UWB}^{T} 
+(25)
+
+ δx^_{2(k+1)} into the nominal-state vector x_{2(k+1)} , the actual state vector x^_{2(k+1)} is obtained. The x^_{2(k+1)} is output as a navigation solution for the integral system. In addition, the error-state vector δx^_{2(k+1)} of the static ESKF needs to be zeroed, according to Equation (18).
+
+## 4. Simulation-Experiment Verification
+
+## 4.1. Coordinate- and Trajectory-Simulation Settings
+
+ xyz coordinate data measured by the UWB with respect to the local coordinate system into the coordinate data of the navigation-coordinate system ( n system), which is denoted by o_{n}x_{n}y_{n}z_{n} . As the navigation -coordinate system was the reference coordinate system, the “East–North–Sky” geographic coordinate system (g system) was selected as the navigation reference coordinate system, represented by o_{g}x_{g}y_{g}z_{g} , where the origin was defined as the center of gravity of the UGV, the o_{g}x_{g} axis denoted the geographic east, the o_{g}y_{g} axis denoted the geographic north, and the o_{g}z_{g} axis denoted the sky perpendicular to the local rotating ellipsoid, and the three axes formed a right-handed coordinate system. In addition, the coordinates of the UGV under the g system were expressed in terms of longitude λ , latitude L , and ellipsoidal altitude h . The DW3000 was used as the base station for the UWB simulation and received the signals from the tags mounted on the carrier. The tag information received by the base station was used to locate the tag using the TDOA (time difference of arrival) algorithm. The specific location of the base station is shown in Figure 3, with the red circle representing the UWB base station.
+
+## Figure 3.
+
+Open in a new tab
+
+ 113^{∘}58^{′}E , 34^{∘}81^{′}N , the initial attitude (yaw, roll and pitch) was [0^{∘};0^{∘};0^{∘}] , and the initial speed was [0m/s;0m/s;0m/s] . The UGV ran for a total of 108 s. It first accelerated for 5 s at 1m/s^{2} and then moved north for 10 s at a constant speed of 5m/s . Next, it turned 90° to the east and continued to run at a constant speed for 20 s. After turning 90° to the south and running at a constant speed for 10 s, it continued to turn 90° to the east and ran at a constant speed for 20 s. Finally, after turning 90° to the north and decelerating at −1m/s^{2} for 5 s, the UGV stopped. The true simulation trajectory is shown in Figure 3.
+
+## 4.2. Sensor-Simulation-Parameter Setting
+
+ [0.01^{∘}/h;0.015^{∘}/h;0.02^{∘}/h] , the accelerometer bias was [80μg;90μg;90μg] , the angular random-wander error was 0.001^{o}/sqrt(h) , the velocity random-wander error was 1μg/sqrt(Hz) , and the sampling frequency was 100Hz . The velocity-system error of the GNSS was 0.5m/s , the position-system error was [1m;1m;1m] , and the sampling frequency was 1Hz . The velocity-system error of the UWB was 0.5m/s , the position-system error was [0.8m;0.8m;0.8m] , and the sampling frequency was 1Hz . The sensor parameters of the UGV were set as shown in Table 1.
+
+## Table 1.
+
+Sensor Type
+Parameter
+Value
+
+IMU
+Gyro error
+bias
+
+ [0.01^{∘}/h;0.015^{∘}/h;0.02^{∘}/h] 
+
+random walk
+
+ 0.001^{o}/sqrt(h) 
+
+Accelerometer error
+bias
+
+ [80μg;90μg;90μg] 
+
+random walk
+
+ 1μg/sqrt(Hz) 
+
+Frequency
+
+ 100Hz 
+
+GNSS
+Location
+
+ [1m;1m;1m] 
+
+Speed
+
+ 0.5m/s 
+
+Frequency
+
+ 1Hz 
+
+UWB
+Location
+
+ [0.8m;0.8m;0.8m] 
+
+Speed
+
+ 0.4m/s 
+
+Frequency
+
+ 1Hz 
+
+Open in a new tab
+
+## 4.3. Simulation Results and Analysis
+
+ v_{k}^{GNSS} of the kinematic filter was set to [0.5m/s;0.5m/s;0.5m/s;1m;1m;1m]^{T} and the measurement noise v_{k}^{UWB} of the static filter was set to [0.4m/s;0.4m/s;0.4m/s;0.8m;0.8m;0.8m]^{T} . The simulation experiments related to the kinematic and static filtering of the ESKF based on INS/GNSS/UWB were carried out, and the simulation results of the specific filtered velocity error and position error are shown in Figure 4 and Figure 5.
+
+## Figure 4.
+
+Open in a new tab
+
+## Figure 5.
+
+Open in a new tab
+
+Figure 4, the blue line represents the curve of the velocity error with time in the east direction during the filter process, the red line represents the curve of the velocity error with time in the north direction during the filter process, and the yellow line represents the curve of the velocity error with time in the sky direction during the filter process. All the units are in m/s.
+
+Figure 5, the blue line represents the curve of the eastward position error with time during the filter process, the red line represents the curve of the northward position error with time during the filter process, and the yellow line represents the curve of the skyward position error with time during the filter process. All of these measurements are in m.
+
+Table 1; the observation error of the loosely coupled GNSS/INS was [0.5m/s;0.5m/s;0.5m/s;1m;1m;1m]^{T} , and the observation error of loosely coupled was UWB/INS [0.4m/s;0.4m/s;0.4m/s;0.8m;0.8m;0.8m]^{T} . The simulation-trajectory-comparison results obtained following the simulation-comparison experiments are shown in Figure 6.
+
+## Figure 6.
+
+Open in a new tab
+
+Figure 6 is the starting point of the UGV trajectory. In the figure, the black trajectory represents the real simulation trajectory, the blue dotted line represents the loosely coupled GNSS/INS simulation trajectory, the green dotted line represents the GNSS simulation trajectory, the purple dotted line represents the loosely coupled UWB/INS simulation trajectory, the blue dashed line represents the UWB simulation trajectory, and the red dashed line represents the trajectory of the kinematic and static filter simulation proposed in this paper.
+
+Figure 6, in the straight-line operation phase, the simulation trajectory of the filter proposed in this paper was closer to the real trajectory than the simulation trajectory of the loosely coupled GNSS/INS scheme and the simulation trajectory of the loosely coupled UWB/INS scheme, as shown in the enlarged area on the left in the example diagram. The simulated trajectory of the method proposed in this paper also had a constraining effect on the error in the simulated trajectory of the two compared solutions during the turning-maneuver phase of the carrier. An example is given in the enlarged area on the right in the figure.
+
+Figure 7, Figure 8 and Figure 9. In the figures, the green line represents the errors in the attitude, velocity, and position versus time in the loosely coupled scheme GNSS/INS; the blue line represents the errors in the attitude, velocity, and position versus time in the loosely coupled UWB/INS scheme. The red line represents the errors in the attitude, velocity, and position versus time in the kinematic and static filtering of the ESKF based on the INS/GNSS/UWB proposed in this paper.
+
+## Figure 7.
+
+Open in a new tab
+
+## Figure 8.
+
+Open in a new tab
+
+## Figure 9.
+
+Open in a new tab
+
+Figure 7, there were no significant differences between the errors in the yaw, roll, and pitch between the three schemes; the errors in the yaw and pitch angle both decreased with time, while the errors in the roll angle gradually increased with time, mainly because of the lack of feedback correction in the INS attitude data from both the kinematic ESKF and the static ESKF. Furthermore, the error curves for the yaw and roll angle both jittered around 20, 45, 60, and 90 s, which was mainly due to the carriers performing turning maneuvers at these times.
+
+Figure 8, compared with the other two schemes, the absolute values of the velocity errors in the east–east, north, and sky directions of the schemes proposed in this paper were significantly reduced during the acceleration and steady phases from 0 to 20 s. After 20 s, the absolute values of the velocity errors all decreased slightly. The main reason for this was that all three schemes converged at around 20 s in the filter. Before this convergence, the difference between the three velocity errors was large because of the unstable filter. After the convergence, as the filter gradually stabilized and there was no coarse difference interference, the difference in velocity error between the three schemes was smaller.
+
+Figure 9, the absolute values of the position errors in the longitude (east), latitude (north), and ellipsoidal altitude (down) of the proposed scheme in this paper were smaller than those in the other two schemes. However, since the fusion filter proposed in this paper fused the two ESKFs in a sequential form, the trend of its position-error-variation curve with time was similar to that of the kinematic ESKF (the ESKF based on the GNSS/INS). Therefore, in the construction of the overall kinematic and static filters based on the ESKF, the selection of the sensors in the kinematic ESKF largely affected the navigation accuracy of the overall filter. Therefore, the sensors in the kinematic ESKF should be selected to be more accurate and robust to correct the INS measurement data, thus improving the accuracy and robustness of the overall filter. Comparisons of the root mean square error (RMSE) and mean absolute error (MAE) of the attitude, position, and velocity of the three scenes are shown in Table 2 and Table 3.
+
+## Table 2.
+
+RMSE
+Pitch(″)
+Yaw(″)
+Roll (′)
+VX(m/s)
+VY(m/s)
+VZ(m/s)
+X(m)
+Y(m)
+Z(m)
+
+Loosely coupled GNSS/INS
+5.72
+6.63
+0.19
+0.08
+0.07
+0.06
+0.71
+0.54
+0.45
+
+Loosely coupled UWB/INS
+5.70
+6.56
+0.19
+0.05
+0.05
+0.07
+0.41
+0.56
+0.70
+
+Kinematic and static filtering of ESKF based on INS/GNSS/UWB
+5.73
+6.62
+0.19
+0.05
+0.04
+0.07
+0.40
+0.46
+0.51
+
+Open in a new tab
+
+## Table 3.
+
+MAE
+Pitch(″)
+Yaw(″)
+Roll (′)
+VX(m/s)
+VY(m/s)
+VZ(m/s)
+X(m)
+Y(m)
+Z(m)
+
+Loosely coupled GNSS/INS
+5.70 
+6.62 
+0.19 
+0.04 
+0.05 
+0.04 
+0.59 
+0.42 
+0.38 
+
+Loosely coupled UWB/INS
+5.68 
+6.55 
+0.19 
+0.04 
+0.03 
+0.05 
+0.34 
+0.47 
+0.63 
+
+Kinematic and static filtering of ESKF based on INS/GNSS/UWB
+5.71 
+6.60 
+0.19 
+0.03 
+0.03 
+0.05 
+0.32 
+0.36 
+0.38 
+
+Open in a new tab
+
+Table 3, the overall RMSE of the attitude in the proposed kinematic and static filter of the ESKF based on the INS/GNSS/UWB was closer to that of the loosely coupled GNSS/INS and the loosely coupled UWB/INS; the overall RMSE of the velocity was reduced by 24.12% compared to the loosely coupled GNSS/INS and by 8.62% compared to the loosely coupled UWB/INS; the overall RMSE of the position was reduced by 19.84% compared to the loosely coupled GNSS/INS and by 17.44% compared to the loosely coupled UWB/INS. The overall RMSE of the position was reduced by 19.84% compared to the loosely coupled GNSS/INS and by 17.44% compared to the loosely coupled UWB/INS.
+
+Table 4, compared to the loosely coupled GNSS/INS, the overall MAE of the velocity was reduced by 15.99%, and the overall MAE of the position was reduced by 23.70% in the kinematic and static filtering of the ESKF based on the INS/GNSS/UWB proposed in this paper. Compared with the loosely coupled UWB/INS, the overall MAE of the velocity was reduced by 12.46%, and the overall MAE of the position was reduced by 27.33%. The simulation results demonstrated that the method proposed in this paper can reduce the accumulation of errors caused by the integration of the INS and effectively improve the accuracy of the multi-source fusion navigation system based on kinematic and static filtering.
+
+## Table 4.
+
+Sensor Type
+Parameter
+Value
+
+Scene 1
+Scene 2
+Scene 3
+Scene 4
+
+IMU
+Gyro error
+bias
+
+ 0.02^{∘}/h 
+
+ 0.02^{∘}/h 
+
+ 0.2^{∘}/h 
+
+ 0.2^{∘}/h 
+
+random walk
+
+ 0.001^{o}/sqrt(h) 
+
+ 0.001^{o}/sqrt(h) 
+
+ 0.08^{o}/sqrt(h) 
+
+ 0.08^{o}/sqrt(h) 
+
+Accelerometer error
+bias
+
+ 90μg 
+
+ 90μg 
+
+ 100μg 
+
+ 100μg 
+
+random walk
+
+ 1μg/sqrt(Hz) 
+
+ 1μg/sqrt(Hz) 
+
+ 20μg/sqrt(Hz) 
+
+ 20μg/sqrt(Hz) 
+
+Frequency
+
+ 100Hz 
+
+ 100Hz 
+
+ 100Hz 
+
+ 100Hz 
+
+GNSS
+Location
+
+ 0.2m 
+
+ 1m 
+
+ 0.2m 
+
+ 1m 
+
+Speed
+
+ 0.1m/s 
+
+ 0.5m/s 
+
+ 0.1m/s 
+
+ 0.5m/s 
+
+Frequency
+
+ 1Hz 
+
+ 1Hz 
+
+ 1Hz 
+
+ 1Hz 
+
+UWB
+Location
+
+ 0.8m 
+
+ 0.2m 
+
+ 0.2m 
+
+ 0.8m 
+
+Speed
+
+ 0.4m/s 
+
+ 0.1m/s 
+
+ 0.1m/s 
+
+ 0.4m/s 
+
+Frequency
+
+ 1Hz 
+
+ 1Hz 
+
+ 1Hz 
+
+ 1Hz 
+
+Open in a new tab
+
+## 5. Comparative Experiments and Analysis
+
+## 5.1. Experimental Analysis of Sensor-Accuracy Comparisons
+
+Table 4. In Scene 1, the UGV was equipped with a high-accuracy IMU, a high-accuracy GNSS (RTK-corrected GNSS), and a low-accuracy UWB. The measurement noise of the kinematic filter was set to [0.1m/s;0.1m/s;0.1m/s;0.2m;0.2m;0.2m]^{T} and the measurement noise of the static filter was set to [0.4m/s;0.4m/s;0.4m/s;0.8m;0.8m;0.8m]^{T} . In Scene 2, the UGV was equipped with a high-accuracy IMU, a low-accuracy GNSS, and a high-accuracy UWB. The measurement noise of the kinematic filter was set to [0.5m/s;0.5m/s;0.5m/s;1m;1m;1m]^{T} and the measurement noise of the static filter was set to [0.1m/s;0.1m/s;0.1m/s;0.2m;0.2m;0.2m]^{T} . In Scene 3, the UGV was equipped with a high-accuracy IMU, a low-accuracy GNSS, and a high-accuracy UWB. The measurement noise of the kinematic filter was set to [0.1m/s;0.1m/s;0.1m/s;0.2m;0.2m;0.2m]^{T} and the measurement noise of the static filter was set to [0.1m/s;0.1m/s;0.1m/s;0.2m;0.2m;0.2m]^{T} . In Scene 4, the UGV was equipped with a low-accuracy IMU, a low-accuracy GNSS, and a low-accuracy UWB. The measurement noise of the kinematic filter was set to [0.5m/s;0.5m/s;0.5m/s;1m;1m;1m]^{T} and the measurement noise of the static filter was set to [0.4m/s;0.4m/s;0.4m/s;0.8m;0.8m;0.8m]^{T} .
+
+Figure 10, the kinematic and static filtering of the ESKF based on INS/GNSS/UWB proposed in this paper had good localization results in all four scenes, with different sensor accuracies. Because of the IMU, GNSS, and UWB on board the UGV in Scene 4 had the lowest accuracy, the UGV had a poorer localization effect in this scene than in the other three scenes. In the zoomed-in area of the straight-line running, the simulated trajectory of Scene 2 was closer to the real trajectory than those of Scene 1 and Scene 3, but the trajectory was not as smooth as the trajectory of the other two scenes. In the zoomed-in area for the turn run, the trajectory of Scene 3 was closer to the real value than the other three scenes, and the trajectories of Scene 1 and Scene 3 were relatively smooth compared to the other two scenes. The RMSE and MAE values for the four scenes are shown in Table 5 and Table 6.
+
+## Figure 10.
+
+Open in a new tab
+
+## Table 5.
+
+RMSE
+Pitch(″)
+Yaw(″)
+Roll (′)
+VX(m/s)
+VY(m/s)
+VZ(m/s)
+X(m)
+Y(m)
+Z(m)
+
+Scene 1
+4.62 
+7.60 
+0.18 
+0.03 
+0.03 
+0.03 
+0.12 
+0.16 
+0.19 
+
+Scene 2
+4.71 
+6.37 
+0.18 
+0.04 
+0.05 
+0.06 
+0.26 
+0.23 
+0.23 
+
+Scene 3
+13.25 
+36.12 
+0.36 
+0.04 
+0.04 
+0.02 
+0.17 
+0.15 
+0.11 
+
+Scene 4
+12.35 
+30.93 
+0.50 
+0.11 
+0.14 
+0.10 
+1.09 
+0.83 
+0.73 
+
+Open in a new tab
+
+## Table 6.
+
+MAE
+Pitch(″)
+Yaw(″)
+Roll (′)
+VX(m/s)
+VY(m/s)
+VZ(m/s)
+X(m)
+Y(m)
+Z(m)
+
+Scene 1
+4.59 
+7.53 
+0.18 
+0.02 
+0.02 
+0.02 
+0.10 
+0.13 
+0.16 
+
+Scene 2
+4.69 
+6.33 
+0.18 
+0.02 
+0.03 
+0.03 
+0.21 
+0.19 
+0.18 
+
+Scene 3
+10.29 
+34.86 
+0.27 
+0.02 
+0.02 
+0.01 
+0.13 
+0.12 
+0.09 
+
+Scene 4
+9.89 
+24.18 
+0.42 
+0.09 
+0.10 
+0.07 
+0.95 
+0.66 
+0.54 
+
+Open in a new tab
+
+Table 5 and Table 6, a comparison of the RMSE and MAE for Scene 1 and Scene 2 shows that the overall reduction in the attitude error for Scene 2 compared to Scene 1 was 9.19%, the overall reduction in the velocity RMSE for Scene 1 compared to Scene 2 was 40%, and the overall reduction in the position RMSE was 34.72%. The overall reduction in the pose error for Scene 2 was 8.94% compared to the overall reduction in the pose RMS error for Scene 1, the overall reduction in the velocity RMS error for Scene 1 compared to Scene 2 was 25%, and the overall reduction in the position RMS error was 32.76%. It can be deduced that compared to static filtering, the sensor accuracy of the dynamic filtering had a greater impact on the overall filtering accuracy. Because the algorithm proposed in this paper was used for sequential filtering, in the filtering design, the sensor with higher accuracy should enter into the overall filtering process first, as dynamic filtering.
+
+Table 5 and Table 6, we learned that in the dynamic and static filtering based on the ESKF, the higher-accuracy GNSS (RKT corrected GNSS) and UWB had a better effect on the correction of the velocity and position of the low-accuracy IMU, and the overall positioning accuracy of the filter was higher than the positioning accuracy of the GNSS and UWB alone. However, as only the velocity and position information of the GNSS and UWB were used to correct the IMU during the observation of the dynamic and static filtering, which made its attitude errors accumulate gradually, the next step in the process was to equip the UGV with a dual-antenna GNSS, so that the GNSS could measure the heading (yaw) and course angle of the UGV, and then correct the attitude information of the IMU through the attitude angle obtained from the GNSS measurement. According to the analysis of the errors in Scene 4, we learned that the UGV can still show a relatively good positioning effect when equipped with a low-precision IMU, GNSS, and UWB. Based on this observation, 10 Monte Carlo experiments were conducted in the four scenarios, and the experimental results are shown in Figure 11.
+
+## Figure 11.
+
+Open in a new tab
+
+## 5.2. Analysis of Complex-Environment-Simulation Experiments
+
+Section 5.1 as the experimental conditions and set up two environments with errors and three filtering-solution schemes. In Environment 1, from 10 s to 40 s, there was a non-line-of-sight situation for the UWB and occlusion between the tag and the base station, leading to a reduction in its positioning accuracy, which developed as follows. In the simulation scenario, the systematic error of the UWB was 20 times the initial error (taking 20 times as an example), the velocity’s systematic error was R^{′}_{V_{UWB}}=20R_{V_{UWB}}=2m/s , and the position’s systematic error was R^{′}_{P_{UWB}}=20R_{P_{UWB}}=4m . In Environment 2, from 66 s to 108 s, the GNSS was rejected and the receiver was located in the indoor scenario, resulting in a systematic error of the GNSS that was 20 times the initial error; the velocity’s systematic error was R^{′}_{V_{GNSS}}=20R_{V_{GNSS}}=2m/s and the position’s systematic error was R^{′}_{P_{GNSS}}=20R_{P_{GNSS}}=4m . The GNSS and UWB positioning systems were normal at all the other times.
+
+ β_{i}=(1)/(2)(i=1,2) . The kinematic and static filtering of the ESKF based on the INS/GNSS/UWB proposed in this paper was used in Scheme 2. Scheme 3, based on Scheme 2, introduced an evaluation system and switching strategy to block a particular sensor during the overall filtering in case its accuracy degraded. Taking this experimental scheme as an example, in the period of 10~40 s, because of the presence of large errors in the UWB data, the UWB data were shielded; only kinematic filtering was performed, and the kinematic filtering solution was output as the navigation solution for the overall filtering. In the period of 66~108 s, because of the large errors in the GNSS data, the GNSS data were shielded, and the overall filtering was only updated in time in the kinematic filtering. The UWB data were used to measure and update in the static filtering, the error-state vector was fed back to the INS, and the feedback INS data were obtained, which were then output as the navigation solution of the overall filtering. A comparison of the solved trajectories for the three schemes is shown in Figure 12, and the velocity-error and position-error comparisons are shown in Figure 13 and Figure 14, respectively.
+
+## Figure 12.
+
+Open in a new tab
+
+## Figure 13.
+
+Open in a new tab
+
+## Figure 14.
+
+Open in a new tab
+
+Figure 13 and Figure 14, the kinematic and static filtering of the ESKF based on INS/GNSS/UWB with the evaluation system and switching strategy had smaller localization errors for velocity and position than Scheme 1 and Scheme 2. The error variation was smoother, mainly because of the shielding of the contaminated GNSS and UWB, which in turn improved the overall localization accuracy of the filtering. Compared to the federated filtering using the ESKF, the proposed algorithm had a higher overall positioning accuracy and a smoother error-variation curve. The RMSE and MAE of the three schemes are shown in Table 7 and Table 8, respectively.
+
+## Table 7.
+
+RMSE
+Pitch(″)
+Yaw(″)
+Roll(′)
+VX(m/s)
+VY(m/s)
+VZ(m/s)
+X(m)
+Y(m)
+Z(m)
+
+Scheme 1
+
+833.72 
+740.69 
+221.99 
+11.46 
+3.91 
+1.23 
+5.49 
+11.86 
+1.72 
+
+Scheme 2
+
+16.31 
+34.98 
+0.65 
+0.62 
+0.76 
+0.48 
+3.73 
+3.46 
+2.66 
+
+Scheme 3
+
+30.36 
+38.64 
+0.86 
+0.04 
+0.04 
+0.02 
+0.18 
+0.25 
+0.13 
+
+Open in a new tab
+
+## Table 8.
+
+MAE
+Pitch(″)
+Yaw(″)
+Roll(′)
+VX(m/s)
+VY(m/s)
+VZ(m/s)
+X(m)
+Y(m)
+Z(m)
+
+Scheme 1
+
+516.93 
+449.10 
+180.65 
+8.88 
+3.39 
+1.03 
+4.34 
+9.89 
+1.14 
+
+Scheme 2
+
+13.54 
+33.02 
+0.56 
+0.46 
+0.56 
+0.27 
+2.44 
+2.37 
+1.56 
+
+Scheme 3
+
+25.29 
+30.57 
+0.71 
+0.02 
+0.02 
+0.01 
+0.14 
+0.18 
+0.07 
+
+Open in a new tab
+
+Table 7 and Table 8, Scheme 3 had the highest accuracy, as the dynamic and static filtering had good plug-and-play capability, which shielded the contaminated sensors more quickly and conveniently, thus improving the overall system accuracy. Comparing Scheme 1 with Scheme 2, the RMSE and the MAE of the kinematic and static filtering of the ESKF based on the INS/GNSS/UWB in terms of attitude, velocity, and position were smaller than those of the ESKF-based federated filtering. Therefore, the proposed method had good robustness.
+
+## 6. Conclusions
+
+## Author Contributions
+
+## Institutional Review Board Statement
+
+## Informed Consent Statement
+
+## Data Availability Statement
+
+## Conflicts of Interest
+
+## Funding Statement
+
+## Footnotes
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to people or property resulting from any ideas, methods, instructions or products referred to in the content.
+
+## References
+
+1.Liu J., Zhao Z., Hu N., Huang G., Gong X., Yang S. Summary and Prospect of Indoor High-Precision Positioning Technology. Geomat. Inf. Sci. Wuhan Univ. 2022;47:997–1008. [Google Scholar]
+
+2.Girma A., Bahadori N., Sarkar M. IoT-Enabled Autonomous System Collaboration for Disaster-Area Management. IEEE CAA J. Autom. Sin. 2020;7:1249–1262. doi: 10.1109/JAS.2020.1003291. [DOI] [Google Scholar]
+
+3.Dinelli C., Racette J., Escarcega M., Lotero S., Gordon J., Montoya J., Dunaway C., Androulakis V., Khaniani H., Shao S., et al. Configurations and Applications of Multi-Agent Hybrid Drone/Unmanned Ground Vehicle for Underground Environments: A Review. Drones. 2023;7:136. doi: 10.3390/drones7020136. [DOI] [Google Scholar]
+
+4.Zhang S., Wang H., Chen P., Zhang X., Li Q. Overview of the application of neural networks in the motion control of unmanned vehicles. Chin. J. Eng. 2022;44:235–243. [Google Scholar]
+
+5.Qi Y., He B., Pan S., Mu W., Zhang Y., Xu Y. Path Processing Method for Wheeled Mobile Robots Based on Rearrangement and Optimization. Robot. 2023;45:70–77. [Google Scholar]
+
+6.Yang Y. Concepts of Comprehensive PNT and Related Key Technologies. Acta Geod. Cartogr. Sin. 2016;45:505–510. [Google Scholar]
+
+7.Zhang K., Shen C., Zhou Q. A combined GPS UWB and MARG locationing algorithm for indoor and outdoor mixed scenario. Clust. Comput. 2019;22:5965–5974. doi: 10.1007/s10586-018-1735-9. [DOI] [Google Scholar]
+
+8.Kuang J., Niu X., Chen X. Robust pedestrian dead reckoning based on MEMS-IMU for smartphones. Sensors. 2018;18:1391. doi: 10.3390/s18051391. [DOI] [PMC free article] [PubMed] [Google Scholar]
+
+9.Cao H., Wang Y., Bi J. Indoor Positioning Method Using WiFi RTT Based on LOS Identification and Range Calibration. ISPRS Int. J. Geo-Inf. 2020;9:627. doi: 10.3390/ijgi9110627. [DOI] [Google Scholar]
+
+10.Xuan L., Shen Y., Gan T., Zhang C., Zhang Y. Research on indoor positioning method of smart trash can based on RFID; Proceedings of the IEEE 8th International Conference on Computer and Communications (ICCC); Chengdu, China. 9–12 December 2022; pp. 505–510. [Google Scholar]
+
+11.Cabrera-Goyes E., Ordóñez-Camacho D. Towards a bluetooth indoor positioning system with android consumer devices; Proceedings of the International Conference on Information Systems and Computer Science (INCISCOS); Quito, Ecuador. 23–25 November 2017; pp. 56–59. [Google Scholar]
+
+12.Liu C., Cao Y., Sun C., Shen W., Li X., Gao L. An outlier-aware method for UWB indoor positioning in NLoS situations; Proceedings of the IEEE 25th International Conference on Computer Supported Cooperative Work in Design (CSCWD); Hangzhou, China. 4–6 May 2022; pp. 1504–1509. [Google Scholar]
+
+13.Kealy A., Alam N., Toth C., Moore T., Gikas V., Danezis C., Roberts G.W., Retscher G., Hasnur-Rabiain A., Grejner-Brzezinska D.A., et al. Collaborative navigation with ground vehicles and personal navigators; Proceedings of the International sConference on Indoor Positioning and Indoor Navigation (IPIN); Sydney, NSW, Australia. 13–15 November 2012; pp. 1–8. [Google Scholar]
+
+14.Jiang W., Cao Z., Cai B., Li B., Wang J. Indoor and Outdoor Seamless Positioning Method Using UWB Enhanced Multi-Sensor Tightly-Coupled Integration. IEEE Trans. Veh. Technol. 2021;70:10633–10645. doi: 10.1109/TVT.2021.3110325. [DOI] [Google Scholar]
+
+15.You C., Peng L., Wang J., Wen C., Chen R. VLC and PDR Fusion Positioning by Incorporating High-Precision Indoor Map. J. Geo-Inf. Sci. 2019;21:1402–1410. [Google Scholar]
+
+16.Duan L. Research on Multi-Source and Heterogeneous Fusion Positioning Method. School of Information and Communication; Tokyo, Japan: 2018. [Google Scholar]
+
+17.Zhang J., Chen H., Chen Y. A Multi-sensor Fusion Positioning Algorithm Based on Federated Kalman Filter. Missiles Space Veh. 2018:90–98. [Google Scholar]
+
+18.Yan G., Deng Y. Review on practical Kalman filtering techniques in traditional integrated navigation system. Navig. Position. Timing. 2020;7:50–64. [Google Scholar]
+
+19.Yuan G., Dai C., Liu F. Further Discussion on the Application Feasibility of Federated Kalman Filter in Integrated Navigation. Navig. Position. Timing. 2022;9:1–6. [Google Scholar]
+
+20.Yang Y. Kinematic and static filtering for multi-sensor navigation systems. Geomat. Inf. Sci. Wuhan Univ. 2003;28 [Google Scholar]
+
+21.Shi J., Qiu L., Wang X., Xue X., Hou J. Research on integrated navigation technology based on the dynamic, static filtering algorithm; Proceedings of the China Satellite Navigation Conference (CSNC 2015); Xi’an, China. 13–15 May 2015. [Google Scholar]
+
+22.Wang Y., Zheng W., An X., Sun S. Pulsar/CNS integrated navigation method based on improved kinematic and static filter for deep space explorer. Chin. Space Sci. Technol. 2013;33:22–28. [Google Scholar]
+
+23.Lu K., Wang C., Wang Y. Attitude estimation algorithm based on error state Kalman filter; Proceedings of the International Conference on Autonomous Unmanned Systems (ICAUS 2022); Xi’an, China. 23–25 September 2022. [Google Scholar]
+
+24.Dai J., Hao X., Liu S., Ren Z. Research on UAV Robust Adaptive Positioning Algorithm Based on IMU/GNSS/VO in Complex Scenes. Sensors. 2022;22:2832. doi: 10.3390/s22082832. [DOI] [PMC free article] [PubMed] [Google Scholar]
+
+25.Farkas M., Vanek B., Rozsa S. Small UAV’s position and attitude estimation using tightly coupled multi baseline multi constellation GNSS and inertial sensor fusion; Proceedings of the IEEE 5th International Workshop on Metrology for AeroSpace (MetroAeroSpace); Turin, Italy. 19–21 June 2019; pp. 176–181. [Google Scholar]
+
+## Associated Data
+
+This section collects any data citations, data availability statements, or supplementary materials included in this article.
+
+## Data Availability Statement
+
+Multidisciplinary Digital Publishing Institute (MDPI)
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+## ACTIONS
+
+ 
+ 
+ 
+ 
+ 
+ View on publisher site
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ PDF (7.8 MB)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Cite
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Collections
+ 
+ 
+ 
+ 
+ 
+ Permalink
+ 
+ 
+
+ 
+ 
+
+## PERMALINK
+
+ 
+ 
+ 
+ 
+ Copy
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+## RESOURCES
+
+ 
+ 
+ 
+
+## 
+ 
+ Similar articles
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+## 
+ 
+ Cited by other articles
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+## 
+ 
+ Links to NCBI Databases
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+## Cite
+
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ Copy
+ 
+ 
+ 
+ 
+ 
+ Download .nbib
+ .nbib
+ 
+ 
+ 
+ 
+
+ Format:
+ 
+ 
+ 
+ AMA
+ 
+ 
+ 
+ APA
+ 
+ 
+ 
+ MLA
+ 
+ 
+ 
+ NLM
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+## Add to Collections
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ Create a new collection
+ 
+ 
+ 
+ Add to an existing collection
+ 
+ 
+
+ 
+ 
+ 
+ Name your collection
+ *
+ 
+ 
+ 
+ 
+ 
+ Choose a collection
+ 
+ 
+ 
+ 
+ Unable to load your collection due to an error
+ Please try again
+ 
+ 
+ 
+
+ 
+ 
+ Add
+ 
+ 
+ Cancel
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Follow NCBI
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI on X (formerly known as Twitter)
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI on Facebook
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI on LinkedIn
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI on GitHub
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NCBI RSS feed
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ Connect with NLM
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ NLM on X (formerly known as Twitter)
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ NLM on Facebook
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ NLM on YouTube
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+National Library of Medicine
+ 8600 Rockville Pike Bethesda, MD 20894
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Web Policies
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ FOIA
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ HHS Vulnerability Disclosure
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Help
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Accessibility
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Careers
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ NLM
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ NIH
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ HHS
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ USA.gov
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ Back to Top
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ window.ncbi = window.ncbi || {};
+ window.ncbi.pmc = window.ncbi.pmc || {};
+ window.ncbi.pmc.options = {
+ logLevel: 'INFO',
+ 
+ staticEndpoint: 'https://cdn.ncbi.nlm.nih.gov/pmc/pd-medc-pmc-cloudpmc-viewer/production/674d4f95/var/data/static/',
+ 
+ citeCookieName: 'pmc-cf',
+ };
+
+ 
+
+ 
+  
+ 
+ jQuery.getScript("https://cdn.ncbi.nlm.nih.gov/core/alerts/alerts.js", function () {
+ galert(['div.nav_and_browser', 'div.header', '#universal_header', '.usa-banner', 'body > *:nth-child(1)'])
+ });
+ 
+
+ var exports = {};
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+
+ 
+
+
