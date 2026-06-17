@@ -110,8 +110,75 @@ def analyze_one(path):
 
 def stats(radii):
     r = np.asarray(radii, float)
-    return dict(n=len(r), mean=r.mean(), cep=np.median(r),
-                rmse=np.sqrt((r ** 2).mean()), worst=r.max())
+    return dict(n=len(r), mean=float(r.mean()), cep=float(np.median(r)),
+                r95=float(np.percentile(r, 95)), rmse=float(np.sqrt((r ** 2).mean())),
+                worst=float(r.max()))
+
+
+def compare_plots(runs, out, show):
+    """A-vs-B aggregate over N runs: touchdown scatter + CEP/R95 circles, error CDF, metric bars.
+    These are the standard landing-accuracy result charts (CEP = 50 % radius, R95 = 95 %, RMSE)."""
+    scen_runs = {s: [r for r in runs if r['scen'] == s] for s in ('A', 'B')}
+    fig, ax = plt.subplots(1, 3, figsize=(17, 5.5))
+
+    # 1) touchdown scatter + CEP50 (solid) / R95 (dashed) circles
+    a = ax[0]
+    a.plot(0, 0, 'k*', ms=16, label='pad')
+    for s in ('A', 'B'):
+        rr = scen_runs[s]
+        if not rr:
+            continue
+        xs = [r['true_xy'][0] for r in rr]
+        ys = [r['true_xy'][1] for r in rr]
+        radii = [r['true_err'] for r in rr]
+        a.scatter(ys, xs, c=SCEN_COLOR[s], label=f"{SCEN_LABEL[s]} (n={len(rr)})", alpha=0.7, zorder=3)
+        a.add_patch(plt.Circle((0, 0), np.median(radii), color=SCEN_COLOR[s], fill=False, ls='-', alpha=0.8))
+        a.add_patch(plt.Circle((0, 0), np.percentile(radii, 95), color=SCEN_COLOR[s], fill=False, ls='--', alpha=0.5))
+    a.set_aspect('equal'); a.grid(alpha=0.3); a.legend(fontsize=8)
+    a.set_xlabel('East [m]'); a.set_ylabel('North [m]')
+    a.set_title('Touchdown scatter (solid=CEP50, dashed=R95)')
+
+    # 2) empirical CDF of horizontal landing error
+    a = ax[1]
+    for s in ('A', 'B'):
+        rr = scen_runs[s]
+        if not rr:
+            continue
+        e = np.sort([r['true_err'] for r in rr])
+        cdf = np.arange(1, len(e) + 1) / len(e)
+        a.step(np.concatenate([[0], e]), np.concatenate([[0], cdf]), where='post',
+               color=SCEN_COLOR[s], label=SCEN_LABEL[s])
+    a.axhline(0.5, color='gray', ls=':', lw=0.8)
+    a.set_ylim(0, 1); a.grid(alpha=0.3); a.legend(fontsize=8)
+    a.set_xlabel('horizontal landing error [m]'); a.set_ylabel('fraction of landings ≤ x')
+    a.set_title('Landing-error CDF (0.5 line ⇒ CEP)')
+
+    # 3) metric bars A vs B
+    a = ax[2]
+    names = ['mean', 'CEP50', 'R95', 'RMSE']
+    keys = ['mean', 'cep', 'r95', 'rmse']
+    x = np.arange(len(names))
+    w = 0.38
+    for k, s in enumerate(('A', 'B')):
+        rr = scen_runs[s]
+        if not rr:
+            continue
+        st = stats([r['true_err'] for r in rr])
+        vals = [st[kk] for kk in keys]
+        bars = a.bar(x + (k - 0.5) * w, vals, w, color=SCEN_COLOR[s], label=SCEN_LABEL[s])
+        a.bar_label(bars, fmt='%.2f', fontsize=7)
+    a.set_xticks(x); a.set_xticklabels(names); a.grid(alpha=0.3, axis='y'); a.legend(fontsize=8)
+    a.set_ylabel('[m]'); a.set_title('Landing-error metrics')
+
+    na, nb = len(scen_runs['A']), len(scen_runs['B'])
+    fig.suptitle(f"UWB precision landing — A (GPS-only) vs B (GPS+UWB), {na}/{nb} runs", fontsize=12)
+    fig.tight_layout()
+    if out:
+        fig.savefig(out, dpi=120)
+        print(f"\nsaved comparison -> {out}")
+    if show:
+        print("\nshowing comparison window — use the toolbar Save button to choose where to save")
+        plt.show()
 
 
 def plots(runs, out, show):
@@ -203,6 +270,8 @@ def main():
     ap.add_argument('--out', default=None,
                     help='also save the figure to this path (default: only show the window)')
     ap.add_argument('--no-show', action='store_true', help='headless: do not open a window')
+    ap.add_argument('--compare', action='store_true',
+                    help='A-vs-B aggregate charts (scatter+CEP/R95, CDF, metric bars) for N-run sweeps')
     args = ap.parse_args()
 
     runs = []
@@ -221,16 +290,24 @@ def main():
         print("no valid runs"); sys.exit(1)
 
     print("\nper-scenario summary (true landing error):")
-    print(f"  {'scen':<4} {'n':>3} {'mean':>6} {'CEP50':>6} {'RMSE':>6} {'worst':>6}  [m]")
+    print(f"  {'scen':<4} {'n':>3} {'mean':>6} {'CEP50':>6} {'R95':>6} {'RMSE':>6} {'worst':>6}  [m]")
+    summ = {}
     for scen in ['A', 'B', '?']:
         radii = [r['true_err'] for r in runs if r['scen'] == scen]
         if not radii:
             continue
         s = stats(radii)
+        summ[scen] = s
         print(f"  {scen:<4} {s['n']:>3} {s['mean']:>6.2f} {s['cep']:>6.2f} "
-              f"{s['rmse']:>6.2f} {s['worst']:>6.2f}")
+              f"{s['r95']:>6.2f} {s['rmse']:>6.2f} {s['worst']:>6.2f}")
+    if 'A' in summ and 'B' in summ and summ['A']['cep'] > 0:
+        imp = 100.0 * (1.0 - summ['B']['cep'] / summ['A']['cep'])
+        print(f"  => CEP50 improvement B vs A: {imp:.0f}%  ({summ['A']['cep']:.2f} -> {summ['B']['cep']:.2f} m)")
 
-    plots(runs, args.out, show=not args.no_show)
+    if args.compare:
+        compare_plots(runs, args.out, show=not args.no_show)
+    else:
+        plots(runs, args.out, show=not args.no_show)
 
 
 if __name__ == '__main__':

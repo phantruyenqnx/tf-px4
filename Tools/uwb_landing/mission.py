@@ -332,7 +332,8 @@ def main():
     ap.add_argument('--connect', default='udpin:0.0.0.0:14540')
     ap.add_argument('--alt', type=float, default=30.0, help='mission altitude [m]')
     ap.add_argument('--box', type=float, default=50.0, help='box edge [m] (>28 keeps >14 m from pad)')
-    ap.add_argument('--laps', type=int, default=2)
+    ap.add_argument('--laps', type=int, default=3,
+                    help='laps of the box before returning (3 = more accumulated GPS drift)')
     ap.add_argument('--approach-alt', type=float, default=6.0,
                     help='low approach altitude over the pad [m] (within UWB range, centre then land)')
     ap.add_argument('--acc-rad', type=float, default=0.5, help='waypoint acceptance radius [m]')
