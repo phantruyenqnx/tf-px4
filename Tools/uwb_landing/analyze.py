@@ -116,13 +116,71 @@ def stats(radii):
 
 
 def compare_plots(runs, out, show):
-    """A-vs-B aggregate over N runs: touchdown scatter + CEP/R95 circles, error CDF, metric bars.
-    These are the standard landing-accuracy result charts (CEP = 50 % radius, R95 = 95 %, RMSE)."""
+    """A-vs-B comparison in a 4-row layout:
+      row 1 — 3D trajectory (wide);
+      row 2 — X / Y / Z vs time;
+      row 3 — per-axis position error (EKF − truth) vs time;
+      row 4 — aggregate landing-accuracy charts: touchdown scatter + CEP50/R95 circles,
+              error CDF, metric bars (CEP = 50 % radius, R95 = 95 %, RMSE).
+    Time-series overlay every run, coloured by scenario (A red / B green); the ground-truth
+    reference is the first run's true path."""
     scen_runs = {s: [r for r in runs if r['scen'] == s] for s in ('A', 'B')}
-    fig, ax = plt.subplots(1, 3, figsize=(17, 5.5))
+    s0 = runs[0]['series']                       # ground-truth reference path
+    fig = plt.figure(figsize=(17, 19), constrained_layout=True)
+    gs = fig.add_gridspec(4, 3, height_ratios=[1.5, 1, 1, 1.1])
 
-    # 1) touchdown scatter + CEP50 (solid) / R95 (dashed) circles
-    a = ax[0]
+    def each_run():
+        for s in ('A', 'B'):
+            for r in scen_runs[s]:
+                yield s, r['series']
+
+    # ---- Row 1: 3D trajectory (spans all 3 columns) ----
+    ax = fig.add_subplot(gs[0, :], projection='3d')
+    seen = set()
+    for s, ser in each_run():
+        ax.plot(ser['ey'], ser['ex'], -ser['ez'], color=SCEN_COLOR[s], lw=0.7, alpha=0.7,
+                label=SCEN_LABEL[s] if s not in seen else None)
+        seen.add(s)
+    ax.plot(s0['gy'], s0['gx'], -s0['gz'], 'k--', lw=0.9, alpha=0.6, label='ground-truth')
+    ax.scatter([0], [0], [0], c='k', marker='*', s=90)
+    ax.set_xlabel('E [m]'); ax.set_ylabel('N [m]'); ax.set_zlabel('Up [m]')
+    ax.set_title('3D trajectory — EKF (A red / B green) vs ground-truth'); ax.legend(fontsize=8)
+
+    # ---- Row 2: X / Y / Z vs time (EKF per scenario + ground-truth ref) ----
+    def pos_axis(col, ekf, gt, title, ylabel, sign=1):
+        a = fig.add_subplot(gs[1, col])
+        seen = set()
+        for s, ser in each_run():
+            a.plot(ser['t'], sign * ser[ekf], color=SCEN_COLOR[s], lw=0.8, alpha=0.7,
+                   label=SCEN_LABEL[s] if s not in seen else None)
+            seen.add(s)
+        a.plot(s0['t'], sign * s0[gt], 'k--', lw=0.8, alpha=0.6, label='truth')
+        a.grid(alpha=0.3); a.legend(fontsize=7)
+        a.set_xlabel('time [s]'); a.set_ylabel(ylabel); a.set_title(title)
+
+    pos_axis(0, 'ex', 'gx', 'X (North) vs time', 'N [m]')
+    pos_axis(1, 'ey', 'gy', 'Y (East) vs time', 'E [m]')
+    pos_axis(2, 'ez', 'gz', 'Z (Up) vs time', 'Up [m]', sign=-1)
+
+    # ---- Row 3: per-axis position error (EKF − truth) vs time ----
+    def err_axis(col, ekf, gt, title):
+        a = fig.add_subplot(gs[2, col])
+        seen = set()
+        for s, ser in each_run():
+            a.plot(ser['t'], ser[ekf] - ser[gt], color=SCEN_COLOR[s], lw=0.8, alpha=0.7,
+                   label=SCEN_LABEL[s] if s not in seen else None)
+            seen.add(s)
+        a.axhline(0, color='gray', ls=':', lw=0.8)
+        a.grid(alpha=0.3); a.legend(fontsize=7)
+        a.set_xlabel('time [s]'); a.set_ylabel('error [m]'); a.set_title(title)
+
+    err_axis(0, 'ex', 'gx', 'Px error (North) vs time')
+    err_axis(1, 'ey', 'gy', 'Py error (East) vs time')
+    err_axis(2, 'ez', 'gz', 'Pz error (Down) vs time')
+
+    # ---- Row 4: aggregate landing-accuracy charts ----
+    # 4a) touchdown scatter + CEP50 (solid) / R95 (dashed) circles
+    a = fig.add_subplot(gs[3, 0])
     a.plot(0, 0, 'k*', ms=16, label='pad')
     for s in ('A', 'B'):
         rr = scen_runs[s]
@@ -138,8 +196,8 @@ def compare_plots(runs, out, show):
     a.set_xlabel('East [m]'); a.set_ylabel('North [m]')
     a.set_title('Touchdown scatter (solid=CEP50, dashed=R95)')
 
-    # 2) empirical CDF of horizontal landing error
-    a = ax[1]
+    # 4b) empirical CDF of horizontal landing error
+    a = fig.add_subplot(gs[3, 1])
     for s in ('A', 'B'):
         rr = scen_runs[s]
         if not rr:
@@ -153,8 +211,8 @@ def compare_plots(runs, out, show):
     a.set_xlabel('horizontal landing error [m]'); a.set_ylabel('fraction of landings ≤ x')
     a.set_title('Landing-error CDF (0.5 line ⇒ CEP)')
 
-    # 3) metric bars A vs B
-    a = ax[2]
+    # 4c) metric bars A vs B
+    a = fig.add_subplot(gs[3, 2])
     names = ['mean', 'CEP50', 'R95', 'RMSE']
     keys = ['mean', 'cep', 'r95', 'rmse']
     x = np.arange(len(names))
@@ -171,8 +229,7 @@ def compare_plots(runs, out, show):
     a.set_ylabel('[m]'); a.set_title('Landing-error metrics')
 
     na, nb = len(scen_runs['A']), len(scen_runs['B'])
-    fig.suptitle(f"UWB precision landing — A (GPS-only) vs B (GPS+UWB), {na}/{nb} runs", fontsize=12)
-    fig.tight_layout()
+    fig.suptitle(f"UWB precision landing — A (GPS-only) vs B (GPS+UWB), {na}/{nb} runs", fontsize=13)
     if out:
         fig.savefig(out, dpi=120)
         print(f"\nsaved comparison -> {out}")
